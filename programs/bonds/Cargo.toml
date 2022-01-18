@@ -1,5 +1,5 @@
 [package]
-name = "template"
+name = "bonds"
 version = "0.1.0"
 description = "Created with Anchor"
 edition = "2018"
@@ -7,7 +7,7 @@ license = "Apache-2.0"
 
 [lib]
 crate-type = ["cdylib", "lib"]
-name = "template"
+name = "bonds"
 doctest = false
 
 [features]
@@ -17,7 +17,7 @@ cpi = ["no-entrypoint"]
 default = []
 
 [dependencies]
-anchor-lang = "0.18.2"
-anchor-spl = "0.18.2"
+anchor-lang = "0.20.1"
+anchor-spl = "0.20.1"
 integer-sqrt = "0.1.5"
 uint = "0.9"
