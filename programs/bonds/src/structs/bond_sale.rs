@@ -20,6 +20,26 @@ pub struct BondSale {
     pub nonce: u8,
 }
 
+impl Default for BondSale {
+    fn default() -> BondSale {
+        BondSale {
+            token_buy: Pubkey::default(),
+            token_sell: Pubkey::default(),
+            token_buy_account: Pubkey::default(),
+            token_sell_account: Pubkey::default(),
+            payer: Pubkey::default(),
+            floor_price: Decimal::default(),
+            up_bound: Decimal::default(),
+            velocity: Decimal::default(),
+            buy_amount: TokenAmount(0),
+            remaining_amount: TokenAmount(0),
+            sell_amount: TokenAmount(0),
+            sale_time: 0,
+            nonce: 0,
+        }
+    }
+}
+
 impl BondSale {
     pub fn calculate_ceil_price(&self) -> Decimal {
         (Decimal::one() + self.up_bound) * self.floor_price
