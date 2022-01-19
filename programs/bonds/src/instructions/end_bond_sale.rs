@@ -1,7 +1,11 @@
 use anchor_lang::prelude::*;
-use anchor_spl::token::{Mint, TokenAccount};
+use anchor_spl::token::{transfer, Mint, TokenAccount, Transfer};
 
-use crate::structs::BondSale;
+use crate::{
+    interfaces::TransferY,
+    structs::{token_amount::TokenAmount, BondSale},
+    utils::close,
+};
 
 #[derive(Accounts)]
 pub struct EndBondSale<'info> {
@@ -21,8 +25,36 @@ pub struct EndBondSale<'info> {
         constraint = token_sell.key() == bond_sale.load()?.token_sell
     )]
     pub token_sell: Account<'info, Mint>,
-    #[account(
-        constraint = &payer.key() == bond_sale.to_account_info().owner
+    pub authority: AccountInfo<'info>,
+    #[account(mut,
+        constraint = payer.key() == bond_sale.load()?.payer
     )]
     pub payer: Signer<'info>,
+    pub token_program: AccountInfo<'info>,
+}
+
+impl<'info> TransferY<'info> for EndBondSale<'info> {
+    fn transfer_y(&self) -> CpiContext<'_, '_, '_, 'info, anchor_spl::token::Transfer<'info>> {
+        CpiContext::new(
+            self.token_program.to_account_info(),
+            Transfer {
+                from: self.bond_sale_sell.to_account_info(),
+                to: self.payer_y_account.to_account_info(),
+                authority: self.authority.to_account_info().clone(),
+            },
+        )
+    }
+}
+
+pub fn handler(ctx: Context<EndBondSale>) -> ProgramResult {
+    let mut bond_sale = ctx.accounts.bond_sale.load_mut()?;
+
+    transfer(ctx.accounts.transfer_y(), bond_sale.sell_amount.0)?;
+    bond_sale.sell_amount.0 = 0;
+
+    close(
+        ctx.accounts.bond_sale.to_account_info(),
+        ctx.accounts.payer_y_account.to_account_info(),
+    )?;
+    Ok(())
 }
