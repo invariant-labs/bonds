@@ -135,13 +135,13 @@ mod tests {
             let result = calculate_new_price(&mut bond_sale, 604800, TokenAmount(0));
 
             let expected_result: Decimal = bond_sale.floor_price;
-            // let expected_bond_sale_previous_price: Decimal = bond_sale.floor_price;
+            let expected_bond_sale_previous_price: Decimal = bond_sale.floor_price;
 
             assert_eq!(result, expected_result);
-            // assert_eq!(
-            // { bond_sale.previous_price },
-            // expected_bond_sale_previous_price
-            // );
+            assert_eq!(
+                { bond_sale.previous_price },
+                expected_bond_sale_previous_price
+            );
         }
     }
 }
