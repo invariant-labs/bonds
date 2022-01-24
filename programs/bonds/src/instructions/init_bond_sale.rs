@@ -46,7 +46,6 @@ impl<'info> TransferX<'info> for InitBondSale<'info> {
     }
 }
 
-// trunk-ignore(clippy/too_many_arguments)
 pub fn handler(
     ctx: Context<InitBondSale>,
     floor_price: u128,
@@ -87,6 +86,6 @@ pub fn handler(
         last_trade: get_current_timestamp(),
     };
 
-    token::transfer(ctx.accounts.transfer_x(), buy_amount);
+    token::transfer(ctx.accounts.transfer_x(), buy_amount)?;
     Ok(())
 }

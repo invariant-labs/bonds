@@ -19,18 +19,14 @@ pub const SEED: &str = "Bonds";
 
 #[program]
 pub mod bonds {
-    use structs::Decimal;
-
     use super::*;
 
-    // trunk-ignore(clippy/too_many_arguments)
     pub fn init_bond_sale(
         ctx: Context<InitBondSale>,
         floor_price: u128,
         up_bound: u128,
         velocity: u128,
         buy_amount: u64,
-        sell_amount: u64,
         end_time: u64,
     ) -> ProgramResult {
         instructions::init_bond_sale::handler(

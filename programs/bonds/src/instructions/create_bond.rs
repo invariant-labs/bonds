@@ -86,7 +86,7 @@ pub fn handler(ctx: Context<CreateBond>, buy_amount: u64, sell_amount: u64) -> P
     token::transfer(ctx.accounts.transfer_x(), buy_amount)?;
     token::transfer(ctx.accounts.transfer_y(), sell_amount)?;
 
-    bond_sale.remaining_amount = bond_sale.remaining_amount - TokenAmount::new(buy_amount);
-    bond_sale.sell_amount = bond_sale.sell_amount + TokenAmount::new(sell_amount);
+    bond_sale.update_amounts(buy_amount, sell_amount);
+
     Ok(())
 }

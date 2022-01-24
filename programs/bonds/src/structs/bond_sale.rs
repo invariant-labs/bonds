@@ -1,5 +1,7 @@
 use anchor_lang::prelude::*;
 
+use crate::utils::get_current_timestamp;
+
 use super::{Decimal, TokenAmount};
 
 #[account(zero_copy)]
@@ -25,5 +27,11 @@ pub struct BondSale {
 impl BondSale {
     pub fn calculate_ceil_price(&self) -> Decimal {
         (Decimal::one() + self.up_bound) * self.floor_price
+    }
+
+    pub fn update_amounts(&mut self, buy_amount: u64, sell_amount: u64) {
+        self.last_trade = get_current_timestamp();
+        self.remaining_amount = self.remaining_amount - TokenAmount::new(buy_amount);
+        self.sell_amount = self.sell_amount + TokenAmount::new(sell_amount);
     }
 }
