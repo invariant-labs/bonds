@@ -42,9 +42,9 @@ mod tests {
             previous_price: Decimal::from_integer(2),
             up_bound: Decimal::from_decimal(50, 2),
             velocity: Decimal::one(),
-            buy_amount: TokenAmount(10),
+            buy_amount: TokenAmount(50),
             remaining_amount: TokenAmount(20),
-            sell_amount: TokenAmount(30),
+            sell_amount: TokenAmount(25),
             sale_time: 604800, // second in a week
             last_trade: 0,
             ..Default::default()
@@ -80,6 +80,45 @@ mod tests {
                 ..nonpanic_bond_sale
             };
             calculate_new_price(&mut bond_sale, 20, TokenAmount(20));
+        }
+    }
+
+    #[test]
+    fn test_calculate_new_price() {
+        let nonpanic_bond_sale = BondSale {
+            floor_price: Decimal::from_integer(2),
+            previous_price: Decimal::from_integer(2),
+            up_bound: Decimal::from_decimal(50, 2),
+            velocity: Decimal::one(),
+            buy_amount: TokenAmount(50),
+            remaining_amount: TokenAmount(20),
+            sell_amount: TokenAmount(25),
+            sale_time: 604800, // second in a week
+            last_trade: 0,
+            ..Default::default()
+        };
+        /*
+        10% of supply was taken
+        ceil_price = x1.5 floor_price
+        */
+        {
+            let mut bond_sale = BondSale {
+                previous_price: Decimal::from_integer(2),
+                up_bound: Decimal::from_decimal(50, 2),
+                buy_amount: TokenAmount(100),
+                ..nonpanic_bond_sale
+            };
+
+            let result = calculate_new_price(&mut bond_sale, 0, TokenAmount(10));
+
+            let expected_result: Decimal = Decimal::new(2250000000000);
+            let expected_bond_sale_previous_price: Decimal = Decimal::new(2100000000000);
+
+            assert_eq!(result, expected_result);
+            assert_eq!(
+                { bond_sale.previous_price },
+                expected_bond_sale_previous_price
+            );
         }
     }
 }
