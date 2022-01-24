@@ -111,8 +111,8 @@ mod tests {
 
             let result = calculate_new_price(&mut bond_sale, 0, TokenAmount(10));
 
-            let expected_result: Decimal = Decimal::new(2250000000000);
-            let expected_bond_sale_previous_price: Decimal = Decimal::new(2100000000000);
+            let expected_result: Decimal = Decimal::from_decimal(205, 2);
+            let expected_bond_sale_previous_price: Decimal = Decimal::from_decimal(210, 2);
 
             assert_eq!(result, expected_result);
             assert_eq!(
