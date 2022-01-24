@@ -4,11 +4,9 @@ use anchor_spl::token::{Mint, TokenAccount, Transfer};
 use bond_sale::BondSale;
 
 use crate::{
-    get_signer,
     interfaces::{TransferX, TransferY},
     structs::{bond_sale, token_amount::TokenAmount, Bond},
     utils::get_current_timestamp,
-    SEED,
 };
 
 #[derive(Accounts)]
@@ -18,25 +16,25 @@ pub struct CreateBond<'info> {
     pub bond_sale: AccountLoader<'info, BondSale>,
     #[account(init, seeds = [b"bondv1", owner.key().as_ref(), bond_sale.key().as_ref(),], payer = owner, bump = bump)]
     pub bond: AccountLoader<'info, Bond>,
-    pub token_buy: Account<'info, Mint>,
-    pub token_sell: Account<'info, Mint>,
+    pub token_buy: Box<Account<'info, Mint>>,
+    pub token_sell: Box<Account<'info, Mint>>,
     #[account(init,
         token::mint = token_buy,
         token::authority = authority,
         payer = owner,
         constraint = bond_buy.mint == bond_sale_buy.mint
     )]
-    pub bond_buy: Account<'info, TokenAccount>,
+    pub bond_buy: Box<Account<'info, TokenAccount>>,
     #[account(init,
         token::mint = token_buy,
         token::authority = authority,
         payer = owner,
         constraint = bond_sell.mint == bond_sale_sell.mint)]
-    pub bond_sell: Account<'info, TokenAccount>,
+    pub bond_sell: Box<Account<'info, TokenAccount>>,
     #[account(mut)]
-    pub bond_sale_buy: Account<'info, TokenAccount>,
+    pub bond_sale_buy: Box<Account<'info, TokenAccount>>,
     #[account(mut)]
-    pub bond_sale_sell: Account<'info, TokenAccount>,
+    pub bond_sale_sell: Box<Account<'info, TokenAccount>>,
     pub owner: Signer<'info>,
     pub authority: AccountInfo<'info>,
     pub token_program: AccountInfo<'info>,
@@ -89,9 +87,8 @@ pub fn handler(ctx: Context<CreateBond>, buy_amount: u64, sell_amount: u64) -> P
         last_trade: get_current_timestamp(),
     };
 
-    let signer: &[&[&[u8]]] = get_signer!(bond_sale.nonce);
-    token::transfer(ctx.accounts.transfer_x().with_signer(signer), buy_amount)?;
-    token::transfer(ctx.accounts.transfer_y().with_signer(signer), sell_amount)?;
+    token::transfer(ctx.accounts.transfer_x(), buy_amount)?;
+    token::transfer(ctx.accounts.transfer_y(), sell_amount)?;
 
     bond_sale.remaining_amount = bond_sale.remaining_amount - TokenAmount::new(buy_amount);
     bond_sale.sell_amount = bond_sale.sell_amount + TokenAmount::new(sell_amount);

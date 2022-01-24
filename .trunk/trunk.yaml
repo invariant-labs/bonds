@@ -13,3 +13,4 @@ lint:
     - linters: [ALL]
       paths:
         - .eslintrc.js
+        - sdk/src/idl/bonds.ts

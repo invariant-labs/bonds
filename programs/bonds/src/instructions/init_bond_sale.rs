@@ -16,15 +16,21 @@ pub struct InitBondSale<'info> {
     #[account(zero)]
     pub bond_sale: AccountLoader<'info, BondSale>,
     #[account(init, mint::decimals = 6, mint::authority = authority, payer = payer)]
-    pub token_buy: Account<'info, Mint>,
+    pub token_buy: Box<Account<'info, Mint>>,
     #[account(init, mint::decimals = 6, mint::authority = authority, payer = payer)]
-    pub token_sell: Account<'info, Mint>,
+    pub token_sell: Box<Account<'info, Mint>>,
     #[account(init, token::mint = token_buy, token::authority = authority, payer = payer)]
-    pub bond_sale_buy: Account<'info, TokenAccount>,
+    pub bond_sale_buy: Box<Account<'info, TokenAccount>>,
     #[account(init, token::mint = token_sell, token::authority = authority, payer = payer)]
-    pub bond_sale_sell: Account<'info, TokenAccount>,
-    #[account(mut)]
-    pub payer_x_account: Account<'info, TokenAccount>,
+    pub bond_sale_sell: Box<Account<'info, TokenAccount>>,
+    #[account(
+        constraint = payer_buy_account.mint == token_buy.key()
+    )]
+    pub payer_buy_account: Box<Account<'info, TokenAccount>>,
+    #[account(mut,
+        constraint = payer_sell_account.mint == token_sell.key()
+    )]
+    pub payer_sell_account: Box<Account<'info, TokenAccount>>,
     pub payer: Signer<'info>,
     pub authority: AccountInfo<'info>,
     pub token_program: AccountInfo<'info>,
@@ -38,7 +44,7 @@ impl<'info> TransferX<'info> for InitBondSale<'info> {
         CpiContext::new(
             self.token_program.to_account_info(),
             Transfer {
-                from: self.payer_x_account.to_account_info(),
+                from: self.payer_buy_account.to_account_info(),
                 to: self.bond_sale_buy.to_account_info(),
                 authority: self.authority.to_account_info().clone(),
             },
@@ -46,15 +52,13 @@ impl<'info> TransferX<'info> for InitBondSale<'info> {
     }
 }
 
-// trunk-ignore(clippy/too_many_arguments)
 pub fn handler(
     ctx: Context<InitBondSale>,
-    floor_price: Decimal,
-    up_bound: Decimal,
-    velocity: Decimal,
+    floor_price: u128,
+    up_bound: u128,
+    velocity: u128,
     buy_amount: u64,
     end_time: u64,
-    nonce: u8,
 ) -> ProgramResult {
     let bond_sale = &mut ctx.accounts.bond_sale.load_mut()?;
 
@@ -76,16 +80,15 @@ pub fn handler(
         token_buy_account: ctx.accounts.bond_sale_buy.key(),
         token_sell_account: ctx.accounts.bond_sale_sell.key(),
         payer: ctx.accounts.payer.key(),
-        floor_price,
-        up_bound,
-        velocity,
+        authority: ctx.accounts.authority.key(),
+        floor_price: Decimal::new(floor_price),
+        up_bound: Decimal::new(up_bound),
+        velocity: Decimal::new(velocity),
         buy_amount: TokenAmount::new(buy_amount),
         remaining_amount: TokenAmount::new(buy_amount),
         sell_amount: TokenAmount::new(0),
         sale_time: current_timestamp.checked_add(end_time).unwrap(),
-        nonce,
     };
-
-    token::transfer(ctx.accounts.transfer_x(), buy_amount);
+    token::transfer(ctx.accounts.transfer_x(), buy_amount)?;
     Ok(())
 }
