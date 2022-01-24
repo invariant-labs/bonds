@@ -91,7 +91,7 @@ mod tests {
             buy_amount: TokenAmount(50),
             remaining_amount: TokenAmount(20),
             sell_amount: TokenAmount(25),
-            sale_time: 604800, // second in a week
+            sale_time: 604800, // seconds in a week
             last_trade: 0,
             ..Default::default()
         };
@@ -127,7 +127,7 @@ mod tests {
                 up_bound: Decimal::from_decimal(50, 2),
                 velocity: Decimal::one(),
                 floor_price: Decimal::from_integer(2),
-                sale_time: 604800, // second in a week
+                sale_time: 604800, // seconds in a week
                 last_trade: 0,
                 ..nonpanic_bond_sale
             };
@@ -136,6 +136,50 @@ mod tests {
 
             let expected_result: Decimal = bond_sale.floor_price;
             let expected_bond_sale_previous_price: Decimal = bond_sale.floor_price;
+
+            assert_eq!(result, expected_result);
+            assert_eq!(
+                { bond_sale.previous_price },
+                expected_bond_sale_previous_price
+            );
+        }
+        // if delta_time = sale_time/2, doubled velocity and buy_amount = 0, then trade_price = new_price = floor_price
+        {
+            let mut bond_sale = BondSale {
+                buy_amount: TokenAmount(50),
+                remaining_amount: TokenAmount(50),
+                previous_price: Decimal::from_integer(3), // ==ceil price
+                up_bound: Decimal::from_decimal(50, 2),
+                velocity: Decimal::from_integer(2),
+                floor_price: Decimal::from_integer(2),
+                sale_time: 302400, // half of seconds in a week
+                last_trade: 0,
+                ..nonpanic_bond_sale
+            };
+
+            let result = calculate_new_price(&mut bond_sale, 604800, TokenAmount(0));
+
+            let expected_result: Decimal = bond_sale.floor_price;
+            let expected_bond_sale_previous_price: Decimal = bond_sale.floor_price;
+
+            assert_eq!(result, expected_result);
+            assert_eq!(
+                { bond_sale.previous_price },
+                expected_bond_sale_previous_price
+            );
+        }
+        // instantly taken 100% of supply
+        {
+            let mut bond_sale = BondSale {
+                buy_amount: TokenAmount(50),
+                remaining_amount: TokenAmount(50),
+                ..nonpanic_bond_sale
+            };
+
+            let result = calculate_new_price(&mut bond_sale, 0, TokenAmount(50));
+
+            let expected_result: Decimal = Decimal::from_decimal(250, 2);
+            let expected_bond_sale_previous_price: Decimal = Decimal::from_integer(3);
 
             assert_eq!(result, expected_result);
             assert_eq!(
