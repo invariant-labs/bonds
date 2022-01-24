@@ -1,11 +1,7 @@
 use anchor_lang::prelude::*;
 use anchor_spl::token::{transfer, Mint, TokenAccount, Transfer};
 
-use crate::{
-    interfaces::TransferY,
-    structs::{token_amount::TokenAmount, BondSale},
-    utils::close,
-};
+use crate::{interfaces::TransferY, structs::BondSale, utils::close};
 
 #[derive(Accounts)]
 pub struct EndBondSale<'info> {
