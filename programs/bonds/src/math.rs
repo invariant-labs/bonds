@@ -2,6 +2,7 @@ use std::convert::TryInto;
 
 use crate::structs::{BondSale, Decimal, TokenAmount};
 
+#[allow(dead_code)]
 pub fn calculate_new_price(
     bond_sale: &mut BondSale,
     current_time: u64,
