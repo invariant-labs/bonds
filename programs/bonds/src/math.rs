@@ -25,7 +25,7 @@ pub fn calculate_new_price(
 
     bond_sale.previous_price = price + jump;
 
-    price + Decimal::from_decimal(50, 2) * bond_sale.up_bound
+    price + Decimal::from_decimal(50, 2) * jump
 }
 
 #[cfg(test)]
