@@ -34,27 +34,3 @@ pub fn calculate_new_price(
 
     price
 }
-
-pub fn calculate_new_price_safely(
-    bond_sale: BondSale,
-    bond: &mut Bond,
-    buy_amount: TokenAmount,
-    time_diff: u64,
-) -> Decimal {
-    let slope: Decimal =
-        bond_sale.up_bound * bond_sale.velocity * Decimal::new(time_diff.try_into().unwrap());
-
-    let bias: Decimal =
-        bond_sale.floor_price * bond_sale.up_bound * buy_amount.percent(bond_sale.buy_amount);
-
-    let temp: Decimal = match bond.previous_price.v.le(&(bond_sale.floor_price + slope).v) {
-        true => bond_sale.floor_price,
-        false => bond.previous_price - slope,
-    };
-
-    let price: Decimal = temp + Decimal::from_decimal(5, 2) * bias;
-
-    bond.update_previous_price(price);
-
-    price
-}

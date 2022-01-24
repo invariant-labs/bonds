@@ -4,11 +4,8 @@ use anchor_spl::token::{Mint, TokenAccount, Transfer};
 use bond_sale::BondSale;
 
 use crate::{
-    get_signer,
     interfaces::{TransferX, TransferY},
     structs::{bond_sale, token_amount::TokenAmount, Bond},
-    utils::get_current_timestamp,
-    SEED,
 };
 
 #[derive(Accounts)]
@@ -83,15 +80,11 @@ pub fn handler(ctx: Context<CreateBond>, buy_amount: u64, sell_amount: u64) -> P
     **bond = Bond {
         bond_sale: ctx.accounts.bond_sale.key(),
         owner: ctx.accounts.owner.key(),
-        current_price: bond_sale.floor_price,
-        previous_price: bond_sale.floor_price,
         buy_amount: TokenAmount(buy_amount),
-        last_trade: get_current_timestamp(),
     };
 
-    let signer: &[&[&[u8]]] = get_signer!(bond_sale.nonce);
-    token::transfer(ctx.accounts.transfer_x().with_signer(signer), buy_amount)?;
-    token::transfer(ctx.accounts.transfer_y().with_signer(signer), sell_amount)?;
+    token::transfer(ctx.accounts.transfer_x(), buy_amount)?;
+    token::transfer(ctx.accounts.transfer_y(), sell_amount)?;
 
     bond_sale.remaining_amount = bond_sale.remaining_amount - TokenAmount::new(buy_amount);
     bond_sale.sell_amount = bond_sale.sell_amount + TokenAmount::new(sell_amount);
