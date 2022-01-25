@@ -43,7 +43,12 @@ pub mod bonds {
         ctx: Context<CreateBond>,
         buy_amount: u64,
         sell_amount: u64,
+        bump: u8,
     ) -> ProgramResult {
-        instructions::create_bond::handler(ctx, buy_amount, sell_amount)
+        instructions::create_bond::handler(ctx, buy_amount, sell_amount, bump)
+    }
+
+    pub fn end_bond_sale(ctx: Context<EndBondSale>) -> ProgramResult {
+        instructions::end_bond_sale::handler(ctx)
     }
 }

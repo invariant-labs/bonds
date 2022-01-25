@@ -5,18 +5,18 @@ use super::{Decimal, TokenAmount};
 #[account(zero_copy)]
 #[repr(packed)]
 pub struct BondSale {
-    pub token_buy: Pubkey,
-    pub token_sell: Pubkey,
-    pub token_buy_account: Pubkey,
-    pub token_sell_account: Pubkey,
+    pub token_bond: Pubkey,
+    pub token_quote: Pubkey,
+    pub token_bond_account: Pubkey,
+    pub token_quote_account: Pubkey,
     pub payer: Pubkey,
     pub authority: Pubkey,
     pub floor_price: Decimal,
     pub up_bound: Decimal,
     pub velocity: Decimal,
-    pub buy_amount: TokenAmount,
+    pub bond_amount: TokenAmount,
     pub remaining_amount: TokenAmount,
-    pub sell_amount: TokenAmount,
+    pub quote_amount: TokenAmount,
     pub sale_time: u64,
 }
 

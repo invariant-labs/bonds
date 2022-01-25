@@ -1,4 +1,4 @@
-import { Program, Provider, BN } from '@project-serum/anchor'
+import { Program, Provider, BN, utils } from '@project-serum/anchor'
 import { Token, TOKEN_PROGRAM_ID } from '@solana/spl-token'
 import {
   Connection,
@@ -15,6 +15,7 @@ import { getProgramAddress, Network } from './network'
 
 import { signAndSend } from './utils'
 export const SEED = 'Bonds'
+export const BOND_SEED = 'bondv1'
 
 export const DEFAULT_PUBLIC_KEY = new PublicKey(0)
 
@@ -60,24 +61,28 @@ export class Sale {
     }
   }
 
+  async getBondSale(bondSalePubkey: PublicKey) {
+    return (await this.program.account.bondSale.fetch(bondSalePubkey)) as BondSaleStruct
+  }
+
   async initBondSaleInstruction(
     initBondSale: InitBondSale,
     bondSalePub: PublicKey,
-    bondSaleBuyPub: PublicKey,
-    bondSaleSellPub: PublicKey
+    tokenBondAccountPub: PublicKey,
+    tokenQuoteAccountPub: PublicKey
   ) {
     const {
-      tokenBuy,
-      tokenSell,
-      payerBuyAccount,
-      payerSellAccount,
+      tokenBond,
+      tokenQuote,
+      payerBondAccount,
+      payerQuoteAccount,
       floorPrice,
       upBound,
       velocity,
       buyAmount,
       endTime
     } = initBondSale
-    const payerPubkey = initBondSale.payer || this.wallet.publicKey
+    const payerPubkey = initBondSale.payer ?? this.wallet.publicKey
 
     return this.program.instruction.initBondSale(
       floorPrice,
@@ -88,14 +93,14 @@ export class Sale {
       {
         accounts: {
           bondSale: bondSalePub,
-          tokenBuy: tokenBuy.publicKey,
-          tokenSell: tokenSell.publicKey,
-          bondSaleBuy: bondSaleBuyPub,
-          bondSaleSell: bondSaleSellPub,
-          payerBuyAccount,
-          payerSellAccount,
+          tokenBond: tokenBond.publicKey,
+          tokenQuote: tokenQuote.publicKey,
+          tokenBondAccount: tokenBondAccountPub,
+          tokenQuoteAccount: tokenQuoteAccountPub,
+          payerBondAccount,
+          payerQuoteAccount,
           payer: payerPubkey,
-          authority: this.programAuthority,
+          authority: payerPubkey,
           tokenProgram: TOKEN_PROGRAM_ID,
           systemProgram: SystemProgram.programId,
           rent: SYSVAR_RENT_PUBKEY
@@ -107,46 +112,101 @@ export class Sale {
   async initBondSaleTransaction(
     initBondSale: InitBondSale,
     bondSalePub: PublicKey,
-    bondSaleBuyPub: PublicKey,
-    bondSaleSellPub: PublicKey
+    bondSaleBondPub: PublicKey,
+    bondSaleQuotePub: PublicKey
   ) {
-    const ix = await this.initBondSaleInstruction(
+    const createIx = SystemProgram.createAccount({
+      fromPubkey: initBondSale.payer,
+      newAccountPubkey: bondSalePub,
+      space: this.program.account.bondSale.size,
+      lamports: await this.connection.getMinimumBalanceForRentExemption(
+        this.program.account.bondSale.size
+      ),
+      programId: this.program.programId
+    })
+
+    const initIx = await this.initBondSaleInstruction(
       initBondSale,
       bondSalePub,
-      bondSaleBuyPub,
-      bondSaleSellPub
+      bondSaleBondPub,
+      bondSaleQuotePub
     )
 
-    return new Transaction().add(ix)
+    return new Transaction({
+      feePayer: initBondSale.payer
+    })
+      .add(createIx)
+      .add(initIx)
   }
 
   async initBondSale(initBondSale: InitBondSale, payer: Keypair) {
     const bondSaleAddress = Keypair.generate()
-    const bondSaleBuyAccount = Keypair.generate()
-    const bondSaleSellAccount = Keypair.generate()
+    const bondSaleBondAccount = Keypair.generate()
+    const bondSaleQuoteAccount = Keypair.generate()
 
     const tx = await this.initBondSaleTransaction(
       initBondSale,
       bondSaleAddress.publicKey,
-      bondSaleBuyAccount.publicKey,
-      bondSaleSellAccount.publicKey
+      bondSaleBondAccount.publicKey,
+      bondSaleQuoteAccount.publicKey
     )
 
     await signAndSend(
       tx,
-      [payer, bondSaleAddress, bondSaleBuyAccount, bondSaleSellAccount],
+      [payer, bondSaleAddress, bondSaleBondAccount, bondSaleQuoteAccount],
       this.connection
     )
+
+    return bondSaleAddress.publicKey
   }
 
-  async createBondInstruction() {}
+  async getBondAddress(owner: PublicKey, bondSale: PublicKey) {
+    const [bondAddress, bump] = await PublicKey.findProgramAddress(
+      [Buffer.from(utils.bytes.utf8.encode(BOND_SEED)), owner.toBuffer(), bondSale.toBuffer()],
+      this.program.programId
+    )
+
+    return {
+      bondAddress,
+      bump
+    }
+  }
+
+  async createBondInstruction(
+    createBond: CreateBond,
+    bondAccountPub: PublicKey,
+    quoteAccountPub: PublicKey
+  ) {
+    const { bondSale, buyAmount, quoteAmount } = createBond
+    const ownerPubkey = createBond.owner ?? this.wallet.publicKey
+    const bondSaleStruct = await this.getBondSale(bondSale)
+    const { bondAddress, bump } = await this.getBondAddress(ownerPubkey, bondSale)
+
+    return this.program.instruction.createBond(buyAmount, quoteAmount, bump, {
+      accounts: {
+        bondSale,
+        bond: bondAddress,
+        tokenBond: bondSaleStruct.tokenBond,
+        tokenQuote: bondSaleStruct.tokenQuote,
+        bondAccount: bondAccountPub,
+        quoteAccount: quoteAccountPub,
+        bondSaleBondAccount: bondSaleStruct.tokenBondAccount,
+        bondSaleQuoteAccount: bondSaleStruct.tokenQuoteAccount,
+        owner: ownerPubkey,
+        authority: this.programAuthority,
+        tokenProgram: TOKEN_PROGRAM_ID,
+        systemProgram: SystemProgram.programId,
+        rent: SYSVAR_RENT_PUBKEY
+      }
+    })
+  }
 }
 
 export interface InitBondSale {
-  tokenBuy: Token
-  tokenSell: Token
-  payerBuyAccount: PublicKey
-  payerSellAccount: PublicKey
+  tokenBond: Token
+  tokenQuote: Token
+  payerBondAccount: PublicKey
+  payerQuoteAccount: PublicKey
   payer?: PublicKey
   floorPrice: BN
   upBound: BN
@@ -156,6 +216,32 @@ export interface InitBondSale {
 }
 
 export interface CreateBond {
-  tokenBuy: Token
-  tokenSell: Token
+  bondSale: PublicKey
+  buyAmount: BN
+  quoteAmount: BN
+  owner?: PublicKey
+}
+
+export interface BondSaleStruct {
+  tokenBond: PublicKey
+  tokenQuote: PublicKey
+  tokenBondAccount: PublicKey
+  tokenQuoteAccount: PublicKey
+  payer: PublicKey
+  authority: PublicKey
+  floorPrice: Decimal
+  upBound: Decimal
+  velocity: Decimal
+  bondAmount: TokenAmount
+  remainingAmount: TokenAmount
+  quoteAmount: TokenAmount
+  saleTime: BN
+}
+
+export interface Decimal {
+  v: BN
+}
+
+export interface TokenAmount {
+  v: BN
 }

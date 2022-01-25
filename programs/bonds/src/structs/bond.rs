@@ -14,6 +14,7 @@ pub struct Bond {
     pub previous_price: Decimal,
     pub buy_amount: TokenAmount,
     pub last_trade: u64,
+    pub bump: u8,
 }
 
 impl Bond {

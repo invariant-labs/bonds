@@ -11,44 +11,44 @@ export type Bonds = {
           "isSigner": false
         },
         {
-          "name": "tokenBuy",
-          "isMut": true,
-          "isSigner": true
-        },
-        {
-          "name": "tokenSell",
-          "isMut": true,
-          "isSigner": true
-        },
-        {
-          "name": "bondSaleBuy",
-          "isMut": true,
-          "isSigner": true
-        },
-        {
-          "name": "bondSaleSell",
-          "isMut": true,
-          "isSigner": true
-        },
-        {
-          "name": "payerBuyAccount",
+          "name": "tokenBond",
           "isMut": false,
           "isSigner": false
         },
         {
-          "name": "payerSellAccount",
+          "name": "tokenQuote",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "tokenBondAccount",
           "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "tokenQuoteAccount",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "payerBondAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "payerQuoteAccount",
+          "isMut": false,
           "isSigner": false
         },
         {
           "name": "payer",
-          "isMut": false,
+          "isMut": true,
           "isSigner": true
         },
         {
           "name": "authority",
           "isMut": false,
-          "isSigner": false
+          "isSigner": true
         },
         {
           "name": "tokenProgram",
@@ -103,32 +103,32 @@ export type Bonds = {
           "isSigner": false
         },
         {
-          "name": "tokenBuy",
+          "name": "tokenBond",
           "isMut": false,
           "isSigner": false
         },
         {
-          "name": "tokenSell",
+          "name": "tokenQuote",
           "isMut": false,
           "isSigner": false
         },
         {
-          "name": "bondBuy",
+          "name": "bondAccount",
           "isMut": true,
           "isSigner": true
         },
         {
-          "name": "bondSell",
+          "name": "quoteAccount",
           "isMut": true,
           "isSigner": true
         },
         {
-          "name": "bondSaleBuy",
+          "name": "bondSaleBondAccount",
           "isMut": true,
           "isSigner": false
         },
         {
-          "name": "bondSaleSell",
+          "name": "bondSaleQuoteAccount",
           "isMut": true,
           "isSigner": false
         },
@@ -166,8 +166,53 @@ export type Bonds = {
         {
           "name": "sellAmount",
           "type": "u64"
+        },
+        {
+          "name": "bump",
+          "type": "u8"
         }
       ]
+    },
+    {
+      "name": "endBondSale",
+      "accounts": [
+        {
+          "name": "bondSale",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "tokenQuote",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "tokenQuoteAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "payerQuoteAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "authority",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "payer",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "tokenProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": []
     }
   ],
   "accounts": [
@@ -205,6 +250,10 @@ export type Bonds = {
           {
             "name": "lastTrade",
             "type": "u64"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
           }
         ]
       }
@@ -215,19 +264,19 @@ export type Bonds = {
         "kind": "struct",
         "fields": [
           {
-            "name": "tokenBuy",
+            "name": "tokenBond",
             "type": "publicKey"
           },
           {
-            "name": "tokenSell",
+            "name": "tokenQuote",
             "type": "publicKey"
           },
           {
-            "name": "tokenBuyAccount",
+            "name": "tokenBondAccount",
             "type": "publicKey"
           },
           {
-            "name": "tokenSellAccount",
+            "name": "tokenQuoteAccount",
             "type": "publicKey"
           },
           {
@@ -257,7 +306,7 @@ export type Bonds = {
             }
           },
           {
-            "name": "buyAmount",
+            "name": "bondAmount",
             "type": {
               "defined": "TokenAmount"
             }
@@ -269,7 +318,7 @@ export type Bonds = {
             }
           },
           {
-            "name": "sellAmount",
+            "name": "quoteAmount",
             "type": {
               "defined": "TokenAmount"
             }
@@ -291,6 +340,18 @@ export type Bonds = {
           {
             "name": "v",
             "type": "u128"
+          }
+        ]
+      }
+    },
+    {
+      "name": "TokenAmount",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "v",
+            "type": "u64"
           }
         ]
       }
@@ -323,44 +384,44 @@ export const IDL: Bonds = {
           "isSigner": false
         },
         {
-          "name": "tokenBuy",
-          "isMut": true,
-          "isSigner": true
-        },
-        {
-          "name": "tokenSell",
-          "isMut": true,
-          "isSigner": true
-        },
-        {
-          "name": "bondSaleBuy",
-          "isMut": true,
-          "isSigner": true
-        },
-        {
-          "name": "bondSaleSell",
-          "isMut": true,
-          "isSigner": true
-        },
-        {
-          "name": "payerBuyAccount",
+          "name": "tokenBond",
           "isMut": false,
           "isSigner": false
         },
         {
-          "name": "payerSellAccount",
+          "name": "tokenQuote",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "tokenBondAccount",
           "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "tokenQuoteAccount",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "payerBondAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "payerQuoteAccount",
+          "isMut": false,
           "isSigner": false
         },
         {
           "name": "payer",
-          "isMut": false,
+          "isMut": true,
           "isSigner": true
         },
         {
           "name": "authority",
           "isMut": false,
-          "isSigner": false
+          "isSigner": true
         },
         {
           "name": "tokenProgram",
@@ -415,32 +476,32 @@ export const IDL: Bonds = {
           "isSigner": false
         },
         {
-          "name": "tokenBuy",
+          "name": "tokenBond",
           "isMut": false,
           "isSigner": false
         },
         {
-          "name": "tokenSell",
+          "name": "tokenQuote",
           "isMut": false,
           "isSigner": false
         },
         {
-          "name": "bondBuy",
+          "name": "bondAccount",
           "isMut": true,
           "isSigner": true
         },
         {
-          "name": "bondSell",
+          "name": "quoteAccount",
           "isMut": true,
           "isSigner": true
         },
         {
-          "name": "bondSaleBuy",
+          "name": "bondSaleBondAccount",
           "isMut": true,
           "isSigner": false
         },
         {
-          "name": "bondSaleSell",
+          "name": "bondSaleQuoteAccount",
           "isMut": true,
           "isSigner": false
         },
@@ -478,8 +539,53 @@ export const IDL: Bonds = {
         {
           "name": "sellAmount",
           "type": "u64"
+        },
+        {
+          "name": "bump",
+          "type": "u8"
         }
       ]
+    },
+    {
+      "name": "endBondSale",
+      "accounts": [
+        {
+          "name": "bondSale",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "tokenQuote",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "tokenQuoteAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "payerQuoteAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "authority",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "payer",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "tokenProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": []
     }
   ],
   "accounts": [
@@ -517,6 +623,10 @@ export const IDL: Bonds = {
           {
             "name": "lastTrade",
             "type": "u64"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
           }
         ]
       }
@@ -527,19 +637,19 @@ export const IDL: Bonds = {
         "kind": "struct",
         "fields": [
           {
-            "name": "tokenBuy",
+            "name": "tokenBond",
             "type": "publicKey"
           },
           {
-            "name": "tokenSell",
+            "name": "tokenQuote",
             "type": "publicKey"
           },
           {
-            "name": "tokenBuyAccount",
+            "name": "tokenBondAccount",
             "type": "publicKey"
           },
           {
-            "name": "tokenSellAccount",
+            "name": "tokenQuoteAccount",
             "type": "publicKey"
           },
           {
@@ -569,7 +679,7 @@ export const IDL: Bonds = {
             }
           },
           {
-            "name": "buyAmount",
+            "name": "bondAmount",
             "type": {
               "defined": "TokenAmount"
             }
@@ -581,7 +691,7 @@ export const IDL: Bonds = {
             }
           },
           {
-            "name": "sellAmount",
+            "name": "quoteAmount",
             "type": {
               "defined": "TokenAmount"
             }
@@ -603,6 +713,18 @@ export const IDL: Bonds = {
           {
             "name": "v",
             "type": "u128"
+          }
+        ]
+      }
+    },
+    {
+      "name": "TokenAmount",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "v",
+            "type": "u64"
           }
         ]
       }

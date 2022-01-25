@@ -17,7 +17,7 @@ pub fn calculate_new_price(
         .checked_sub(bond.last_trade)
         .unwrap();
     let price_increment =
-        buy_amount.percent(bond_sale.buy_amount) * bond_sale.up_bound * bond_sale.floor_price;
+        buy_amount.percent(bond_sale.bond_amount) * bond_sale.up_bound * bond_sale.floor_price;
     let slope = fraction * Decimal::from_integer(time_diff.try_into().unwrap());
 
     let temp = bond.current_price;
