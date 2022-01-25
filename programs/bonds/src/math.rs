@@ -24,6 +24,7 @@ pub fn calculate_new_price(
     let jump: Decimal = supply_ratio * bond_sale.up_bound * bond_sale.floor_price;
 
     bond_sale.previous_price = price + jump;
+    bond_sale.remaining_amount = bond_sale.remaining_amount - buy_amount;
 
     price + Decimal::from_decimal(50, 2) * jump
     // TODO add update of remaining amount + tests
