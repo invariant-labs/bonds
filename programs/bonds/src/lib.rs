@@ -26,13 +26,12 @@ pub mod bonds {
     // trunk-ignore(clippy/too_many_arguments)
     pub fn init_bond_sale(
         ctx: Context<InitBondSale>,
-        floor_price: Decimal,
-        up_bound: Decimal,
-        velocity: Decimal,
+        floor_price: u128,
+        up_bound: u128,
+        velocity: u128,
         buy_amount: u64,
         sell_amount: u64,
         end_time: u64,
-        nonce: u8,
     ) -> ProgramResult {
         instructions::init_bond_sale::handler(
             ctx,
@@ -41,7 +40,6 @@ pub mod bonds {
             velocity,
             buy_amount,
             end_time,
-            nonce,
         )
     }
 

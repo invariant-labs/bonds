@@ -49,12 +49,11 @@ impl<'info> TransferX<'info> for InitBondSale<'info> {
 // trunk-ignore(clippy/too_many_arguments)
 pub fn handler(
     ctx: Context<InitBondSale>,
-    floor_price: Decimal,
-    up_bound: Decimal,
-    velocity: Decimal,
+    floor_price: u128,
+    up_bound: u128,
+    velocity: u128,
     buy_amount: u64,
-    end_time: u64,
-    nonce: u8,
+    sale_time: u64,
 ) -> ProgramResult {
     let bond_sale = &mut ctx.accounts.bond_sale.load_mut()?;
 
@@ -76,14 +75,16 @@ pub fn handler(
         token_buy_account: ctx.accounts.bond_sale_buy.key(),
         token_sell_account: ctx.accounts.bond_sale_sell.key(),
         payer: ctx.accounts.payer.key(),
-        floor_price,
-        up_bound,
-        velocity,
+        authority: ctx.accounts.authority.key(),
+        floor_price: Decimal::new(floor_price),
+        previous_price: Decimal::new(floor_price),
+        up_bound: Decimal::new(up_bound),
+        velocity: Decimal::new(velocity),
         buy_amount: TokenAmount::new(buy_amount),
         remaining_amount: TokenAmount::new(buy_amount),
         sell_amount: TokenAmount::new(0),
-        sale_time: current_timestamp.checked_add(end_time).unwrap(),
-        nonce,
+        sale_time,
+        last_trade: 0,
     };
 
     token::transfer(ctx.accounts.transfer_x(), buy_amount);
