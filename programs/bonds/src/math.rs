@@ -27,7 +27,6 @@ pub fn calculate_new_price(
     bond_sale.remaining_amount = bond_sale.remaining_amount - buy_amount;
 
     price + Decimal::from_decimal(50, 2) * jump
-    // TODO add update of remaining amount + tests
 }
 
 #[cfg(test)]
@@ -106,6 +105,7 @@ mod tests {
                 previous_price: Decimal::from_integer(2),
                 up_bound: Decimal::from_decimal(50, 2),
                 buy_amount: TokenAmount(100),
+                remaining_amount: TokenAmount(20),
                 ..nonpanic_bond_sale
             };
 
@@ -119,6 +119,7 @@ mod tests {
                 { bond_sale.previous_price },
                 expected_bond_sale_previous_price
             );
+            assert_eq!({ bond_sale.remaining_amount }, TokenAmount(10));
         }
         // if delta_time = sale_time and buy_amount = 0, then trade_price = new_price = floor_price
         {
@@ -144,11 +145,12 @@ mod tests {
                 { bond_sale.previous_price },
                 expected_bond_sale_previous_price
             );
+            assert_eq!({ bond_sale.remaining_amount }, TokenAmount(50));
         }
         // if delta_time = sale_time/2, doubled velocity and buy_amount = 0, then trade_price = new_price = floor_price
         {
             let mut bond_sale = BondSale {
-                buy_amount: TokenAmount(50),
+                buy_amount: TokenAmount(100),
                 remaining_amount: TokenAmount(50),
                 previous_price: Decimal::from_integer(3), // ==ceil price
                 up_bound: Decimal::from_decimal(50, 2),
@@ -169,6 +171,7 @@ mod tests {
                 { bond_sale.previous_price },
                 expected_bond_sale_previous_price
             );
+            assert_eq!({ bond_sale.remaining_amount }, TokenAmount(50));
         }
         // instantly taken 100% of supply
         {
@@ -188,6 +191,7 @@ mod tests {
                 { bond_sale.previous_price },
                 expected_bond_sale_previous_price
             );
+            assert_eq!({ bond_sale.remaining_amount }, TokenAmount(0));
         }
     }
 }
