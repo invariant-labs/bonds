@@ -53,7 +53,7 @@ pub fn handler(
     up_bound: u128,
     velocity: u128,
     buy_amount: u64,
-    end_time: u64,
+    sale_time: u64,
 ) -> ProgramResult {
     let bond_sale = &mut ctx.accounts.bond_sale.load_mut()?;
 
@@ -83,8 +83,8 @@ pub fn handler(
         buy_amount: TokenAmount::new(buy_amount),
         remaining_amount: TokenAmount::new(buy_amount),
         sell_amount: TokenAmount::new(0),
-        sale_time: current_timestamp.checked_add(end_time).unwrap(),
-        last_trade: get_current_timestamp(),
+        sale_time,
+        last_trade: 0,
     };
 
     token::transfer(ctx.accounts.transfer_x(), buy_amount);
