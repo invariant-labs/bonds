@@ -1,92 +1,89 @@
-use std::cmp::Ordering;
-
 use anchor_lang::prelude::*;
 use anchor_lang::solana_program::system_program;
 use anchor_spl::token::{self, Transfer};
 use anchor_spl::token::{Mint, TokenAccount};
 
-use crate::interfaces::TransferX;
-use crate::{
-    structs::{BondSale, Decimal, TokenAmount},
-    utils::get_current_timestamp,
-};
+use crate::interfaces::TransferBond;
+use crate::structs::{BondSale, Decimal, TokenAmount};
 
 #[derive(Accounts)]
 pub struct InitBondSale<'info> {
     #[account(zero)]
     pub bond_sale: AccountLoader<'info, BondSale>,
-    #[account(init, mint::decimals = 6, mint::authority = authority, payer = payer)]
-    pub token_buy: Account<'info, Mint>,
-    #[account(init, mint::decimals = 6, mint::authority = authority, payer = payer)]
-    pub token_sell: Account<'info, Mint>,
-    #[account(init, token::mint = token_buy, token::authority = authority, payer = payer)]
-    pub bond_sale_buy: Account<'info, TokenAccount>,
-    #[account(init, token::mint = token_sell, token::authority = authority, payer = payer)]
-    pub bond_sale_sell: Account<'info, TokenAccount>,
+    pub token_bond: Box<Account<'info, Mint>>,
+    pub token_quote: Box<Account<'info, Mint>>,
+    #[account(init,
+        token::mint = token_bond,
+        token::authority = authority,
+        payer = payer
+    )]
+    pub token_bond_account: Box<Account<'info, TokenAccount>>,
+    #[account(init,
+        token::mint = token_quote,
+        token::authority = authority,
+        payer = payer
+    )]
+    pub token_quote_account: Box<Account<'info, TokenAccount>>,
+    #[account(mut,
+        constraint = payer_bond_account.mint == token_bond.key()
+    )]
+    pub payer_bond_account: Box<Account<'info, TokenAccount>>,
+    #[account(
+        constraint = payer_quote_account.mint == token_quote.key()
+    )]
+    pub payer_quote_account: Box<Account<'info, TokenAccount>>,
     #[account(mut)]
-    pub payer_x_account: Account<'info, TokenAccount>,
     pub payer: Signer<'info>,
-    pub authority: AccountInfo<'info>,
+    pub authority: Signer<'info>,
     pub token_program: AccountInfo<'info>,
     #[account(address = system_program::ID)]
     pub system_program: AccountInfo<'info>,
     pub rent: Sysvar<'info, Rent>,
 }
 
-impl<'info> TransferX<'info> for InitBondSale<'info> {
+impl<'info> TransferBond<'info> for InitBondSale<'info> {
     fn transfer_x(&self) -> CpiContext<'_, '_, '_, 'info, token::Transfer<'info>> {
         CpiContext::new(
             self.token_program.to_account_info(),
             Transfer {
-                from: self.payer_x_account.to_account_info(),
-                to: self.bond_sale_buy.to_account_info(),
+                from: self.payer_bond_account.to_account_info(),
+                to: self.token_bond_account.to_account_info(),
                 authority: self.authority.to_account_info().clone(),
             },
         )
     }
 }
 
-// trunk-ignore(clippy/too_many_arguments)
 pub fn handler(
     ctx: Context<InitBondSale>,
     floor_price: u128,
     up_bound: u128,
     velocity: u128,
-    buy_amount: u64,
+    bond_amount: u64,
     sale_time: u64,
 ) -> ProgramResult {
-    let bond_sale = &mut ctx.accounts.bond_sale.load_mut()?;
+    let bond_sale = &mut ctx.accounts.bond_sale.load_init()?;
 
-    let token_buy_address = ctx.accounts.token_buy.to_account_info().key;
-    let token_sell_address = ctx.accounts.token_sell.to_account_info().key;
-    require!(
-        token_buy_address
-            .to_string()
-            .cmp(&token_sell_address.to_string())
-            == Ordering::Less,
-        InvalidPoolTokenAddresses
-    );
-
-    let current_timestamp = get_current_timestamp();
+    let token_bond_address = &ctx.accounts.token_bond.key();
+    let token_quote_address = &ctx.accounts.token_quote.key();
 
     **bond_sale = BondSale {
-        token_buy: token_buy_address.key(),
-        token_sell: token_sell_address.key(),
-        token_buy_account: ctx.accounts.bond_sale_buy.key(),
-        token_sell_account: ctx.accounts.bond_sale_sell.key(),
+        token_bond: token_bond_address.key(),
+        token_quote: token_quote_address.key(),
+        token_bond_account: ctx.accounts.token_bond_account.key(),
+        token_quote_account: ctx.accounts.token_quote_account.key(),
         payer: ctx.accounts.payer.key(),
         authority: ctx.accounts.authority.key(),
         floor_price: Decimal::new(floor_price),
         previous_price: Decimal::new(floor_price),
         up_bound: Decimal::new(up_bound),
         velocity: Decimal::new(velocity),
-        buy_amount: TokenAmount::new(buy_amount),
-        remaining_amount: TokenAmount::new(buy_amount),
-        sell_amount: TokenAmount::new(0),
+        bond_amount: TokenAmount::new(bond_amount),
+        remaining_amount: TokenAmount::new(bond_amount),
+        quote_amount: TokenAmount::new(0),
         sale_time,
         last_trade: 0,
     };
-
-    token::transfer(ctx.accounts.transfer_x(), buy_amount);
+    token::transfer(ctx.accounts.transfer_x(), bond_amount)?;
     Ok(())
 }

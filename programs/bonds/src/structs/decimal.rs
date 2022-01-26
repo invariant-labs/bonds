@@ -58,7 +58,7 @@ impl Decimal {
     }
 
     pub fn from_token_amount(amount: TokenAmount) -> Decimal {
-        Decimal::from_integer(amount.0.into())
+        Decimal::from_integer(amount.v.into())
     }
 
     pub fn div_up(self, other: Decimal) -> Decimal {
@@ -78,19 +78,22 @@ impl Decimal {
     }
 
     pub fn to_token_floor(self) -> TokenAmount {
-        TokenAmount(self.v.checked_div(DENOMINATOR).unwrap().try_into().unwrap())
+        TokenAmount {
+            v: self.v.checked_div(DENOMINATOR).unwrap().try_into().unwrap(),
+        }
     }
 
     pub fn to_token_ceil(self) -> TokenAmount {
-        TokenAmount(
-            self.v
+        TokenAmount {
+            v: self
+                .v
                 .checked_add(DENOMINATOR.checked_sub(1).unwrap())
                 .unwrap()
                 .checked_div(DENOMINATOR)
                 .unwrap()
                 .try_into()
                 .unwrap(),
-        )
+        }
     }
 
     pub fn big_mul(self, other: Decimal) -> Decimal {
@@ -245,9 +248,10 @@ impl MulUp<Decimal> for Decimal {
 
 impl MulUp<TokenAmount> for Decimal {
     fn mul_up(self, other: TokenAmount) -> TokenAmount {
-        TokenAmount(
-            self.v
-                .checked_mul(other.0 as u128)
+        TokenAmount {
+            v: self
+                .v
+                .checked_mul(other.v as u128)
                 .unwrap()
                 .checked_add(DENOMINATOR.checked_sub(1).unwrap())
                 .unwrap()
@@ -255,7 +259,7 @@ impl MulUp<TokenAmount> for Decimal {
                 .unwrap()
                 .try_into()
                 .unwrap(),
-        )
+        }
     }
 }
 
@@ -310,13 +314,13 @@ mod tests {
         }
         {
             let a = Decimal::from_integer(1);
-            let b = TokenAmount(1);
-            assert_eq!(a.mul_up(b), TokenAmount(1));
+            let b = TokenAmount::new(1);
+            assert_eq!(a.mul_up(b), TokenAmount::new(1));
         }
         {
             let a = Decimal::from_integer(3) / Decimal::from_integer(10);
-            let b = TokenAmount(3);
-            assert_eq!(a.mul_up(b), TokenAmount(1));
+            let b = TokenAmount::new(3);
+            assert_eq!(a.mul_up(b), TokenAmount::new(1));
         }
     }
 
@@ -474,22 +478,22 @@ mod tests {
         {
             let d = Decimal::from_integer(1);
 
-            assert_eq!(d.to_token_floor(), TokenAmount(1));
-            assert_eq!(d.to_token_ceil(), TokenAmount(1));
+            assert_eq!(d.to_token_floor(), TokenAmount::new(1));
+            assert_eq!(d.to_token_ceil(), TokenAmount::new(1));
         }
         // little over
         {
             let d = Decimal::from_integer(1) + Decimal::new(1);
 
-            assert_eq!(d.to_token_floor(), TokenAmount(1));
-            assert_eq!(d.to_token_ceil(), TokenAmount(2));
+            assert_eq!(d.to_token_floor(), TokenAmount::new(1));
+            assert_eq!(d.to_token_ceil(), TokenAmount::new(2));
         }
         // little below
         {
             let d = Decimal::from_integer(2) - Decimal::new(1);
 
-            assert_eq!(d.to_token_floor(), TokenAmount(1));
-            assert_eq!(d.to_token_ceil(), TokenAmount(2));
+            assert_eq!(d.to_token_floor(), TokenAmount::new(1));
+            assert_eq!(d.to_token_ceil(), TokenAmount::new(2));
         }
     }
 

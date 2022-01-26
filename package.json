@@ -1,6 +1,6 @@
 {
   "scripts": {
-    "test:template": "anchor test --skip-build tests/template.spec.ts",
+    "test:init-bond-sale": "anchor test --skip-build tests/init-bond-sale.spec.ts",
     "build": "cd sdk && npm run build"
   },
   "dependencies": {

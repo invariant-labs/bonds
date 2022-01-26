@@ -1,8 +1,6 @@
-use crate::SEED;
-
 #[macro_export]
 macro_rules! get_signer {
-    ($nonce: expr) => {
-        &[&[SEED.as_bytes(), &[$nonce]]]
+    ($authority: expr) => {
+        &[&[SEED.as_bytes(), &[$authority]]]
     };
 }

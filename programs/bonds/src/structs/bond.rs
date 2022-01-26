@@ -9,4 +9,5 @@ pub struct Bond {
     pub bond_sale: Pubkey,
     pub owner: Pubkey,
     pub buy_amount: TokenAmount,
+    pub bump: u8,
 }

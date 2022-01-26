@@ -1,4 +1,4 @@
-import { Provider } from '@project-serum/anchor'
+import { Provider, BN } from '@project-serum/anchor'
 import {
   Transaction,
   Keypair,
@@ -6,6 +6,9 @@ import {
   ConfirmOptions,
   sendAndConfirmRawTransaction
 } from '@solana/web3.js'
+
+export const DECIMAL = 12
+export const DENOMINATOR = new BN(10).pow(new BN(DECIMAL))
 
 export const signAndSend = async (
   tx: Transaction,
