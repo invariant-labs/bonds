@@ -230,26 +230,10 @@ export type Bonds = {
             "type": "publicKey"
           },
           {
-            "name": "currentPrice",
-            "type": {
-              "defined": "Decimal"
-            }
-          },
-          {
-            "name": "previousPrice",
-            "type": {
-              "defined": "Decimal"
-            }
-          },
-          {
             "name": "buyAmount",
             "type": {
               "defined": "TokenAmount"
             }
-          },
-          {
-            "name": "lastTrade",
-            "type": "u64"
           },
           {
             "name": "bump",
@@ -294,6 +278,12 @@ export type Bonds = {
             }
           },
           {
+            "name": "previousPrice",
+            "type": {
+              "defined": "Decimal"
+            }
+          },
+          {
             "name": "upBound",
             "type": {
               "defined": "Decimal"
@@ -325,6 +315,10 @@ export type Bonds = {
           },
           {
             "name": "saleTime",
+            "type": "u64"
+          },
+          {
+            "name": "lastTrade",
             "type": "u64"
           }
         ]
@@ -603,26 +597,10 @@ export const IDL: Bonds = {
             "type": "publicKey"
           },
           {
-            "name": "currentPrice",
-            "type": {
-              "defined": "Decimal"
-            }
-          },
-          {
-            "name": "previousPrice",
-            "type": {
-              "defined": "Decimal"
-            }
-          },
-          {
             "name": "buyAmount",
             "type": {
               "defined": "TokenAmount"
             }
-          },
-          {
-            "name": "lastTrade",
-            "type": "u64"
           },
           {
             "name": "bump",
@@ -667,6 +645,12 @@ export const IDL: Bonds = {
             }
           },
           {
+            "name": "previousPrice",
+            "type": {
+              "defined": "Decimal"
+            }
+          },
+          {
             "name": "upBound",
             "type": {
               "defined": "Decimal"
@@ -698,6 +682,10 @@ export const IDL: Bonds = {
           },
           {
             "name": "saleTime",
+            "type": "u64"
+          },
+          {
+            "name": "lastTrade",
             "type": "u64"
           }
         ]

@@ -6,7 +6,6 @@ use bond_sale::BondSale;
 use crate::{
     interfaces::{TransferBond, TransferQuote},
     structs::{bond_sale, token_amount::TokenAmount, Bond},
-    utils::get_current_timestamp,
 };
 
 #[derive(Accounts)]
@@ -87,10 +86,7 @@ pub fn handler(
     **bond = Bond {
         bond_sale: ctx.accounts.bond_sale.key(),
         owner: ctx.accounts.owner.key(),
-        current_price: bond_sale.floor_price,
-        previous_price: bond_sale.floor_price,
         buy_amount: TokenAmount::new(buy_amount),
-        last_trade: get_current_timestamp(),
         bump,
     };
 

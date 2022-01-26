@@ -11,8 +11,6 @@ use anchor_lang::prelude::*;
 
 use errors::*;
 use instructions::*;
-use structs::*;
-use utils::*;
 
 declare_id!("R9PatsTac3Y3UpC7ihYMMgzAQCe1tXnVvkSQ8DtLWUc");
 pub const SEED: &str = "Bonds";

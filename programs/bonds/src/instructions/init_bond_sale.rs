@@ -4,10 +4,7 @@ use anchor_spl::token::{self, Transfer};
 use anchor_spl::token::{Mint, TokenAccount};
 
 use crate::interfaces::TransferBond;
-use crate::{
-    structs::{BondSale, Decimal, TokenAmount},
-    utils::get_current_timestamp,
-};
+use crate::structs::{BondSale, Decimal, TokenAmount};
 
 #[derive(Accounts)]
 pub struct InitBondSale<'info> {
@@ -63,14 +60,12 @@ pub fn handler(
     up_bound: u128,
     velocity: u128,
     bond_amount: u64,
-    end_time: u64,
+    sale_time: u64,
 ) -> ProgramResult {
     let bond_sale = &mut ctx.accounts.bond_sale.load_init()?;
 
     let token_bond_address = &ctx.accounts.token_bond.key();
     let token_quote_address = &ctx.accounts.token_quote.key();
-
-    let current_timestamp = get_current_timestamp();
 
     **bond_sale = BondSale {
         token_bond: token_bond_address.key(),
@@ -80,12 +75,14 @@ pub fn handler(
         payer: ctx.accounts.payer.key(),
         authority: ctx.accounts.authority.key(),
         floor_price: Decimal::new(floor_price),
+        previous_price: Decimal::new(floor_price),
         up_bound: Decimal::new(up_bound),
         velocity: Decimal::new(velocity),
         bond_amount: TokenAmount::new(bond_amount),
         remaining_amount: TokenAmount::new(bond_amount),
         quote_amount: TokenAmount::new(0),
-        sale_time: current_timestamp.checked_add(end_time).unwrap(),
+        sale_time,
+        last_trade: 0,
     };
     token::transfer(ctx.accounts.transfer_x(), bond_amount)?;
     Ok(())
