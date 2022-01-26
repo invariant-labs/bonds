@@ -193,5 +193,42 @@ mod tests {
             );
             assert_eq!({ bond_sale.remaining_amount }, TokenAmount::new(0));
         }
+        /*
+        bond_amount = 1_000_000
+        floor_price = 2
+        sale_time = 1week
+        up_bound = 300%
+        velocity = 1
+        Someone makes 28 trades proportionally each 6 hours
+        */
+        {
+            let mut bond_sale = BondSale {
+                bond_amount: TokenAmount::new(1_000_000),
+                remaining_amount: TokenAmount::new(1_000_000),
+                floor_price: Decimal::from_integer(2),
+                sale_time: 604800,
+                up_bound: Decimal::from_decimal(300, 2),
+                velocity: Decimal::from_decimal(100, 2),
+                ..Default::default()
+            };
+            let buy_amount: TokenAmount = TokenAmount::new(35714); // floor(1_000_000/28)
+            let basic_time: u64 = 21600; //1week/28
+
+            for n in 0..28 {
+                let current_time = n * basic_time;
+                let result = calculate_new_price(&mut bond_sale, current_time, buy_amount);
+
+                let expected_result: Decimal = Decimal::new(2107142000000);
+                let expected_bond_sale_previous_price: Decimal = Decimal::new(2214284000000);
+
+                assert_eq!(result, expected_result);
+                assert_eq!(
+                    { bond_sale.previous_price },
+                    expected_bond_sale_previous_price
+                );
+            }
+
+            assert_eq!({ bond_sale.remaining_amount }, TokenAmount::new(8)); // 8 = 1_000_000 - 28 * 35714
+        }
     }
 }
