@@ -13,7 +13,7 @@ pub fn calculate_new_price(
         / Decimal::from_integer(bond_sale.sale_time.try_into().unwrap());
 
     let delta_price: Decimal =
-        bond_sale.velocity * (Decimal::one() + bond_sale.up_bound) * time_ratio;
+        bond_sale.velocity * bond_sale.up_bound * bond_sale.floor_price * time_ratio;
     let supply_ratio: Decimal = buy_amount.percent(bond_sale.buy_amount);
 
     let price: Decimal =
