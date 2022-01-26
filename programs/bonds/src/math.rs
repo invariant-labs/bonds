@@ -29,6 +29,42 @@ pub fn calculate_new_price(
     price + Decimal::from_decimal(50, 2) * jump
 }
 
+#[allow(dead_code)]
+pub fn calculate_bond_to_quote(
+    // how many bond tokens correspond to quote tokens
+    bond_sale: &mut BondSale,
+    current_time: u64,
+    buy_amount: TokenAmount,
+) -> Decimal {
+    let delta_time: u64 = current_time - bond_sale.last_trade;
+    let time_ratio: Decimal = Decimal::from_integer(delta_time.try_into().unwrap())
+        / Decimal::from_integer(bond_sale.sale_time.try_into().unwrap());
+
+    let delta_price: Decimal =
+        bond_sale.velocity * bond_sale.up_bound * bond_sale.floor_price * time_ratio;
+    let supply_ratio: Decimal = buy_amount.percent(bond_sale.bond_amount);
+
+    let price: Decimal =
+        match { bond_sale.previous_price } < { bond_sale.floor_price + delta_price } {
+            true => bond_sale.floor_price,
+            false => bond_sale.previous_price - delta_price,
+        };
+    let jump: Decimal = supply_ratio * bond_sale.up_bound * bond_sale.floor_price;
+
+    price + Decimal::from_decimal(50, 2) * jump
+}
+
+/*  TODO quote_to_bond func and bond_to_quote
+#[allow(dead_code)]
+pub fn bond_to_quote(
+    // how many quote tokens correspond to bond tokens
+    bond_sale: &mut BondSale,
+    current_time: u64,
+    buy_amount: TokenAmount,
+) -> Decimal {
+
+} */
+
 #[cfg(test)]
 mod tests {
 
