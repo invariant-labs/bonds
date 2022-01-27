@@ -83,6 +83,32 @@ pub fn calculate_quote_to_bond_price(
     }
 }
 
+#[allow(dead_code)]
+pub fn calculate_bond_to_quote_amount(
+    bond_sale: &mut BondSale,
+    current_time: u64,
+    buy_amount: TokenAmount,
+) -> Decimal {
+    buy_amount.big_mul(calculate_bond_to_quote_price(
+        bond_sale,
+        current_time,
+        buy_amount,
+    ))
+}
+
+#[allow(dead_code)]
+pub fn calculate_quote_to_bond_amount(
+    bond_sale: &mut BondSale,
+    current_time: u64,
+    buy_amount: TokenAmount,
+) -> Decimal {
+    buy_amount.big_mul(calculate_quote_to_bond_price(
+        bond_sale,
+        current_time,
+        buy_amount,
+    ))
+}
+
 #[cfg(test)]
 mod tests {
 
