@@ -227,6 +227,54 @@ export class Sale {
 
     return bond.publicKey
   }
+
+  async changeVelocityInstruction(changeVelocity: ChangeVelocity) {
+    const { bondSale, velocity } = changeVelocity
+    const payerPubkey = changeVelocity.payer ?? this.wallet.publicKey
+
+    return this.program.instruction.changeVelocity(velocity, {
+      accounts: {
+        bondSale,
+        payer: payerPubkey
+      }
+    })
+  }
+
+  async changeVelocityTransaction(changeVelocity: ChangeVelocity) {
+    const ix = await this.changeVelocityInstruction(changeVelocity)
+
+    return new Transaction().add(ix)
+  }
+
+  async changeVelocity(changeVelocity: ChangeVelocity, signer: Keypair) {
+    const tx = await this.changeVelocityTransaction(changeVelocity)
+
+    await signAndSend(tx, [signer], this.connection)
+  }
+
+  async changeUpBoundInstruction(changeUpBound: ChangeUpBound) {
+    const { bondSale, upBound } = changeUpBound
+    const payerPubkey = changeUpBound.payer ?? this.wallet.publicKey
+
+    return this.program.instruction.changeUpBound(upBound, {
+      accounts: {
+        bondSale,
+        payer: payerPubkey
+      }
+    })
+  }
+
+  async changeUpBoundTransaction(changeUpBound: ChangeUpBound) {
+    const ix = await this.changeUpBoundInstruction(changeUpBound)
+
+    return new Transaction().add(ix)
+  }
+
+  async changeUpBound(changeUpBound: ChangeUpBound, signer: Keypair) {
+    const tx = await this.changeUpBoundTransaction(changeUpBound)
+
+    await signAndSend(tx, [signer], this.connection)
+  }
 }
 
 export interface InitBondSale {
@@ -248,6 +296,18 @@ export interface CreateBond {
   amount: BN
   owner?: PublicKey
   byAmountIn: boolean
+}
+
+export interface ChangeVelocity {
+  bondSale: PublicKey
+  payer?: PublicKey
+  velocity: BN
+}
+
+export interface ChangeUpBound {
+  bondSale: PublicKey
+  payer?: PublicKey
+  upBound: BN
 }
 
 export interface BondSaleStruct {
