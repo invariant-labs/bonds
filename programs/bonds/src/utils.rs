@@ -5,7 +5,6 @@ use anchor_lang::__private::{ErrorCode, CLOSED_ACCOUNT_DISCRIMINATOR};
 use anchor_lang::prelude::*;
 use anchor_lang::prelude::{Clock, SolanaSysvar};
 
-// trunk-ignore(clippy/dead_code)
 pub fn get_current_timestamp() -> u64 {
     Clock::get().unwrap().unix_timestamp.try_into().unwrap()
 }

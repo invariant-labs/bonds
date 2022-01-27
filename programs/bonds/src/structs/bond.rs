@@ -7,7 +7,7 @@ use super::TokenAmount;
 #[derive(Debug, Default)]
 pub struct Bond {
     pub bond_sale: Pubkey,
+    pub bond_account: Pubkey,
     pub owner: Pubkey,
     pub buy_amount: TokenAmount,
-    pub bump: u8,
 }

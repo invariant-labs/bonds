@@ -48,7 +48,7 @@ export type Bonds = {
         {
           "name": "authority",
           "isMut": false,
-          "isSigner": true
+          "isSigner": false
         },
         {
           "name": "tokenProgram",
@@ -80,11 +80,11 @@ export type Bonds = {
           "type": "u128"
         },
         {
-          "name": "buyAmount",
+          "name": "bondAmount",
           "type": "u64"
         },
         {
-          "name": "endTime",
+          "name": "duration",
           "type": "u64"
         }
       ]
@@ -118,9 +118,9 @@ export type Bonds = {
           "isSigner": true
         },
         {
-          "name": "quoteAccount",
+          "name": "ownerQuoteAccount",
           "isMut": true,
-          "isSigner": true
+          "isSigner": false
         },
         {
           "name": "bondSaleBondAccount",
@@ -134,7 +134,7 @@ export type Bonds = {
         },
         {
           "name": "owner",
-          "isMut": false,
+          "isMut": true,
           "isSigner": true
         },
         {
@@ -160,15 +160,15 @@ export type Bonds = {
       ],
       "args": [
         {
-          "name": "buyAmount",
+          "name": "amount",
           "type": "u64"
         },
         {
-          "name": "sellAmount",
-          "type": "u64"
+          "name": "byAmountIn",
+          "type": "bool"
         },
         {
-          "name": "bump",
+          "name": "nonce",
           "type": "u8"
         }
       ]
@@ -226,6 +226,10 @@ export type Bonds = {
             "type": "publicKey"
           },
           {
+            "name": "bondAccount",
+            "type": "publicKey"
+          },
+          {
             "name": "owner",
             "type": "publicKey"
           },
@@ -234,10 +238,6 @@ export type Bonds = {
             "type": {
               "defined": "TokenAmount"
             }
-          },
-          {
-            "name": "bump",
-            "type": "u8"
           }
         ]
       }
@@ -415,7 +415,7 @@ export const IDL: Bonds = {
         {
           "name": "authority",
           "isMut": false,
-          "isSigner": true
+          "isSigner": false
         },
         {
           "name": "tokenProgram",
@@ -447,11 +447,11 @@ export const IDL: Bonds = {
           "type": "u128"
         },
         {
-          "name": "buyAmount",
+          "name": "bondAmount",
           "type": "u64"
         },
         {
-          "name": "endTime",
+          "name": "duration",
           "type": "u64"
         }
       ]
@@ -485,9 +485,9 @@ export const IDL: Bonds = {
           "isSigner": true
         },
         {
-          "name": "quoteAccount",
+          "name": "ownerQuoteAccount",
           "isMut": true,
-          "isSigner": true
+          "isSigner": false
         },
         {
           "name": "bondSaleBondAccount",
@@ -501,7 +501,7 @@ export const IDL: Bonds = {
         },
         {
           "name": "owner",
-          "isMut": false,
+          "isMut": true,
           "isSigner": true
         },
         {
@@ -527,15 +527,15 @@ export const IDL: Bonds = {
       ],
       "args": [
         {
-          "name": "buyAmount",
+          "name": "amount",
           "type": "u64"
         },
         {
-          "name": "sellAmount",
-          "type": "u64"
+          "name": "byAmountIn",
+          "type": "bool"
         },
         {
-          "name": "bump",
+          "name": "nonce",
           "type": "u8"
         }
       ]
@@ -593,6 +593,10 @@ export const IDL: Bonds = {
             "type": "publicKey"
           },
           {
+            "name": "bondAccount",
+            "type": "publicKey"
+          },
+          {
             "name": "owner",
             "type": "publicKey"
           },
@@ -601,10 +605,6 @@ export const IDL: Bonds = {
             "type": {
               "defined": "TokenAmount"
             }
-          },
-          {
-            "name": "bump",
-            "type": "u8"
           }
         ]
       }

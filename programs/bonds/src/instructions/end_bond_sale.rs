@@ -30,7 +30,7 @@ pub struct EndBondSale<'info> {
 }
 
 impl<'info> TransferQuote<'info> for EndBondSale<'info> {
-    fn transfer_y(&self) -> CpiContext<'_, '_, '_, 'info, anchor_spl::token::Transfer<'info>> {
+    fn transfer_quote(&self) -> CpiContext<'_, '_, '_, 'info, anchor_spl::token::Transfer<'info>> {
         CpiContext::new(
             self.token_program.to_account_info(),
             Transfer {
@@ -45,7 +45,7 @@ impl<'info> TransferQuote<'info> for EndBondSale<'info> {
 pub fn handler(ctx: Context<EndBondSale>) -> ProgramResult {
     let mut bond_sale = ctx.accounts.bond_sale.load_mut()?;
 
-    transfer(ctx.accounts.transfer_y(), bond_sale.quote_amount.v)?;
+    transfer(ctx.accounts.transfer_quote(), bond_sale.quote_amount.v)?;
     bond_sale.quote_amount.v = 0;
 
     close(
