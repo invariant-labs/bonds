@@ -213,6 +213,48 @@ export type Bonds = {
         }
       ],
       "args": []
+    },
+    {
+      "name": "changeVelocity",
+      "accounts": [
+        {
+          "name": "bondSale",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "payer",
+          "isMut": false,
+          "isSigner": true
+        }
+      ],
+      "args": [
+        {
+          "name": "velocity",
+          "type": "u128"
+        }
+      ]
+    },
+    {
+      "name": "changeUpBound",
+      "accounts": [
+        {
+          "name": "bondSale",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "payer",
+          "isMut": false,
+          "isSigner": true
+        }
+      ],
+      "args": [
+        {
+          "name": "upBound",
+          "type": "u128"
+        }
+      ]
     }
   ],
   "accounts": [
@@ -580,6 +622,48 @@ export const IDL: Bonds = {
         }
       ],
       "args": []
+    },
+    {
+      "name": "changeVelocity",
+      "accounts": [
+        {
+          "name": "bondSale",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "payer",
+          "isMut": false,
+          "isSigner": true
+        }
+      ],
+      "args": [
+        {
+          "name": "velocity",
+          "type": "u128"
+        }
+      ]
+    },
+    {
+      "name": "changeUpBound",
+      "accounts": [
+        {
+          "name": "bondSale",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "payer",
+          "isMut": false,
+          "isSigner": true
+        }
+      ],
+      "args": [
+        {
+          "name": "upBound",
+          "type": "u128"
+        }
+      ]
     }
   ],
   "accounts": [

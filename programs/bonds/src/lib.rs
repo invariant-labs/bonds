@@ -49,4 +49,12 @@ pub mod bonds {
     pub fn end_bond_sale(ctx: Context<EndBondSale>) -> ProgramResult {
         instructions::end_bond_sale::handler(ctx)
     }
+
+    pub fn change_velocity(ctx: Context<ChangeVelocity>, velocity: u128) -> ProgramResult {
+        instructions::change_velocity::handler(ctx, velocity)
+    }
+
+    pub fn change_up_bound(ctx: Context<ChangeUpBound>, up_bound: u128) -> ProgramResult {
+        instructions::change_up_bound::handler(ctx, up_bound)
+    }
 }
