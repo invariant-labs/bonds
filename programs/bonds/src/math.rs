@@ -1,5 +1,7 @@
 use std::convert::TryInto;
 
+use anchor_lang::prelude::msg;
+
 use crate::structs::{BondSale, Decimal, TokenAmount};
 
 #[allow(dead_code)]
@@ -8,20 +10,21 @@ pub fn calculate_new_price(
     current_time: u64,
     buy_amount: TokenAmount,
 ) -> Decimal {
-    let delta_time: u64 = current_time - bond_sale.last_trade;
-    let time_ratio: Decimal = Decimal::from_integer(delta_time.try_into().unwrap())
-        / Decimal::from_integer(bond_sale.sale_time.try_into().unwrap());
+    msg!("last_trade: {}", { bond_sale.last_trade });
+    msg!("current_time: {}", current_time);
+    let delta_time = current_time - bond_sale.last_trade;
+    let sale_time = bond_sale.end_time - bond_sale.start_time;
+    let time_ratio = Decimal::from_integer(delta_time.try_into().unwrap())
+        / Decimal::from_integer(sale_time.try_into().unwrap());
 
-    let delta_price: Decimal =
-        bond_sale.velocity * bond_sale.up_bound * bond_sale.floor_price * time_ratio;
-    let supply_ratio: Decimal = buy_amount.percent(bond_sale.bond_amount);
+    let delta_price = bond_sale.velocity * bond_sale.up_bound * bond_sale.floor_price * time_ratio;
+    let supply_ratio = buy_amount.percent(bond_sale.bond_amount);
 
-    let price: Decimal =
-        match { bond_sale.previous_price } < { bond_sale.floor_price + delta_price } {
-            true => bond_sale.floor_price,
-            false => bond_sale.previous_price - delta_price,
-        };
-    let jump: Decimal = supply_ratio * bond_sale.up_bound * bond_sale.floor_price;
+    let price = match { bond_sale.previous_price } < { bond_sale.floor_price + delta_price } {
+        true => bond_sale.floor_price,
+        false => bond_sale.previous_price - delta_price,
+    };
+    let jump = supply_ratio * bond_sale.up_bound * bond_sale.floor_price;
 
     bond_sale.previous_price = price + jump;
     bond_sale.remaining_amount = bond_sale.remaining_amount - buy_amount;
@@ -43,7 +46,7 @@ mod tests {
             bond_amount: TokenAmount::new(50),
             remaining_amount: TokenAmount::new(20),
             quote_amount: TokenAmount::new(25),
-            sale_time: 604800, // second in a week
+            end_time: 604800, // second in a week
             last_trade: 0,
             ..Default::default()
         };
@@ -91,7 +94,7 @@ mod tests {
             bond_amount: TokenAmount::new(50),
             remaining_amount: TokenAmount::new(20),
             quote_amount: TokenAmount::new(25),
-            sale_time: 604800, // seconds in a week
+            end_time: 604800, // seconds in a week
             last_trade: 0,
             ..Default::default()
         };
@@ -129,7 +132,7 @@ mod tests {
                 up_bound: Decimal::from_decimal(50, 2),
                 velocity: Decimal::one(),
                 floor_price: Decimal::from_integer(2),
-                sale_time: 604800, // seconds in a week
+                end_time: 604800, // seconds in a week
                 last_trade: 0,
                 ..nonpanic_bond_sale
             };
@@ -155,7 +158,7 @@ mod tests {
                 up_bound: Decimal::from_decimal(50, 2),
                 velocity: Decimal::from_integer(2),
                 floor_price: Decimal::from_integer(2),
-                sale_time: 302400, // half of seconds in a week
+                end_time: 302400, // half of seconds in a week
                 last_trade: 0,
                 ..nonpanic_bond_sale
             };
