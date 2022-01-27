@@ -19,7 +19,8 @@ pub struct BondSale {
     pub bond_amount: TokenAmount,
     pub remaining_amount: TokenAmount,
     pub quote_amount: TokenAmount,
-    pub sale_time: u64,
+    pub end_time: u64,
+    pub start_time: u64,
     pub last_trade: u64,
 }
 

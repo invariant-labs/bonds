@@ -57,4 +57,8 @@ pub mod bonds {
     pub fn change_up_bound(ctx: Context<ChangeUpBound>, up_bound: u128) -> ProgramResult {
         instructions::change_up_bound::handler(ctx, up_bound)
     }
+
+    pub fn claim_quote(ctx: Context<ClaimQuote>, nonce: u8) -> ProgramResult {
+        instructions::claim_quote::handler(ctx, nonce)
+    }
 }

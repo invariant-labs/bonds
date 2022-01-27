@@ -255,6 +255,47 @@ export type Bonds = {
           "type": "u128"
         }
       ]
+    },
+    {
+      "name": "claimQuote",
+      "accounts": [
+        {
+          "name": "bondSale",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "bondSaleQuoteAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "payerQuoteAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "payer",
+          "isMut": false,
+          "isSigner": true
+        },
+        {
+          "name": "authority",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "tokenProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "nonce",
+          "type": "u8"
+        }
+      ]
     }
   ],
   "accounts": [
@@ -356,7 +397,11 @@ export type Bonds = {
             }
           },
           {
-            "name": "saleTime",
+            "name": "endTime",
+            "type": "u64"
+          },
+          {
+            "name": "startTime",
             "type": "u64"
           },
           {
@@ -664,6 +709,47 @@ export const IDL: Bonds = {
           "type": "u128"
         }
       ]
+    },
+    {
+      "name": "claimQuote",
+      "accounts": [
+        {
+          "name": "bondSale",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "bondSaleQuoteAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "payerQuoteAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "payer",
+          "isMut": false,
+          "isSigner": true
+        },
+        {
+          "name": "authority",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "tokenProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "nonce",
+          "type": "u8"
+        }
+      ]
     }
   ],
   "accounts": [
@@ -765,7 +851,11 @@ export const IDL: Bonds = {
             }
           },
           {
-            "name": "saleTime",
+            "name": "endTime",
+            "type": "u64"
+          },
+          {
+            "name": "startTime",
             "type": "u64"
           },
           {

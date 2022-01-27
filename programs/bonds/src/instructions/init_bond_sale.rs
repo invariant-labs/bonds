@@ -83,7 +83,8 @@ pub fn handler(
         bond_amount: TokenAmount::new(bond_amount),
         remaining_amount: TokenAmount::new(bond_amount),
         quote_amount: TokenAmount::new(0),
-        sale_time: current_time + duration,
+        end_time: current_time + duration,
+        start_time: current_time,
         last_trade: current_time,
     };
     token::transfer(ctx.accounts.transfer_bond(), bond_amount)?;

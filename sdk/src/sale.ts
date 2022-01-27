@@ -275,6 +275,36 @@ export class Sale {
 
     await signAndSend(tx, [signer], this.connection)
   }
+
+  async claimQuoteInstruction(claimQuote: ClaimQuote) {
+    const { bondSale, payerQuoteAccount } = claimQuote
+    const payerPubkey = claimQuote.payer ?? this.wallet.publicKey
+    const bondSaleQuoteAccount = await (await this.getBondSale(bondSale)).tokenQuoteAccount
+    const { programAuthority, nonce } = await this.getProgramAuthority()
+
+    return this.program.instruction.claimQuote(nonce, {
+      accounts: {
+        bondSale: bondSale,
+        bondSaleQuoteAccount,
+        payerQuoteAccount,
+        payer: payerPubkey,
+        authority: programAuthority,
+        tokenProgram: TOKEN_PROGRAM_ID
+      }
+    })
+  }
+
+  async claimQuoteTransaction(claimQuote: ClaimQuote) {
+    const ix = await this.claimQuoteInstruction(claimQuote)
+
+    return new Transaction().add(ix)
+  }
+
+  async claimQuote(claimQuote: ClaimQuote, signer: Keypair) {
+    const tx = await this.claimQuoteTransaction(claimQuote)
+
+    await signAndSend(tx, [signer], this.connection)
+  }
 }
 
 export interface InitBondSale {
@@ -310,6 +340,12 @@ export interface ChangeUpBound {
   upBound: BN
 }
 
+export interface ClaimQuote {
+  bondSale: PublicKey
+  payerQuoteAccount: PublicKey
+  payer?: PublicKey
+}
+
 export interface BondSaleStruct {
   tokenBond: PublicKey
   tokenQuote: PublicKey
@@ -323,7 +359,7 @@ export interface BondSaleStruct {
   bondAmount: TokenAmount
   remainingAmount: TokenAmount
   quoteAmount: TokenAmount
-  saleTime: BN
+  endTime: BN
 }
 
 export interface BondStruct {
