@@ -24,26 +24,26 @@ pub mod bonds {
         floor_price: u128,
         up_bound: u128,
         velocity: u128,
-        buy_amount: u64,
-        end_time: u64,
+        bond_amount: u64,
+        duration: u64,
     ) -> ProgramResult {
         instructions::init_bond_sale::handler(
             ctx,
             floor_price,
             up_bound,
             velocity,
-            buy_amount,
-            end_time,
+            bond_amount,
+            duration,
         )
     }
 
     pub fn create_bond(
         ctx: Context<CreateBond>,
-        buy_amount: u64,
-        sell_amount: u64,
-        bump: u8,
+        amount: u64,
+        by_amount_in: bool,
+        nonce: u8,
     ) -> ProgramResult {
-        instructions::create_bond::handler(ctx, buy_amount, sell_amount, bump)
+        instructions::create_bond::handler(ctx, amount, by_amount_in, nonce)
     }
 
     pub fn end_bond_sale(ctx: Context<EndBondSale>) -> ProgramResult {

@@ -31,7 +31,6 @@ pub fn calculate_new_price(
 
 #[cfg(test)]
 mod tests {
-
     use super::*;
 
     #[test]

@@ -5,6 +5,7 @@ use anchor_spl::token::{Mint, TokenAccount};
 
 use crate::interfaces::TransferBond;
 use crate::structs::{BondSale, Decimal, TokenAmount};
+use crate::utils::get_current_timestamp;
 
 #[derive(Accounts)]
 pub struct InitBondSale<'info> {
@@ -34,7 +35,7 @@ pub struct InitBondSale<'info> {
     pub payer_quote_account: Box<Account<'info, TokenAccount>>,
     #[account(mut)]
     pub payer: Signer<'info>,
-    pub authority: Signer<'info>,
+    pub authority: AccountInfo<'info>,
     pub token_program: AccountInfo<'info>,
     #[account(address = system_program::ID)]
     pub system_program: AccountInfo<'info>,
@@ -42,13 +43,13 @@ pub struct InitBondSale<'info> {
 }
 
 impl<'info> TransferBond<'info> for InitBondSale<'info> {
-    fn transfer_x(&self) -> CpiContext<'_, '_, '_, 'info, token::Transfer<'info>> {
+    fn transfer_bond(&self) -> CpiContext<'_, '_, '_, 'info, token::Transfer<'info>> {
         CpiContext::new(
             self.token_program.to_account_info(),
             Transfer {
                 from: self.payer_bond_account.to_account_info(),
                 to: self.token_bond_account.to_account_info(),
-                authority: self.authority.to_account_info().clone(),
+                authority: self.payer.to_account_info().clone(),
             },
         )
     }
@@ -60,10 +61,11 @@ pub fn handler(
     up_bound: u128,
     velocity: u128,
     bond_amount: u64,
-    sale_time: u64,
+    duration: u64,
 ) -> ProgramResult {
     let bond_sale = &mut ctx.accounts.bond_sale.load_init()?;
 
+    let current_time = get_current_timestamp();
     let token_bond_address = &ctx.accounts.token_bond.key();
     let token_quote_address = &ctx.accounts.token_quote.key();
 
@@ -81,9 +83,9 @@ pub fn handler(
         bond_amount: TokenAmount::new(bond_amount),
         remaining_amount: TokenAmount::new(bond_amount),
         quote_amount: TokenAmount::new(0),
-        sale_time,
-        last_trade: 0,
+        sale_time: current_time + duration,
+        last_trade: current_time,
     };
-    token::transfer(ctx.accounts.transfer_x(), bond_amount)?;
+    token::transfer(ctx.accounts.transfer_bond(), bond_amount)?;
     Ok(())
 }

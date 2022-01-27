@@ -1,14 +1,14 @@
 import * as anchor from '@project-serum/anchor'
 import { Provider, BN } from '@project-serum/anchor'
 import { Token, TOKEN_PROGRAM_ID } from '@solana/spl-token'
-import { Keypair } from '@solana/web3.js'
+import { Keypair, PublicKey } from '@solana/web3.js'
 import { Sale, Network } from '@template-labs/sdk'
-import { InitBondSale } from '@template-labs/sdk/lib/sale'
+import { CreateBond, InitBondSale } from '@template-labs/sdk/lib/sale'
 import { DENOMINATOR } from '@template-labs/sdk/lib/utils'
 import { assert } from 'chai'
 import { createToken } from './testUtils'
 
-describe('init-bond-sale', () => {
+describe('create-bond', () => {
   const provider = Provider.local()
   const connection = provider.connection
 
@@ -17,10 +17,12 @@ describe('init-bond-sale', () => {
   const mintAuthority = Keypair.generate()
   const admin = Keypair.generate()
   const bondInitPayer = Keypair.generate()
+  const bondOwner = Keypair.generate()
 
   let sale: Sale
   let tokenBond: Token
   let tokenQuote: Token
+  let bondSalePubkey: PublicKey
 
   before(async () => {
     sale = await Sale.build(
@@ -34,7 +36,8 @@ describe('init-bond-sale', () => {
       await connection.requestAirdrop(mintAuthority.publicKey, 1e12),
       await connection.requestAirdrop(admin.publicKey, 1e12),
       await connection.requestAirdrop(wallet.publicKey, 1e12),
-      await connection.requestAirdrop(bondInitPayer.publicKey, 1e12)
+      await connection.requestAirdrop(bondInitPayer.publicKey, 1e12),
+      await connection.requestAirdrop(bondOwner.publicKey, 1e12)
     ])
 
     const tokens = await Promise.all([
@@ -64,18 +67,25 @@ describe('init-bond-sale', () => {
       payer: bondInitPayer.publicKey
     }
 
-    const bondSalePubkey = await sale.initBondSale(initBondSaleVars, bondInitPayer)
-    const bondSale = await sale.getBondSale(bondSalePubkey)
+    bondSalePubkey = await sale.initBondSale(initBondSaleVars, bondInitPayer)
+  })
 
-    assert.ok(bondSale.authority.toString() === bondInitPayer.publicKey.toString())
-    assert.ok(bondSale.bondAmount.v.eqn(1000))
-    assert.ok(bondSale.floorPrice.v.eq(DENOMINATOR))
-    assert.ok(bondSale.payer.toString() === bondInitPayer.publicKey.toString())
-    assert.ok(bondSale.quoteAmount.v.eqn(0))
-    assert.ok(bondSale.remainingAmount.v.eqn(1000))
-    assert.ok(bondSale.tokenBond.toString() === tokenBond.publicKey.toString())
-    assert.ok(bondSale.tokenQuote.toString() === tokenQuote.publicKey.toString())
-    assert.ok(bondSale.upBound.v.eq(new BN(500_000_000_000)))
-    assert.ok(bondSale.velocity.v.eq(new BN(500_000_000_000)))
+  it('#createBond()', async () => {
+    const ownerQuoteAccount = await tokenQuote.createAccount(bondOwner.publicKey)
+    await tokenQuote.mintTo(ownerQuoteAccount, mintAuthority, [mintAuthority], 1000)
+
+    const createBondVars: CreateBond = {
+      amount: new BN(100),
+      bondSale: bondSalePubkey,
+      byAmountIn: false,
+      ownerQuoteAccount,
+      owner: bondOwner.publicKey
+    }
+
+    const bondPub = await sale.createBond(createBondVars, bondOwner)
+    const bond = await sale.getBond(bondPub)
+
+    assert.ok(bond.buyAmount.v.eqn(100))
+    assert.ok(bond.owner.toString() === bondOwner.publicKey.toString())
   })
 })
