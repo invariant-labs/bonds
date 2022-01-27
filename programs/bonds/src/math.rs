@@ -57,7 +57,7 @@ pub fn calculate_bond_to_quote_price(
 
 // TODO quote_to_bond func and bond_to_quote
 #[allow(dead_code)]
-pub fn calculate_bond_to_quote_price(
+pub fn calculate_quote_to_bond_price(
     // how many quote tokens correspond to bond tokens
     bond_sale: &mut BondSale,
     current_time: u64,
