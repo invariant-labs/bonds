@@ -30,7 +30,7 @@ pub fn calculate_new_price(
 }
 
 #[allow(dead_code)]
-pub fn calculate_bond_to_quote(
+pub fn calculate_bond_to_quote_price(
     // how many bond tokens correspond to quote tokens
     // without BondSale update
     bond_sale: &mut BondSale,
@@ -57,7 +57,7 @@ pub fn calculate_bond_to_quote(
 
 // TODO quote_to_bond func and bond_to_quote
 #[allow(dead_code)]
-pub fn bond_to_quote_price(
+pub fn calculate_bond_to_quote_price(
     // how many quote tokens correspond to bond tokens
     bond_sale: &mut BondSale,
     current_time: u64,
