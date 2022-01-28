@@ -55,34 +55,6 @@ pub fn calculate_bond_to_quote_price(
     price + Decimal::from_decimal(50, 2) * jump
 }
 
-// TODO quote_to_bond func and bond_to_quote
-#[allow(dead_code)]
-pub fn calculate_quote_to_bond_price(
-    // how many quote tokens correspond to bond tokens
-    bond_sale: &mut BondSale,
-    current_time: u64,
-    buy_amount: TokenAmount,
-) -> Decimal {
-    if buy_amount.v == 0 {
-        let delta_time: u64 = current_time - bond_sale.last_trade;
-        let time_ratio: Decimal = Decimal::from_integer(delta_time.try_into().unwrap())
-            / Decimal::from_integer(bond_sale.sale_time.try_into().unwrap());
-
-        let delta_price: Decimal =
-            bond_sale.velocity * bond_sale.up_bound * bond_sale.floor_price * time_ratio;
-
-        let price: Decimal =
-            match { bond_sale.previous_price } < { bond_sale.floor_price + delta_price } {
-                true => bond_sale.floor_price,
-                false => bond_sale.previous_price - delta_price,
-            };
-
-        Decimal::one().div_up(price)
-    } else {
-        Decimal::one()
-    }
-}
-
 #[allow(dead_code)]
 pub fn calculate_bond_to_quote_amount(
     bond_sale: &mut BondSale,
@@ -90,19 +62,6 @@ pub fn calculate_bond_to_quote_amount(
     buy_amount: TokenAmount,
 ) -> Decimal {
     buy_amount.big_mul(calculate_bond_to_quote_price(
-        bond_sale,
-        current_time,
-        buy_amount,
-    ))
-}
-
-#[allow(dead_code)]
-pub fn calculate_quote_to_bond_amount(
-    bond_sale: &mut BondSale,
-    current_time: u64,
-    buy_amount: TokenAmount,
-) -> Decimal {
-    buy_amount.big_mul(calculate_quote_to_bond_price(
         bond_sale,
         current_time,
         buy_amount,
