@@ -5,6 +5,7 @@ import { Keypair, PublicKey } from '@solana/web3.js'
 import { Sale, Network } from '@template-labs/sdk'
 import { CreateBond, EndBondSale, InitBondSale } from '@template-labs/sdk/lib/sale'
 import { DENOMINATOR } from '@template-labs/sdk/lib/utils'
+import { assert } from 'chai'
 import { assertThrowsAsync, createToken, ERROR } from './testUtils'
 
 describe('create-bond', () => {
@@ -94,6 +95,8 @@ describe('create-bond', () => {
     }
 
     await sale.endBondSale(endBondSaleVars, bondInitPayer)
+    assert.ok((await tokenBond.getAccountInfo(payerBondAccount)).amount.eqn(900))
+    assert.ok((await tokenQuote.getAccountInfo(payerQuoteAccount)).amount.eqn(103))
     assertThrowsAsync(sale.getBondSale(bondSalePubkey), ERROR.ACCOUNT_NOT_EXISTS)
   })
 })
