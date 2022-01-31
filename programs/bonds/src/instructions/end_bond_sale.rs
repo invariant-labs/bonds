@@ -1,26 +1,36 @@
 use anchor_lang::prelude::*;
-use anchor_spl::token::{transfer, Mint, TokenAccount, Transfer};
+use anchor_spl::token::{transfer, TokenAccount, Transfer};
 
-use crate::{interfaces::TransferQuote, structs::BondSale, utils::close};
+use crate::{
+    get_signer,
+    interfaces::{TransferBond, TransferQuote},
+    structs::BondSale,
+    utils::close,
+    SEED,
+};
 
 #[derive(Accounts)]
 pub struct EndBondSale<'info> {
-    #[account(zero)]
+    #[account(mut)]
     pub bond_sale: AccountLoader<'info, BondSale>,
-    #[account(
-        constraint = token_quote.key() == bond_sale.load()?.token_quote
-    )]
-    pub token_quote: Account<'info, Mint>,
     #[account(mut,
-        constraint = token_quote_account.key() == bond_sale.load()?.token_quote_account,
-        constraint = token_quote_account.mint == token_quote.key(),
+        constraint = token_quote_account.key() == bond_sale.load()?.token_quote_account
     )]
     pub token_quote_account: Account<'info, TokenAccount>,
     #[account(mut,
-        constraint = payer_quote_account.mint == token_quote.key(),
-        constraint = &payer_quote_account.owner == payer.key
+        constraint = token_bond_account.key() == bond_sale.load()?.token_bond_account
+    )]
+    pub token_bond_account: Account<'info, TokenAccount>,
+    #[account(mut,
+        constraint = &payer_quote_account.owner == payer.key,
+        constraint = payer_quote_account.mint == bond_sale.load()?.token_quote
     )]
     pub payer_quote_account: Account<'info, TokenAccount>,
+    #[account(mut,
+        constraint = &payer_bond_account.owner == payer.key,
+        constraint = payer_bond_account.mint == bond_sale.load()?.token_bond
+    )]
+    pub payer_bond_account: Account<'info, TokenAccount>,
     pub authority: AccountInfo<'info>,
     #[account(mut,
         constraint = payer.key() == bond_sale.load()?.payer
@@ -42,12 +52,34 @@ impl<'info> TransferQuote<'info> for EndBondSale<'info> {
     }
 }
 
-pub fn handler(ctx: Context<EndBondSale>) -> ProgramResult {
-    let mut bond_sale = ctx.accounts.bond_sale.load_mut()?;
+impl<'info> TransferBond<'info> for EndBondSale<'info> {
+    fn transfer_bond(&self) -> CpiContext<'_, '_, '_, 'info, anchor_spl::token::Transfer<'info>> {
+        CpiContext::new(
+            self.token_program.to_account_info(),
+            Transfer {
+                from: self.token_bond_account.to_account_info(),
+                to: self.payer_bond_account.to_account_info(),
+                authority: self.authority.to_account_info().clone(),
+            },
+        )
+    }
+}
 
-    transfer(ctx.accounts.transfer_quote(), bond_sale.quote_amount.v)?;
-    bond_sale.quote_amount.v = 0;
-
+pub fn handler(ctx: Context<EndBondSale>, nonce: u8) -> ProgramResult {
+    let mut bond_sale = *ctx.accounts.bond_sale.load_mut()?;
+    {
+        let signer: &[&[&[u8]]] = get_signer!(nonce);
+        transfer(
+            ctx.accounts.transfer_quote().with_signer(signer),
+            bond_sale.quote_amount.v,
+        )?;
+        if bond_sale.remaining_amount.v != 0 {
+            transfer(
+                ctx.accounts.transfer_bond().with_signer(signer),
+                bond_sale.remaining_amount.v,
+            )?;
+        }
+    }
     close(
         ctx.accounts.bond_sale.to_account_info(),
         ctx.accounts.payer_quote_account.to_account_info(),

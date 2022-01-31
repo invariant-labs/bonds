@@ -4,6 +4,7 @@
     "test:create-bond": "anchor test --skip-build tests/create-bond.spec.ts",
     "test:modify-bond-sale": "anchor test --skip-build tests/modify-bond-sale.spec.ts",
     "test:claim-quote": "anchor test --skip-build tests/claim-quote.spec.ts",
+    "test:end-bond-sale": "anchor test --skip-build tests/end-bond-sale.spec.ts",
     "build": "cd sdk && npm run build"
   },
   "dependencies": {

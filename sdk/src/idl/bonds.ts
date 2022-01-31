@@ -182,17 +182,22 @@ export type Bonds = {
           "isSigner": false
         },
         {
-          "name": "tokenQuote",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
           "name": "tokenQuoteAccount",
           "isMut": true,
           "isSigner": false
         },
         {
+          "name": "tokenBondAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
           "name": "payerQuoteAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "payerBondAccount",
           "isMut": true,
           "isSigner": false
         },
@@ -212,7 +217,12 @@ export type Bonds = {
           "isSigner": false
         }
       ],
-      "args": []
+      "args": [
+        {
+          "name": "nonce",
+          "type": "u8"
+        }
+      ]
     },
     {
       "name": "changeVelocity",
@@ -636,17 +646,22 @@ export const IDL: Bonds = {
           "isSigner": false
         },
         {
-          "name": "tokenQuote",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
           "name": "tokenQuoteAccount",
           "isMut": true,
           "isSigner": false
         },
         {
+          "name": "tokenBondAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
           "name": "payerQuoteAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "payerBondAccount",
           "isMut": true,
           "isSigner": false
         },
@@ -666,7 +681,12 @@ export const IDL: Bonds = {
           "isSigner": false
         }
       ],
-      "args": []
+      "args": [
+        {
+          "name": "nonce",
+          "type": "u8"
+        }
+      ]
     },
     {
       "name": "changeVelocity",

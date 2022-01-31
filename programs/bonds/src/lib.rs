@@ -46,8 +46,8 @@ pub mod bonds {
         instructions::create_bond::handler(ctx, amount, by_amount_in, nonce)
     }
 
-    pub fn end_bond_sale(ctx: Context<EndBondSale>) -> ProgramResult {
-        instructions::end_bond_sale::handler(ctx)
+    pub fn end_bond_sale(ctx: Context<EndBondSale>, nonce: u8) -> ProgramResult {
+        instructions::end_bond_sale::handler(ctx, nonce)
     }
 
     pub fn change_velocity(ctx: Context<ChangeVelocity>, velocity: u128) -> ProgramResult {
