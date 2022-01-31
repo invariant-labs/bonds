@@ -279,7 +279,7 @@ export class Sale {
   async claimQuoteInstruction(claimQuote: ClaimQuote) {
     const { bondSale, payerQuoteAccount } = claimQuote
     const payerPubkey = claimQuote.payer ?? this.wallet.publicKey
-    const bondSaleQuoteAccount = await (await this.getBondSale(bondSale)).tokenQuoteAccount
+    const bondSaleQuoteAccount = (await this.getBondSale(bondSale)).tokenQuoteAccount
     const { programAuthority, nonce } = await this.getProgramAuthority()
 
     return this.program.instruction.claimQuote(nonce, {
@@ -302,6 +302,38 @@ export class Sale {
 
   async claimQuote(claimQuote: ClaimQuote, signer: Keypair) {
     const tx = await this.claimQuoteTransaction(claimQuote)
+
+    await signAndSend(tx, [signer], this.connection)
+  }
+
+  async endBondSaleInstruction(endBondSale: EndBondSale) {
+    const { bondSale, payerQuoteAccount, payerBondAccount } = endBondSale
+    const { programAuthority, nonce } = await this.getProgramAuthority()
+    const bondSaleStruct = await this.getBondSale(bondSale)
+    const payerPubkey = endBondSale.payer ?? this.wallet.publicKey
+
+    return this.program.instruction.endBondSale(nonce, {
+      accounts: {
+        bondSale,
+        tokenQuoteAccount: bondSaleStruct.tokenQuoteAccount,
+        tokenBondAccount: bondSaleStruct.tokenBondAccount,
+        payerQuoteAccount,
+        payerBondAccount,
+        authority: programAuthority,
+        payer: payerPubkey,
+        tokenProgram: TOKEN_PROGRAM_ID
+      }
+    })
+  }
+
+  async endBondSaleTransaction(endBondSale: EndBondSale) {
+    const ix = await this.endBondSaleInstruction(endBondSale)
+
+    return new Transaction().add(ix)
+  }
+
+  async endBondSale(endBondSale: EndBondSale, signer: Keypair) {
+    const tx = await this.endBondSaleTransaction(endBondSale)
 
     await signAndSend(tx, [signer], this.connection)
   }
@@ -343,6 +375,13 @@ export interface ChangeUpBound {
 export interface ClaimQuote {
   bondSale: PublicKey
   payerQuoteAccount: PublicKey
+  payer?: PublicKey
+}
+
+export interface EndBondSale {
+  bondSale: PublicKey
+  payerQuoteAccount: PublicKey
+  payerBondAccount: PublicKey
   payer?: PublicKey
 }
 
