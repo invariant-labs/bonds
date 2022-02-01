@@ -1,4 +1,5 @@
 import { Program, Provider, BN } from '@project-serum/anchor'
+import { bs58 } from '@project-serum/anchor/dist/cjs/utils/bytes'
 import { Token, TOKEN_PROGRAM_ID } from '@solana/spl-token'
 import {
   Connection,
@@ -80,7 +81,8 @@ export class Sale {
       upBound,
       velocity,
       buyAmount,
-      duration
+      duration,
+      distribution
     } = initBondSale
     const payerPubkey = initBondSale.payer ?? this.wallet.publicKey
 
@@ -92,6 +94,7 @@ export class Sale {
       velocity,
       buyAmount,
       duration,
+      distribution,
       {
         accounts: {
           bondSale: bondSalePub,
@@ -166,23 +169,31 @@ export class Sale {
     return (await this.program.account.bond.fetch(bondPub)) as BondStruct
   }
 
-  async createBondInstruction(
-    createBond: CreateBond,
-    bondPub: PublicKey,
-    bondAccountPub: PublicKey
-  ) {
+  async getAllBonds(bondSalePub: PublicKey, owner: PublicKey) {
+    return (
+      await this.program.account.bond.all([
+        {
+          memcmp: { bytes: bs58.encode(bondSalePub.toBuffer()), offset: 8 }
+        },
+        {
+          memcmp: { bytes: bs58.encode(owner.toBuffer()), offset: 40 }
+        }
+      ])
+    ).map(a => a.publicKey)
+  }
+
+  async createBondInstruction(createBond: CreateBond, bondPub: PublicKey) {
     const { bondSale, ownerQuoteAccount, amount, byAmountIn } = createBond
     const ownerPubkey = createBond.owner ?? this.wallet.publicKey
     const bondSaleStruct = await this.getBondSale(bondSale)
-    const { programAuthority, nonce } = await this.getProgramAuthority()
+    const { programAuthority } = await this.getProgramAuthority()
 
-    return this.program.instruction.createBond(amount, byAmountIn, nonce, {
+    return this.program.instruction.createBond(amount, byAmountIn, {
       accounts: {
         bondSale,
         bond: bondPub,
         tokenBond: bondSaleStruct.tokenBond,
         tokenQuote: bondSaleStruct.tokenQuote,
-        bondAccount: bondAccountPub,
         ownerQuoteAccount,
         bondSaleBondAccount: bondSaleStruct.tokenBondAccount,
         bondSaleQuoteAccount: bondSaleStruct.tokenQuoteAccount,
@@ -195,11 +206,7 @@ export class Sale {
     })
   }
 
-  async createBondTransaction(
-    createBond: CreateBond,
-    bondPub: PublicKey,
-    bondAccountPub: PublicKey
-  ) {
+  async createBondTransaction(createBond: CreateBond, bondPub: PublicKey) {
     const createIx = SystemProgram.createAccount({
       fromPubkey: createBond.owner,
       newAccountPubkey: bondPub,
@@ -209,7 +216,7 @@ export class Sale {
       ),
       programId: this.program.programId
     })
-    const initIx = await this.createBondInstruction(createBond, bondPub, bondAccountPub)
+    const initIx = await this.createBondInstruction(createBond, bondPub)
 
     return new Transaction({
       feePayer: createBond.owner
@@ -219,11 +226,10 @@ export class Sale {
   }
 
   async createBond(createBond: CreateBond, signer: Keypair) {
-    const bondAccount = Keypair.generate()
     const bond = Keypair.generate()
-    const tx = await this.createBondTransaction(createBond, bond.publicKey, bondAccount.publicKey)
+    const tx = await this.createBondTransaction(createBond, bond.publicKey)
 
-    await signAndSend(tx, [signer, bond, bondAccount], this.connection)
+    await signAndSend(tx, [signer, bond], this.connection)
 
     return bond.publicKey
   }
@@ -306,6 +312,38 @@ export class Sale {
     await signAndSend(tx, [signer], this.connection)
   }
 
+  async claimBondInstruction(claimBond: ClaimBond) {
+    const { bondSale, ownerBondAccount, bondId } = claimBond
+    const owner = claimBond.owner ?? this.wallet.publicKey
+    const bond: PublicKey = (await this.getAllBonds(bondSale, owner)).at(bondId.toNumber())
+    const { programAuthority, nonce } = await this.getProgramAuthority()
+    const { tokenBondAccount } = await this.getBondSale(bondSale)
+
+    return this.program.instruction.claimBond(nonce, {
+      accounts: {
+        bondSale,
+        bond,
+        tokenBondAccount,
+        ownerBondAccount,
+        owner,
+        authority: programAuthority,
+        tokenProgram: TOKEN_PROGRAM_ID
+      }
+    })
+  }
+
+  async claimBondTransaction(claimBond: ClaimBond) {
+    const ix = await this.claimBondInstruction(claimBond)
+
+    return new Transaction().add(ix)
+  }
+
+  async claimBond(claimBond: ClaimBond, signer: Keypair) {
+    const tx = await this.claimBondTransaction(claimBond)
+
+    await signAndSend(tx, [signer], this.connection)
+  }
+
   async endBondSaleInstruction(endBondSale: EndBondSale) {
     const { bondSale, payerQuoteAccount, payerBondAccount } = endBondSale
     const { programAuthority, nonce } = await this.getProgramAuthority()
@@ -350,6 +388,7 @@ export interface InitBondSale {
   velocity: BN
   buyAmount: BN
   duration: BN
+  distribution: BN
 }
 
 export interface CreateBond {
@@ -378,11 +417,25 @@ export interface ClaimQuote {
   payer?: PublicKey
 }
 
+export interface ClaimBond {
+  bondSale: PublicKey
+  ownerBondAccount: PublicKey
+  owner?: PublicKey
+  bondId: BN
+}
+
 export interface EndBondSale {
   bondSale: PublicKey
   payerQuoteAccount: PublicKey
   payerBondAccount: PublicKey
   payer?: PublicKey
+}
+export interface BondStruct {
+  bondSale: PublicKey
+  owner: PublicKey
+  buyAmount: TokenAmount
+  lastClaim: BN
+  distributionEnd: BN
 }
 
 export interface BondSaleStruct {
@@ -399,13 +452,6 @@ export interface BondSaleStruct {
   remainingAmount: TokenAmount
   quoteAmount: TokenAmount
   endTime: BN
-}
-
-export interface BondStruct {
-  bondSale: PublicKey
-  bondAccount: PublicKey
-  owner: PublicKey
-  buyAmount: TokenAmount
 }
 
 export interface Decimal {

@@ -26,6 +26,7 @@ pub mod bonds {
         velocity: u128,
         bond_amount: u64,
         duration: u64,
+        distribution: u64,
     ) -> ProgramResult {
         instructions::init_bond_sale::handler(
             ctx,
@@ -34,16 +35,12 @@ pub mod bonds {
             velocity,
             bond_amount,
             duration,
+            distribution,
         )
     }
 
-    pub fn create_bond(
-        ctx: Context<CreateBond>,
-        amount: u64,
-        by_amount_in: bool,
-        nonce: u8,
-    ) -> ProgramResult {
-        instructions::create_bond::handler(ctx, amount, by_amount_in, nonce)
+    pub fn create_bond(ctx: Context<CreateBond>, amount: u64, by_amount_in: bool) -> ProgramResult {
+        instructions::create_bond::handler(ctx, amount, by_amount_in)
     }
 
     pub fn end_bond_sale(ctx: Context<EndBondSale>, nonce: u8) -> ProgramResult {
@@ -60,5 +57,9 @@ pub mod bonds {
 
     pub fn claim_quote(ctx: Context<ClaimQuote>, nonce: u8) -> ProgramResult {
         instructions::claim_quote::handler(ctx, nonce)
+    }
+
+    pub fn claim_bond(ctx: Context<ClaimBond>, nonce: u8) -> ProgramResult {
+        instructions::claim_bond::handler(ctx, nonce)
     }
 }

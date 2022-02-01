@@ -22,6 +22,7 @@ pub struct BondSale {
     pub end_time: u64,
     pub start_time: u64,
     pub last_trade: u64,
+    pub distribution: u64,
 }
 
 impl BondSale {

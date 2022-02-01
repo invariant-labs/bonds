@@ -62,6 +62,7 @@ pub fn handler(
     velocity: u128,
     bond_amount: u64,
     duration: u64,
+    distribution: u64,
 ) -> ProgramResult {
     let bond_sale = &mut ctx.accounts.bond_sale.load_init()?;
 
@@ -86,6 +87,7 @@ pub fn handler(
         end_time: current_time + duration,
         start_time: current_time,
         last_trade: current_time,
+        distribution,
     };
     token::transfer(ctx.accounts.transfer_bond(), bond_amount)?;
     Ok(())

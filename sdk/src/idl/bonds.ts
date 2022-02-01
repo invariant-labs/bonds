@@ -86,6 +86,10 @@ export type Bonds = {
         {
           "name": "duration",
           "type": "u64"
+        },
+        {
+          "name": "distribution",
+          "type": "u64"
         }
       ]
     },
@@ -111,11 +115,6 @@ export type Bonds = {
           "name": "tokenQuote",
           "isMut": false,
           "isSigner": false
-        },
-        {
-          "name": "bondAccount",
-          "isMut": true,
-          "isSigner": true
         },
         {
           "name": "ownerQuoteAccount",
@@ -166,10 +165,6 @@ export type Bonds = {
         {
           "name": "byAmountIn",
           "type": "bool"
-        },
-        {
-          "name": "nonce",
-          "type": "u8"
         }
       ]
     },
@@ -306,6 +301,52 @@ export type Bonds = {
           "type": "u8"
         }
       ]
+    },
+    {
+      "name": "claimBond",
+      "accounts": [
+        {
+          "name": "bondSale",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "bond",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "tokenBondAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "ownerBondAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "owner",
+          "isMut": false,
+          "isSigner": true
+        },
+        {
+          "name": "authority",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "tokenProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "nonce",
+          "type": "u8"
+        }
+      ]
     }
   ],
   "accounts": [
@@ -319,10 +360,6 @@ export type Bonds = {
             "type": "publicKey"
           },
           {
-            "name": "bondAccount",
-            "type": "publicKey"
-          },
-          {
             "name": "owner",
             "type": "publicKey"
           },
@@ -331,6 +368,14 @@ export type Bonds = {
             "type": {
               "defined": "TokenAmount"
             }
+          },
+          {
+            "name": "lastClaim",
+            "type": "u64"
+          },
+          {
+            "name": "distributionEnd",
+            "type": "u64"
           }
         ]
       }
@@ -417,6 +462,10 @@ export type Bonds = {
           {
             "name": "lastTrade",
             "type": "u64"
+          },
+          {
+            "name": "distribution",
+            "type": "u64"
           }
         ]
       }
@@ -458,6 +507,11 @@ export type Bonds = {
       "code": 6001,
       "name": "InsufficientTokenAmount",
       "msg": "Buy amount exceeds remaining amount"
+    },
+    {
+      "code": 6002,
+      "name": "DistributionEnded",
+      "msg": "Distribution ended"
     }
   ]
 };
@@ -550,6 +604,10 @@ export const IDL: Bonds = {
         {
           "name": "duration",
           "type": "u64"
+        },
+        {
+          "name": "distribution",
+          "type": "u64"
         }
       ]
     },
@@ -575,11 +633,6 @@ export const IDL: Bonds = {
           "name": "tokenQuote",
           "isMut": false,
           "isSigner": false
-        },
-        {
-          "name": "bondAccount",
-          "isMut": true,
-          "isSigner": true
         },
         {
           "name": "ownerQuoteAccount",
@@ -630,10 +683,6 @@ export const IDL: Bonds = {
         {
           "name": "byAmountIn",
           "type": "bool"
-        },
-        {
-          "name": "nonce",
-          "type": "u8"
         }
       ]
     },
@@ -770,6 +819,52 @@ export const IDL: Bonds = {
           "type": "u8"
         }
       ]
+    },
+    {
+      "name": "claimBond",
+      "accounts": [
+        {
+          "name": "bondSale",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "bond",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "tokenBondAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "ownerBondAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "owner",
+          "isMut": false,
+          "isSigner": true
+        },
+        {
+          "name": "authority",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "tokenProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "nonce",
+          "type": "u8"
+        }
+      ]
     }
   ],
   "accounts": [
@@ -783,10 +878,6 @@ export const IDL: Bonds = {
             "type": "publicKey"
           },
           {
-            "name": "bondAccount",
-            "type": "publicKey"
-          },
-          {
             "name": "owner",
             "type": "publicKey"
           },
@@ -795,6 +886,14 @@ export const IDL: Bonds = {
             "type": {
               "defined": "TokenAmount"
             }
+          },
+          {
+            "name": "lastClaim",
+            "type": "u64"
+          },
+          {
+            "name": "distributionEnd",
+            "type": "u64"
           }
         ]
       }
@@ -881,6 +980,10 @@ export const IDL: Bonds = {
           {
             "name": "lastTrade",
             "type": "u64"
+          },
+          {
+            "name": "distribution",
+            "type": "u64"
           }
         ]
       }
@@ -922,6 +1025,11 @@ export const IDL: Bonds = {
       "code": 6001,
       "name": "InsufficientTokenAmount",
       "msg": "Buy amount exceeds remaining amount"
+    },
+    {
+      "code": 6002,
+      "name": "DistributionEnded",
+      "msg": "Distribution ended"
     }
   ]
 };
