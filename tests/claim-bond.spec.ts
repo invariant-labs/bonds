@@ -93,7 +93,7 @@ describe('claim-bond', () => {
     const claimBondVars: ClaimBond = {
       ownerBondAccount,
       bondId: new BN(0),
-      bondSale: bondSalePubkey,
+      tokenBond: tokenBond.publicKey,
       owner: bondOwner.publicKey
     }
     await sale.claimBond(claimBondVars, bondOwner)
@@ -112,7 +112,7 @@ describe('claim-bond', () => {
     const claimBondVars: ClaimBond = {
       ownerBondAccount,
       bondId: new BN(0),
-      bondSale: bondSalePubkey,
+      tokenBond: tokenBond.publicKey,
       owner: bondOwner.publicKey
     }
     await sale.claimBond(claimBondVars, bondOwner)

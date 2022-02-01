@@ -169,17 +169,15 @@ export class Sale {
     return (await this.program.account.bond.fetch(bondPub)) as BondStruct
   }
 
-  async getAllBonds(bondSalePub: PublicKey, owner: PublicKey) {
-    return (
-      await this.program.account.bond.all([
-        {
-          memcmp: { bytes: bs58.encode(bondSalePub.toBuffer()), offset: 8 }
-        },
-        {
-          memcmp: { bytes: bs58.encode(owner.toBuffer()), offset: 40 }
-        }
-      ])
-    ).map(a => a.publicKey)
+  async getAllBonds(tokenBond: PublicKey, owner: PublicKey) {
+    return await this.program.account.bond.all([
+      {
+        memcmp: { bytes: bs58.encode(tokenBond.toBuffer()), offset: 8 }
+      },
+      {
+        memcmp: { bytes: bs58.encode(owner.toBuffer()), offset: 40 }
+      }
+    ])
   }
 
   async createBondInstruction(createBond: CreateBond, bondPub: PublicKey) {
@@ -195,8 +193,8 @@ export class Sale {
         tokenBond: bondSaleStruct.tokenBond,
         tokenQuote: bondSaleStruct.tokenQuote,
         ownerQuoteAccount,
-        bondSaleBondAccount: bondSaleStruct.tokenBondAccount,
-        bondSaleQuoteAccount: bondSaleStruct.tokenQuoteAccount,
+        tokenBondAccount: bondSaleStruct.tokenBondAccount,
+        tokenQuoteAccount: bondSaleStruct.tokenQuoteAccount,
         owner: ownerPubkey,
         authority: programAuthority,
         tokenProgram: TOKEN_PROGRAM_ID,
@@ -313,17 +311,15 @@ export class Sale {
   }
 
   async claimBondInstruction(claimBond: ClaimBond) {
-    const { bondSale, ownerBondAccount, bondId } = claimBond
+    const { tokenBond, ownerBondAccount, bondId } = claimBond
     const owner = claimBond.owner ?? this.wallet.publicKey
-    const bond: PublicKey = (await this.getAllBonds(bondSale, owner)).at(bondId.toNumber())
+    const bond = (await this.getAllBonds(tokenBond, owner)).at(bondId.toNumber())
     const { programAuthority, nonce } = await this.getProgramAuthority()
-    const { tokenBondAccount } = await this.getBondSale(bondSale)
 
     return this.program.instruction.claimBond(nonce, {
       accounts: {
-        bondSale,
-        bond,
-        tokenBondAccount,
+        bond: bond.publicKey,
+        tokenBondAccount: bond.account.tokenBondAccount,
         ownerBondAccount,
         owner,
         authority: programAuthority,
@@ -418,7 +414,7 @@ export interface ClaimQuote {
 }
 
 export interface ClaimBond {
-  bondSale: PublicKey
+  tokenBond: PublicKey
   ownerBondAccount: PublicKey
   owner?: PublicKey
   bondId: BN
@@ -431,8 +427,9 @@ export interface EndBondSale {
   payer?: PublicKey
 }
 export interface BondStruct {
-  bondSale: PublicKey
+  tokenBond: PublicKey
   owner: PublicKey
+  tokenBondAccount: PublicKey
   buyAmount: TokenAmount
   lastClaim: BN
   distributionEnd: BN

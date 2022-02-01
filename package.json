@@ -1,5 +1,6 @@
 {
   "scripts": {
+    "test:all": "npm run test:init-bond-sale && npm run test:create-bond && npm run test:modify-bond-sale && npm run test:claim-quote && npm run test:end-bond-sale && npm run test:claim-bond",
     "test:init-bond-sale": "anchor test --skip-build tests/init-bond-sale.spec.ts",
     "test:create-bond": "anchor test --skip-build tests/create-bond.spec.ts",
     "test:modify-bond-sale": "anchor test --skip-build tests/modify-bond-sale.spec.ts",

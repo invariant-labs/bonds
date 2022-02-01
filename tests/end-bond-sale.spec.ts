@@ -66,7 +66,8 @@ describe('create-bond', () => {
       tokenQuote,
       upBound: DENOMINATOR.divn(2),
       velocity: DENOMINATOR.divn(2),
-      payer: bondInitPayer.publicKey
+      payer: bondInitPayer.publicKey,
+      distribution: new BN(10)
     }
 
     bondSalePubkey = await sale.initBondSale(initBondSaleVars, bondInitPayer)
@@ -97,6 +98,6 @@ describe('create-bond', () => {
     await sale.endBondSale(endBondSaleVars, bondInitPayer)
     assert.ok((await tokenBond.getAccountInfo(payerBondAccount)).amount.eqn(900))
     assert.ok((await tokenQuote.getAccountInfo(payerQuoteAccount)).amount.eqn(103))
-    assertThrowsAsync(sale.getBondSale(bondSalePubkey), ERROR.ACCOUNT_NOT_EXISTS)
+    await assertThrowsAsync(sale.getBondSale(bondSalePubkey), ERROR.ACCOUNT_NOT_EXISTS)
   })
 })

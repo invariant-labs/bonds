@@ -61,13 +61,17 @@ describe('init-bond-sale', () => {
       tokenQuote,
       upBound: DENOMINATOR.divn(2),
       velocity: DENOMINATOR.divn(2),
-      payer: bondInitPayer.publicKey
+      payer: bondInitPayer.publicKey,
+      distribution: new BN(10)
     }
 
     const bondSalePubkey = await sale.initBondSale(initBondSaleVars, bondInitPayer)
     const bondSale = await sale.getBondSale(bondSalePubkey)
 
-    assert.ok(bondSale.authority.toString() === bondInitPayer.publicKey.toString())
+    assert.ok(
+      bondSale.authority.toString() ===
+        (await sale.getProgramAuthority()).programAuthority.toString()
+    )
     assert.ok(bondSale.bondAmount.v.eqn(1000))
     assert.ok(bondSale.floorPrice.v.eq(DENOMINATOR))
     assert.ok(bondSale.payer.toString() === bondInitPayer.publicKey.toString())

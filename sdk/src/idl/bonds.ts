@@ -122,12 +122,12 @@ export type Bonds = {
           "isSigner": false
         },
         {
-          "name": "bondSaleBondAccount",
+          "name": "tokenBondAccount",
           "isMut": true,
           "isSigner": false
         },
         {
-          "name": "bondSaleQuoteAccount",
+          "name": "tokenQuoteAccount",
           "isMut": true,
           "isSigner": false
         },
@@ -306,11 +306,6 @@ export type Bonds = {
       "name": "claimBond",
       "accounts": [
         {
-          "name": "bondSale",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
           "name": "bond",
           "isMut": true,
           "isSigner": false
@@ -356,11 +351,19 @@ export type Bonds = {
         "kind": "struct",
         "fields": [
           {
-            "name": "bondSale",
+            "name": "tokenBond",
             "type": "publicKey"
           },
           {
             "name": "owner",
+            "type": "publicKey"
+          },
+          {
+            "name": "tokenBondAccount",
+            "type": "publicKey"
+          },
+          {
+            "name": "authority",
             "type": "publicKey"
           },
           {
@@ -371,6 +374,10 @@ export type Bonds = {
           },
           {
             "name": "lastClaim",
+            "type": "u64"
+          },
+          {
+            "name": "distributionStart",
             "type": "u64"
           },
           {
@@ -640,12 +647,12 @@ export const IDL: Bonds = {
           "isSigner": false
         },
         {
-          "name": "bondSaleBondAccount",
+          "name": "tokenBondAccount",
           "isMut": true,
           "isSigner": false
         },
         {
-          "name": "bondSaleQuoteAccount",
+          "name": "tokenQuoteAccount",
           "isMut": true,
           "isSigner": false
         },
@@ -824,11 +831,6 @@ export const IDL: Bonds = {
       "name": "claimBond",
       "accounts": [
         {
-          "name": "bondSale",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
           "name": "bond",
           "isMut": true,
           "isSigner": false
@@ -874,11 +876,19 @@ export const IDL: Bonds = {
         "kind": "struct",
         "fields": [
           {
-            "name": "bondSale",
+            "name": "tokenBond",
             "type": "publicKey"
           },
           {
             "name": "owner",
+            "type": "publicKey"
+          },
+          {
+            "name": "tokenBondAccount",
+            "type": "publicKey"
+          },
+          {
+            "name": "authority",
             "type": "publicKey"
           },
           {
@@ -889,6 +899,10 @@ export const IDL: Bonds = {
           },
           {
             "name": "lastClaim",
+            "type": "u64"
+          },
+          {
+            "name": "distributionStart",
             "type": "u64"
           },
           {
