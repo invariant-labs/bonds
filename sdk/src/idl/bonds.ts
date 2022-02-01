@@ -307,7 +307,7 @@ export type Bonds = {
       "accounts": [
         {
           "name": "bondSale",
-          "isMut": true,
+          "isMut": false,
           "isSigner": false
         },
         {
@@ -825,7 +825,7 @@ export const IDL: Bonds = {
       "accounts": [
         {
           "name": "bondSale",
-          "isMut": true,
+          "isMut": false,
           "isSigner": false
         },
         {
