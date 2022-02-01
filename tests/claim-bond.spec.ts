@@ -66,7 +66,7 @@ describe('claim-bond', () => {
       upBound: DENOMINATOR.divn(2),
       velocity: DENOMINATOR.divn(2),
       payer: bondInitPayer.publicKey,
-      distribution: new BN(20)
+      distribution: new BN(10)
     }
 
     bondSalePubkey = await sale.initBondSale(initBondSaleVars, bondInitPayer)
@@ -88,8 +88,8 @@ describe('claim-bond', () => {
 
   it('#claimBond()', async () => {
     await sleep(5000)
-    const ownerBondAccount = await tokenBond.createAccount(bondOwner.publicKey)
 
+    const ownerBondAccount = await tokenBond.createAccount(bondOwner.publicKey)
     const claimBondVars: ClaimBond = {
       ownerBondAccount,
       bondId: new BN(0),
@@ -101,9 +101,27 @@ describe('claim-bond', () => {
     const bondSale = await sale.getBondSale(bondSalePubkey)
     const tokenBondAccount = bondSale.tokenBondAccount
     const amount = (await tokenBond.getAccountInfo(ownerBondAccount)).amount
-    console.log(amount.toString())
-    assert.ok(amount.eqn(30))
-    assert.ok((await tokenBond.getAccountInfo(tokenBondAccount)).amount.eqn(970))
-    console.log(bondSale.remainingAmount.v.toString())
+    assert.ok(amount.eqn(60))
+    assert.ok((await tokenBond.getAccountInfo(tokenBondAccount)).amount.eqn(940))
+  })
+
+  it('closeBond()', async () => {
+    await sleep(11000)
+
+    const ownerBondAccount = await tokenBond.createAccount(bondOwner.publicKey)
+    const claimBondVars: ClaimBond = {
+      ownerBondAccount,
+      bondId: new BN(0),
+      bondSale: bondSalePubkey,
+      owner: bondOwner.publicKey
+    }
+    await sale.claimBond(claimBondVars, bondOwner)
+
+    const bondSale = await sale.getBondSale(bondSalePubkey)
+    const tokenBondAccount = bondSale.tokenBondAccount
+    const amount = (await tokenBond.getAccountInfo(ownerBondAccount)).amount
+    assert.ok(amount.eqn(40))
+    assert.ok((await tokenBond.getAccountInfo(tokenBondAccount)).amount.eqn(900))
+    assert.isUndefined((await sale.getAllBonds(bondSalePubkey, bondOwner.publicKey)).at(0))
   })
 })

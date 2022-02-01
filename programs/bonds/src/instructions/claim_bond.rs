@@ -5,12 +5,12 @@ use crate::{
     get_signer,
     interfaces::TransferBond,
     structs::{Bond, BondSale},
+    utils::{close, get_current_timestamp},
     SEED,
 };
 
 #[derive(Accounts)]
 pub struct ClaimBond<'info> {
-    #[account(mut)]
     pub bond_sale: AccountLoader<'info, BondSale>,
     #[account(mut)]
     pub bond: AccountLoader<'info, Bond>,
@@ -48,15 +48,30 @@ impl<'info> TransferBond<'info> for ClaimBond<'info> {
 }
 
 pub fn handler(ctx: Context<ClaimBond>, nonce: u8) -> ProgramResult {
-    let mut bond = ctx.accounts.bond.load_mut()?;
-    let mut bond_sale = ctx.accounts.bond_sale.load_mut()?;
-    let amount_to_claim = bond.get_amount_to_claim(bond_sale.distribution).unwrap();
+    {
+        let mut bond = ctx.accounts.bond.load_mut()?;
+        let bond_sale = ctx.accounts.bond_sale.load()?;
 
-    let signer: &[&[&[u8]]] = get_signer!(nonce);
-    transfer(
-        ctx.accounts.transfer_bond().with_signer(signer),
-        amount_to_claim.v,
-    )?;
+        let current_time = get_current_timestamp();
+        let amount_to_claim = bond
+            .get_amount_to_claim(bond_sale.distribution, current_time)
+            .unwrap();
+        bond.last_claim = current_time;
+
+        let signer: &[&[&[u8]]] = get_signer!(nonce);
+        transfer(
+            ctx.accounts.transfer_bond().with_signer(signer),
+            amount_to_claim.v,
+        )?;
+    }
+
+    let bond = *ctx.accounts.bond.load()?;
+    if bond.last_claim > bond.distribution_end {
+        close(
+            ctx.accounts.bond.to_account_info(),
+            ctx.accounts.owner.to_account_info(),
+        )?;
+    }
 
     Ok(())
 }
