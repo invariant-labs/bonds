@@ -64,7 +64,8 @@ describe('create-bond', () => {
       tokenQuote,
       upBound: DENOMINATOR.divn(2),
       velocity: DENOMINATOR.divn(2),
-      payer: bondInitPayer.publicKey
+      payer: bondInitPayer.publicKey,
+      distribution: new BN(10)
     }
 
     bondSalePubkey = await sale.initBondSale(initBondSaleVars, bondInitPayer)

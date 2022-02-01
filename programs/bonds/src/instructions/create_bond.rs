@@ -24,9 +24,9 @@ pub struct CreateBond<'info> {
     #[account(mut)]
     pub owner_quote_account: Box<Account<'info, TokenAccount>>,
     #[account(mut)]
-    pub bond_sale_bond_account: Box<Account<'info, TokenAccount>>,
+    pub token_bond_account: Box<Account<'info, TokenAccount>>,
     #[account(mut)]
-    pub bond_sale_quote_account: Box<Account<'info, TokenAccount>>,
+    pub token_quote_account: Box<Account<'info, TokenAccount>>,
     #[account(mut)]
     pub owner: Signer<'info>,
     pub authority: AccountInfo<'info>,
@@ -42,7 +42,7 @@ impl<'info> TransferQuote<'info> for CreateBond<'info> {
             self.token_program.to_account_info(),
             Transfer {
                 from: self.owner_quote_account.to_account_info(),
-                to: self.bond_sale_quote_account.to_account_info(),
+                to: self.token_quote_account.to_account_info(),
                 authority: self.owner.to_account_info().clone(),
             },
         )
@@ -74,10 +74,13 @@ pub fn handler(ctx: Context<CreateBond>, amount: u64, by_amount_in: bool) -> Pro
     }
 
     **bond = Bond {
-        bond_sale: ctx.accounts.bond_sale.key(),
+        token_bond: ctx.accounts.token_bond.key(),
+        token_bond_account: ctx.accounts.token_bond_account.key(),
         owner: ctx.accounts.owner.key(),
+        authority: ctx.accounts.authority.key(),
         buy_amount: TokenAmount::new(buy_amount),
         last_claim: get_current_timestamp(),
+        distribution_start: get_current_timestamp(),
         distribution_end: get_current_timestamp() + bond_sale.distribution,
     };
 

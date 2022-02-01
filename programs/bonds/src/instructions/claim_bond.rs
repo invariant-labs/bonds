@@ -11,11 +11,10 @@ use crate::{
 
 #[derive(Accounts)]
 pub struct ClaimBond<'info> {
-    pub bond_sale: AccountLoader<'info, BondSale>,
     #[account(mut)]
     pub bond: AccountLoader<'info, Bond>,
     #[account(mut,
-        constraint = token_bond_account.key() == bond_sale.load()?.token_bond_account
+        constraint = token_bond_account.key() == bond.load()?.token_bond_account
     )]
     pub token_bond_account: Account<'info, TokenAccount>,
     #[account(mut,
@@ -28,7 +27,7 @@ pub struct ClaimBond<'info> {
     )]
     pub owner: Signer<'info>,
     #[account(
-        constraint = authority.key == &bond_sale.load()?.authority
+        constraint = authority.key == &bond.load()?.authority
     )]
     pub authority: AccountInfo<'info>,
     pub token_program: AccountInfo<'info>,
@@ -50,12 +49,9 @@ impl<'info> TransferBond<'info> for ClaimBond<'info> {
 pub fn handler(ctx: Context<ClaimBond>, nonce: u8) -> ProgramResult {
     {
         let mut bond = ctx.accounts.bond.load_mut()?;
-        let bond_sale = ctx.accounts.bond_sale.load()?;
 
         let current_time = get_current_timestamp();
-        let amount_to_claim = bond
-            .get_amount_to_claim(bond_sale.distribution, current_time)
-            .unwrap();
+        let amount_to_claim = bond.get_amount_to_claim(current_time).unwrap();
         bond.last_claim = current_time;
 
         let signer: &[&[&[u8]]] = get_signer!(nonce);
