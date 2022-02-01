@@ -3,12 +3,12 @@ import { Provider, BN } from '@project-serum/anchor'
 import { Token, TOKEN_PROGRAM_ID } from '@solana/spl-token'
 import { Keypair, PublicKey } from '@solana/web3.js'
 import { Sale, Network } from '@template-labs/sdk'
-import { ClaimQuote, CreateBond, InitBondSale } from '@template-labs/sdk/lib/sale'
-import { DENOMINATOR } from '@template-labs/sdk/lib/utils'
+import { ClaimBond, CreateBond, InitBondSale } from '@template-labs/sdk/lib/sale'
+import { DENOMINATOR, sleep } from '@template-labs/sdk/lib/utils'
 import { assert } from 'chai'
 import { createToken } from './testUtils'
 
-describe('claim-quote', () => {
+describe('claim-bond', () => {
   const provider = Provider.local()
   const connection = provider.connection
 
@@ -86,16 +86,24 @@ describe('claim-quote', () => {
     await sale.createBond(createBondVars, bondOwner)
   })
 
-  it('#claimQuote()', async () => {
-    const claimQuoteVars: ClaimQuote = {
+  it('#claimBond()', async () => {
+    await sleep(5000)
+    const ownerBondAccount = await tokenBond.createAccount(bondOwner.publicKey)
+
+    const claimBondVars: ClaimBond = {
+      ownerBondAccount,
+      bondId: new BN(0),
       bondSale: bondSalePubkey,
-      payerQuoteAccount,
-      payer: bondInitPayer.publicKey
+      owner: bondOwner.publicKey
     }
-    await sale.claimQuote(claimQuoteVars, bondInitPayer)
+    await sale.claimBond(claimBondVars, bondOwner)
 
     const bondSale = await sale.getBondSale(bondSalePubkey)
-    assert.ok(bondSale.quoteAmount.v.eqn(0))
-    assert.ok((await tokenQuote.getAccountInfo(payerQuoteAccount)).amount.eqn(103))
+    const tokenBondAccount = bondSale.tokenBondAccount
+    const amount = (await tokenBond.getAccountInfo(ownerBondAccount)).amount
+    console.log(amount.toString())
+    assert.ok(amount.eqn(30))
+    assert.ok((await tokenBond.getAccountInfo(tokenBondAccount)).amount.eqn(970))
+    console.log(bondSale.remainingAmount.v.toString())
   })
 })

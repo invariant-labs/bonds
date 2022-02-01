@@ -1,17 +1,12 @@
 use std::convert::TryInto;
 
-use anchor_lang::prelude::msg;
-
 use crate::structs::{BondSale, Decimal, TokenAmount};
 
-#[allow(dead_code)]
 pub fn calculate_new_price(
     bond_sale: &mut BondSale,
     current_time: u64,
     buy_amount: TokenAmount,
 ) -> Decimal {
-    msg!("last_trade: {}", { bond_sale.last_trade });
-    msg!("current_time: {}", current_time);
     let delta_time = current_time - bond_sale.last_trade;
     let sale_time = bond_sale.end_time - bond_sale.start_time;
     let time_ratio = Decimal::from_integer(delta_time.try_into().unwrap())

@@ -3,12 +3,10 @@ use anchor_spl::token;
 use anchor_spl::token::{Mint, TokenAccount, Transfer};
 use bond_sale::BondSale;
 
-use crate::get_signer;
 use crate::math::calculate_new_price;
 use crate::utils::get_current_timestamp;
-use crate::SEED;
 use crate::{
-    interfaces::{TransferBond, TransferQuote},
+    interfaces::TransferQuote,
     structs::{bond_sale, token_amount::TokenAmount, Bond},
 };
 
@@ -23,12 +21,6 @@ pub struct CreateBond<'info> {
     pub bond: AccountLoader<'info, Bond>,
     pub token_bond: Box<Account<'info, Mint>>,
     pub token_quote: Box<Account<'info, Mint>>,
-    #[account(init,
-        token::mint = token_bond,
-        token::authority = authority,
-        payer = owner,
-    )]
-    pub bond_account: Box<Account<'info, TokenAccount>>,
     #[account(mut)]
     pub owner_quote_account: Box<Account<'info, TokenAccount>>,
     #[account(mut)]
@@ -44,19 +36,6 @@ pub struct CreateBond<'info> {
     pub rent: Sysvar<'info, Rent>,
 }
 
-impl<'info> TransferBond<'info> for CreateBond<'info> {
-    fn transfer_bond(&self) -> CpiContext<'_, '_, '_, 'info, Transfer<'info>> {
-        CpiContext::new(
-            self.token_program.to_account_info(),
-            Transfer {
-                from: self.bond_sale_bond_account.to_account_info(),
-                to: self.bond_account.to_account_info(),
-                authority: self.authority.to_account_info().clone(),
-            },
-        )
-    }
-}
-
 impl<'info> TransferQuote<'info> for CreateBond<'info> {
     fn transfer_quote(&self) -> CpiContext<'_, '_, '_, 'info, Transfer<'info>> {
         CpiContext::new(
@@ -70,12 +49,7 @@ impl<'info> TransferQuote<'info> for CreateBond<'info> {
     }
 }
 
-pub fn handler(
-    ctx: Context<CreateBond>,
-    amount: u64,
-    by_amount_in: bool,
-    nonce: u8,
-) -> ProgramResult {
+pub fn handler(ctx: Context<CreateBond>, amount: u64, by_amount_in: bool) -> ProgramResult {
     let bond = &mut ctx.accounts.bond.load_init()?;
     let bond_sale = &mut ctx.accounts.bond_sale.load_mut()?;
 
@@ -101,13 +75,12 @@ pub fn handler(
 
     **bond = Bond {
         bond_sale: ctx.accounts.bond_sale.key(),
-        bond_account: ctx.accounts.bond_account.key(),
         owner: ctx.accounts.owner.key(),
-        buy_amount: TokenAmount::new(amount),
+        buy_amount: TokenAmount::new(buy_amount),
+        last_claim: get_current_timestamp(),
+        distribution_end: get_current_timestamp() + bond_sale.distribution,
     };
 
-    let signer: &[&[&[u8]]] = get_signer!(nonce);
-    token::transfer(ctx.accounts.transfer_bond().with_signer(signer), buy_amount)?;
     token::transfer(ctx.accounts.transfer_quote(), quote_amount)?;
 
     bond_sale.quote_amount = bond_sale.quote_amount + TokenAmount::new(quote_amount);
