@@ -198,7 +198,7 @@ export type Bonds = {
         },
         {
           "name": "authority",
-          "isMut": false,
+          "isMut": true,
           "isSigner": false
         },
         {
@@ -723,7 +723,7 @@ export const IDL: Bonds = {
         },
         {
           "name": "authority",
-          "isMut": false,
+          "isMut": true,
           "isSigner": false
         },
         {
