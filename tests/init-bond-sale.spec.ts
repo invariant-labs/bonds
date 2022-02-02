@@ -82,4 +82,41 @@ describe('init-bond-sale', () => {
     assert.ok(bondSale.upBound.v.eq(new BN(500_000_000_000)))
     assert.ok(bondSale.velocity.v.eq(new BN(500_000_000_000)))
   })
+
+  it('#initBondSale() no signer', async () => {
+    const payerBondAccount = await tokenBond.createAccount(wallet.publicKey)
+    const payerQuoteAccount = await tokenQuote.createAccount(wallet.publicKey)
+    await tokenBond.mintTo(payerBondAccount, mintAuthority, [mintAuthority], 1000)
+
+    const initBondSaleVars: InitBondSale = {
+      buyAmount: new BN(1000),
+      duration: new BN(100),
+      floorPrice: DENOMINATOR,
+      payerBondAccount,
+      payerQuoteAccount,
+      tokenBond,
+      tokenQuote,
+      upBound: DENOMINATOR.divn(2),
+      velocity: DENOMINATOR.divn(2),
+      payer: wallet.publicKey,
+      distribution: new BN(10)
+    }
+
+    const bondSalePubkey = await sale.initBondSale(initBondSaleVars)
+    const bondSale = await sale.getBondSale(bondSalePubkey)
+
+    assert.ok(
+      bondSale.authority.toString() ===
+        (await sale.getProgramAuthority()).programAuthority.toString()
+    )
+    assert.ok(bondSale.bondAmount.v.eqn(1000))
+    assert.ok(bondSale.floorPrice.v.eq(DENOMINATOR))
+    assert.ok(bondSale.payer.toString() === wallet.publicKey.toString())
+    assert.ok(bondSale.quoteAmount.v.eqn(0))
+    assert.ok(bondSale.remainingAmount.v.eqn(1000))
+    assert.ok(bondSale.tokenBond.toString() === tokenBond.publicKey.toString())
+    assert.ok(bondSale.tokenQuote.toString() === tokenQuote.publicKey.toString())
+    assert.ok(bondSale.upBound.v.eq(new BN(500_000_000_000)))
+    assert.ok(bondSale.velocity.v.eq(new BN(500_000_000_000)))
+  })
 })

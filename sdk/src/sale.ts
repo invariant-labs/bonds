@@ -14,7 +14,7 @@ import { IWallet } from '.'
 import { Bonds, IDL } from './idl/bonds'
 import { getProgramAddress, Network } from './network'
 
-import { signAndSend } from './utils'
+import { signAndSend, signAndSendWallet } from './utils'
 export const SEED = 'Bonds'
 export const BOND_SEED = 'bondv1'
 
@@ -144,7 +144,7 @@ export class Sale {
       .add(initIx)
   }
 
-  async initBondSale(initBondSale: InitBondSale, payer: Keypair) {
+  async initBondSale(initBondSale: InitBondSale, payer?: Keypair) {
     const bondSaleAddress = Keypair.generate()
     const bondSaleBondAccount = Keypair.generate()
     const bondSaleQuoteAccount = Keypair.generate()
@@ -156,12 +156,19 @@ export class Sale {
       bondSaleQuoteAccount.publicKey
     )
 
-    await signAndSend(
-      tx,
-      [payer, bondSaleAddress, bondSaleBondAccount, bondSaleQuoteAccount],
-      this.connection
-    )
-
+    if (payer === undefined) {
+      await signAndSendWallet(this.wallet, tx, this.connection, [
+        bondSaleAddress,
+        bondSaleBondAccount,
+        bondSaleQuoteAccount
+      ])
+    } else {
+      await signAndSend(
+        tx,
+        [payer, bondSaleAddress, bondSaleBondAccount, bondSaleQuoteAccount],
+        this.connection
+      )
+    }
     return bondSaleAddress.publicKey
   }
 
@@ -223,11 +230,15 @@ export class Sale {
       .add(initIx)
   }
 
-  async createBond(createBond: CreateBond, signer: Keypair) {
+  async createBond(createBond: CreateBond, signer?: Keypair) {
     const bond = Keypair.generate()
     const tx = await this.createBondTransaction(createBond, bond.publicKey)
 
-    await signAndSend(tx, [signer, bond], this.connection)
+    if (signer === undefined) {
+      await signAndSendWallet(this.wallet, tx, this.connection, [bond])
+    } else {
+      await signAndSend(tx, [signer, bond], this.connection)
+    }
 
     return bond.publicKey
   }
@@ -250,10 +261,14 @@ export class Sale {
     return new Transaction().add(ix)
   }
 
-  async changeVelocity(changeVelocity: ChangeVelocity, signer: Keypair) {
+  async changeVelocity(changeVelocity: ChangeVelocity, signer?: Keypair) {
     const tx = await this.changeVelocityTransaction(changeVelocity)
 
-    await signAndSend(tx, [signer], this.connection)
+    if (signer === undefined) {
+      await signAndSendWallet(this.wallet, tx, this.connection)
+    } else {
+      await signAndSend(tx, [signer], this.connection)
+    }
   }
 
   async changeUpBoundInstruction(changeUpBound: ChangeUpBound) {
@@ -274,10 +289,14 @@ export class Sale {
     return new Transaction().add(ix)
   }
 
-  async changeUpBound(changeUpBound: ChangeUpBound, signer: Keypair) {
+  async changeUpBound(changeUpBound: ChangeUpBound, signer?: Keypair) {
     const tx = await this.changeUpBoundTransaction(changeUpBound)
 
-    await signAndSend(tx, [signer], this.connection)
+    if (signer === undefined) {
+      await signAndSendWallet(this.wallet, tx, this.connection)
+    } else {
+      await signAndSend(tx, [signer], this.connection)
+    }
   }
 
   async claimQuoteInstruction(claimQuote: ClaimQuote) {
@@ -304,10 +323,14 @@ export class Sale {
     return new Transaction().add(ix)
   }
 
-  async claimQuote(claimQuote: ClaimQuote, signer: Keypair) {
+  async claimQuote(claimQuote: ClaimQuote, signer?: Keypair) {
     const tx = await this.claimQuoteTransaction(claimQuote)
 
-    await signAndSend(tx, [signer], this.connection)
+    if (signer === undefined) {
+      await signAndSendWallet(this.wallet, tx, this.connection)
+    } else {
+      await signAndSend(tx, [signer], this.connection)
+    }
   }
 
   async claimBondInstruction(claimBond: ClaimBond) {
@@ -334,10 +357,14 @@ export class Sale {
     return new Transaction().add(ix)
   }
 
-  async claimBond(claimBond: ClaimBond, signer: Keypair) {
+  async claimBond(claimBond: ClaimBond, signer?: Keypair) {
     const tx = await this.claimBondTransaction(claimBond)
 
-    await signAndSend(tx, [signer], this.connection)
+    if (signer === undefined) {
+      await signAndSendWallet(this.wallet, tx, this.connection)
+    } else {
+      await signAndSend(tx, [signer], this.connection)
+    }
   }
 
   async endBondSaleInstruction(endBondSale: EndBondSale) {
@@ -366,10 +393,14 @@ export class Sale {
     return new Transaction().add(ix)
   }
 
-  async endBondSale(endBondSale: EndBondSale, signer: Keypair) {
+  async endBondSale(endBondSale: EndBondSale, signer?: Keypair) {
     const tx = await this.endBondSaleTransaction(endBondSale)
 
-    await signAndSend(tx, [signer], this.connection)
+    if (signer === undefined) {
+      await signAndSendWallet(this.wallet, tx, this.connection)
+    } else {
+      await signAndSend(tx, [signer], this.connection)
+    }
   }
 }
 
