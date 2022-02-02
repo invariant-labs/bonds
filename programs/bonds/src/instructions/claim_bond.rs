@@ -4,7 +4,7 @@ use anchor_spl::token::{transfer, TokenAccount, Transfer};
 use crate::{
     get_signer,
     interfaces::TransferBond,
-    structs::{Bond, BondSale},
+    structs::Bond,
     utils::{close, get_current_timestamp},
     SEED,
 };
