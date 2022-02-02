@@ -8,7 +8,7 @@ import { DENOMINATOR } from '@template-labs/sdk/lib/utils'
 import { assert } from 'chai'
 import { assertThrowsAsync, createToken, ERROR } from './testUtils'
 
-describe('create-bond', () => {
+describe('end-bond-sale', () => {
   const provider = Provider.local()
   const connection = provider.connection
 

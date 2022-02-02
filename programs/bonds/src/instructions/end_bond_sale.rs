@@ -1,5 +1,3 @@
-use std::{borrow::BorrowMut, ops::Deref};
-
 use anchor_lang::prelude::*;
 use anchor_spl::token::{close_account, transfer, CloseAccount, TokenAccount, Transfer};
 
@@ -88,7 +86,7 @@ impl<'info> CloseTokenAccount<'info> for EndBondSale<'info> {
 pub fn handler(ctx: Context<EndBondSale>, nonce: u8) -> ProgramResult {
     let signer: &[&[&[u8]]] = get_signer!(nonce);
     {
-        let mut bond_sale = *ctx.accounts.bond_sale.load_mut()?;
+        let bond_sale = *ctx.accounts.bond_sale.load_mut()?;
         if bond_sale.quote_amount.v != 0 {
             transfer(
                 ctx.accounts.transfer_quote().with_signer(signer),
