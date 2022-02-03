@@ -6,7 +6,7 @@ import { Sale, Network } from '@template-labs/sdk'
 import { ChangeUpBound, ChangeVelocity, InitBondSale } from '@template-labs/sdk/lib/sale'
 import { DENOMINATOR } from '@template-labs/sdk/lib/utils'
 import { assert } from 'chai'
-import { createToken } from './testUtils'
+import { assertThrowsAsync, createToken } from './testUtils'
 
 describe('modify-bond-sale', () => {
   const provider = Provider.local()
@@ -94,5 +94,16 @@ describe('modify-bond-sale', () => {
     await sale.changeUpBound(changeUpBoundVars, bondInitPayer)
     const bondSale = await sale.getBondSale(bondSalePubkey)
     assert.ok(bondSale.upBound.v.eq(new BN(DENOMINATOR.divn(3))))
+  })
+
+  it('changeUpBound() wrong signer', async () => {
+    const newUpBound = DENOMINATOR.divn(3)
+    const changeUpBoundVars: ChangeUpBound = {
+      bondSale: bondSalePubkey,
+      upBound: newUpBound,
+      payer: wallet.publicKey
+    }
+
+    await assertThrowsAsync(sale.changeUpBound(changeUpBoundVars))
   })
 })

@@ -293,9 +293,13 @@ export class Sale {
     const tx = await this.changeUpBoundTransaction(changeUpBound)
 
     if (signer === undefined) {
+      console.log('111111111111111')
       await signAndSendWallet(this.wallet, tx, this.connection)
+      console.log('111111111111111')
     } else {
+      console.log('2222222222')
       await signAndSend(tx, [signer], this.connection)
+      console.log('222222222222')
     }
   }
 

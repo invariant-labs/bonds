@@ -42,6 +42,7 @@ export const signAndSendWallet = async (
   )
   tx.recentBlockhash = blockhash.blockhash
   tx = await wallet.signTransaction(tx)
+  tx.feePayer = wallet.publicKey
   if (signers !== undefined) {
     tx.partialSign(...signers)
   }
