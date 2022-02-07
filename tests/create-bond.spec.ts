@@ -8,6 +8,8 @@ import { DENOMINATOR } from '@invariant-labs-bonds/sdk/lib/utils'
 import { assert } from 'chai'
 import { createToken } from './testUtils'
 
+// case with multiple bonds on a single bond sale needed
+
 describe('create-bond', () => {
   const provider = Provider.local()
   const connection = provider.connection
