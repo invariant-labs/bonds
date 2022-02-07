@@ -36,7 +36,6 @@ export async function assertThrowsAsync(fn: Promise<any>, word?: string) {
     console.log(err)
     if (word) {
       const regex = new RegExp(word)
-      console.log(regex.test(err))
       if (!regex.test(err)) {
         console.log(err)
         throw new Error('Invalid Error message')

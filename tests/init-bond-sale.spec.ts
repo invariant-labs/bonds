@@ -2,9 +2,9 @@ import * as anchor from '@project-serum/anchor'
 import { Provider, BN } from '@project-serum/anchor'
 import { Token, TOKEN_PROGRAM_ID } from '@solana/spl-token'
 import { Keypair } from '@solana/web3.js'
-import { Sale, Network } from '@template-labs/sdk'
-import { InitBondSale } from '@template-labs/sdk/lib/sale'
-import { DENOMINATOR } from '@template-labs/sdk/lib/utils'
+import { Sale, Network } from '@invariant-labs-bonds/sdk'
+import { InitBondSale } from '@invariant-labs-bonds/sdk/lib/sale'
+import { DENOMINATOR } from '@invariant-labs-bonds/sdk/lib/utils'
 import { assert } from 'chai'
 import { createToken } from './testUtils'
 
@@ -83,7 +83,7 @@ describe('init-bond-sale', () => {
     assert.ok(bondSale.velocity.v.eq(new BN(500_000_000_000)))
   })
 
-  it('#initBondSale() no signer', async () => {
+  it('#initBondSale() wallet', async () => {
     const payerBondAccount = await tokenBond.createAccount(wallet.publicKey)
     const payerQuoteAccount = await tokenQuote.createAccount(wallet.publicKey)
     await tokenBond.mintTo(payerBondAccount, mintAuthority, [mintAuthority], 1000)
@@ -98,7 +98,6 @@ describe('init-bond-sale', () => {
       tokenQuote,
       upBound: DENOMINATOR.divn(2),
       velocity: DENOMINATOR.divn(2),
-      payer: wallet.publicKey,
       distribution: new BN(10)
     }
 

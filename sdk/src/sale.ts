@@ -120,8 +120,10 @@ export class Sale {
     bondSaleBondPub: PublicKey,
     bondSaleQuotePub: PublicKey
   ) {
+    const payer = initBondSale.payer ?? this.wallet.publicKey
+
     const createIx = SystemProgram.createAccount({
-      fromPubkey: initBondSale.payer,
+      fromPubkey: payer,
       newAccountPubkey: bondSalePub,
       space: this.program.account.bondSale.size,
       lamports: await this.connection.getMinimumBalanceForRentExemption(
@@ -138,7 +140,7 @@ export class Sale {
     )
 
     return new Transaction({
-      feePayer: initBondSale.payer
+      feePayer: payer
     })
       .add(createIx)
       .add(initIx)
@@ -212,8 +214,10 @@ export class Sale {
   }
 
   async createBondTransaction(createBond: CreateBond, bondPub: PublicKey) {
+    const payer = createBond.owner ?? this.wallet.publicKey
+
     const createIx = SystemProgram.createAccount({
-      fromPubkey: createBond.owner,
+      fromPubkey: payer,
       newAccountPubkey: bondPub,
       space: this.program.account.bond.size,
       lamports: await this.connection.getMinimumBalanceForRentExemption(
@@ -224,7 +228,7 @@ export class Sale {
     const initIx = await this.createBondInstruction(createBond, bondPub)
 
     return new Transaction({
-      feePayer: createBond.owner
+      feePayer: payer
     })
       .add(createIx)
       .add(initIx)
@@ -293,13 +297,9 @@ export class Sale {
     const tx = await this.changeUpBoundTransaction(changeUpBound)
 
     if (signer === undefined) {
-      console.log('111111111111111')
       await signAndSendWallet(this.wallet, tx, this.connection)
-      console.log('111111111111111')
     } else {
-      console.log('2222222222')
       await signAndSend(tx, [signer], this.connection)
-      console.log('222222222222')
     }
   }
 

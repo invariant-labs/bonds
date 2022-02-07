@@ -2,11 +2,11 @@ import * as anchor from '@project-serum/anchor'
 import { Provider, BN } from '@project-serum/anchor'
 import { Token, TOKEN_PROGRAM_ID } from '@solana/spl-token'
 import { Keypair, PublicKey } from '@solana/web3.js'
-import { Sale, Network } from '@template-labs/sdk'
-import { ChangeUpBound, ChangeVelocity, InitBondSale } from '@template-labs/sdk/lib/sale'
-import { DENOMINATOR } from '@template-labs/sdk/lib/utils'
+import { Sale, Network } from '@invariant-labs-bonds/sdk'
+import { ChangeUpBound, ChangeVelocity, InitBondSale } from '@invariant-labs-bonds/sdk/lib/sale'
+import { DENOMINATOR } from '@invariant-labs-bonds/sdk/lib/utils'
 import { assert } from 'chai'
-import { assertThrowsAsync, createToken } from './testUtils'
+import { createToken } from './testUtils'
 
 describe('modify-bond-sale', () => {
   const provider = Provider.local()
@@ -47,63 +47,102 @@ describe('modify-bond-sale', () => {
     tokenQuote = new Token(connection, tokens[1].publicKey, TOKEN_PROGRAM_ID, wallet)
   })
 
-  it('#initBondSale()', async () => {
-    const payerBondAccount = await tokenBond.createAccount(bondInitPayer.publicKey)
-    const payerQuoteAccount = await tokenQuote.createAccount(bondInitPayer.publicKey)
-    await tokenBond.mintTo(payerBondAccount, mintAuthority, [mintAuthority], 1000)
+  describe('initBondPayer', () => {
+    it('#initBondSale()', async () => {
+      const payerBondAccount = await tokenBond.createAccount(bondInitPayer.publicKey)
+      const payerQuoteAccount = await tokenQuote.createAccount(bondInitPayer.publicKey)
+      await tokenBond.mintTo(payerBondAccount, mintAuthority, [mintAuthority], 1000)
 
-    const initBondSaleVars: InitBondSale = {
-      buyAmount: new BN(1000),
-      duration: new BN(100),
-      floorPrice: DENOMINATOR,
-      payerBondAccount,
-      payerQuoteAccount,
-      tokenBond,
-      tokenQuote,
-      upBound: DENOMINATOR.divn(2),
-      velocity: DENOMINATOR.divn(2),
-      payer: bondInitPayer.publicKey,
-      distribution: new BN(10)
-    }
+      const initBondSaleVars: InitBondSale = {
+        buyAmount: new BN(1000),
+        duration: new BN(100),
+        floorPrice: DENOMINATOR,
+        payerBondAccount,
+        payerQuoteAccount,
+        tokenBond,
+        tokenQuote,
+        upBound: DENOMINATOR.divn(2),
+        velocity: DENOMINATOR.divn(2),
+        payer: bondInitPayer.publicKey,
+        distribution: new BN(10)
+      }
 
-    bondSalePubkey = await sale.initBondSale(initBondSaleVars, bondInitPayer)
+      bondSalePubkey = await sale.initBondSale(initBondSaleVars, bondInitPayer)
+    })
+
+    it('#changeVelocity()', async () => {
+      const newVelocity = DENOMINATOR.divn(3)
+      const changeVelocityVars: ChangeVelocity = {
+        bondSale: bondSalePubkey,
+        velocity: newVelocity,
+        payer: bondInitPayer.publicKey
+      }
+
+      await sale.changeVelocity(changeVelocityVars, bondInitPayer)
+
+      const bondSale = await sale.getBondSale(bondSalePubkey)
+      assert.ok(bondSale.velocity.v.eq(new BN(DENOMINATOR.divn(3))))
+    })
+
+    it('changeUpBound()', async () => {
+      const newUpBound = DENOMINATOR.divn(3)
+      const changeUpBoundVars: ChangeUpBound = {
+        bondSale: bondSalePubkey,
+        upBound: newUpBound,
+        payer: bondInitPayer.publicKey
+      }
+
+      await sale.changeUpBound(changeUpBoundVars, bondInitPayer)
+      const bondSale = await sale.getBondSale(bondSalePubkey)
+      assert.ok(bondSale.upBound.v.eq(new BN(DENOMINATOR.divn(3))))
+    })
   })
 
-  it('#changeVelocity()', async () => {
-    const newVelocity = DENOMINATOR.divn(3)
-    const changeVelocityVars: ChangeVelocity = {
-      bondSale: bondSalePubkey,
-      velocity: newVelocity,
-      payer: bondInitPayer.publicKey
-    }
+  describe('wallet', () => {
+    it('#initBondSale()', async () => {
+      const payerBondAccount = await tokenBond.createAccount(wallet.publicKey)
+      const payerQuoteAccount = await tokenQuote.createAccount(wallet.publicKey)
+      await tokenBond.mintTo(payerBondAccount, mintAuthority, [mintAuthority], 1000)
 
-    await sale.changeVelocity(changeVelocityVars, bondInitPayer)
+      const initBondSaleVars: InitBondSale = {
+        buyAmount: new BN(1000),
+        duration: new BN(100),
+        floorPrice: DENOMINATOR,
+        payerBondAccount,
+        payerQuoteAccount,
+        tokenBond,
+        tokenQuote,
+        upBound: DENOMINATOR.divn(2),
+        velocity: DENOMINATOR.divn(2),
+        distribution: new BN(10)
+      }
 
-    const bondSale = await sale.getBondSale(bondSalePubkey)
-    assert.ok(bondSale.velocity.v.eq(new BN(DENOMINATOR.divn(3))))
-  })
+      bondSalePubkey = await sale.initBondSale(initBondSaleVars)
+    })
 
-  it('changeUpBound()', async () => {
-    const newUpBound = DENOMINATOR.divn(3)
-    const changeUpBoundVars: ChangeUpBound = {
-      bondSale: bondSalePubkey,
-      upBound: newUpBound,
-      payer: bondInitPayer.publicKey
-    }
+    it('#changeVelocity()', async () => {
+      const newVelocity = DENOMINATOR.divn(3)
+      const changeVelocityVars: ChangeVelocity = {
+        bondSale: bondSalePubkey,
+        velocity: newVelocity
+      }
 
-    await sale.changeUpBound(changeUpBoundVars, bondInitPayer)
-    const bondSale = await sale.getBondSale(bondSalePubkey)
-    assert.ok(bondSale.upBound.v.eq(new BN(DENOMINATOR.divn(3))))
-  })
+      await sale.changeVelocity(changeVelocityVars)
 
-  it('changeUpBound() wrong signer', async () => {
-    const newUpBound = DENOMINATOR.divn(3)
-    const changeUpBoundVars: ChangeUpBound = {
-      bondSale: bondSalePubkey,
-      upBound: newUpBound,
-      payer: wallet.publicKey
-    }
+      const bondSale = await sale.getBondSale(bondSalePubkey)
+      assert.ok(bondSale.velocity.v.eq(new BN(DENOMINATOR.divn(3))))
+    })
 
-    await assertThrowsAsync(sale.changeUpBound(changeUpBoundVars))
+    it('changeUpBound()', async () => {
+      const newUpBound = DENOMINATOR.divn(3)
+      const changeUpBoundVars: ChangeUpBound = {
+        bondSale: bondSalePubkey,
+        upBound: newUpBound
+      }
+
+      await sale.changeUpBound(changeUpBoundVars)
+      const bondSale = await sale.getBondSale(bondSalePubkey)
+      assert.ok(bondSale.upBound.v.eq(new BN(DENOMINATOR.divn(3))))
+    })
   })
 })
