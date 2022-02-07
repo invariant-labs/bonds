@@ -21,6 +21,8 @@ pub struct CreateBond<'info> {
     pub bond: AccountLoader<'info, Bond>,
     pub token_bond: Box<Account<'info, Mint>>,
     pub token_quote: Box<Account<'info, Mint>>,
+    // no validation of owner
+    // the hack where both owner_quote_account and token_quote_account are the same is possible here
     #[account(mut)]
     pub owner_quote_account: Box<Account<'info, TokenAccount>>,
     #[account(mut)]
@@ -56,11 +58,14 @@ pub fn handler(ctx: Context<CreateBond>, amount: u64, by_amount_in: bool) -> Pro
     let current_time = get_current_timestamp();
     let sell_price = calculate_new_price(bond_sale, current_time, TokenAmount::new(amount));
 
-    let mut buy_amount = 0;
-    let mut quote_amount = 0;
+    // I just like this mut-just-once pattern
+    let buy_amount;
+    let quote_amount;
 
     // To be implemented, waiting for a math equation
     if by_amount_in {
+        buy_amount = 0;
+        quote_amount = 0;
     } else {
         require!(
             amount <= bond_sale.remaining_amount.v,

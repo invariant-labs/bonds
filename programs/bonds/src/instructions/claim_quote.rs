@@ -13,6 +13,7 @@ pub struct ClaimQuote<'info> {
         constraint = bond_sale_quote_account.mint == bond_sale.load()?.token_quote
     )]
     pub bond_sale_quote_account: Account<'info, TokenAccount>,
+    // no validation of owner
     #[account(mut,
         constraint = payer_quote_account.mint == bond_sale.load()?.token_quote
     )]

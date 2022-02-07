@@ -2,6 +2,7 @@ import * as anchor from '@project-serum/anchor'
 import { Provider, BN } from '@project-serum/anchor'
 import { Token, TOKEN_PROGRAM_ID } from '@solana/spl-token'
 import { Keypair, PublicKey } from '@solana/web3.js'
+// I would go for @invariant-labs-bonds/sdk
 import { Sale, Network } from '@invariant-labs-bonds/sdk'
 import { ClaimBond, CreateBond, InitBondSale } from '@invariant-labs-bonds/sdk/lib/sale'
 import { DENOMINATOR, sleep } from '@invariant-labs-bonds/sdk/lib/utils'
@@ -33,6 +34,8 @@ describe('claim-bond', () => {
       anchor.workspace.Bonds.programId
     )
 
+    // For every test!
+    // this doesn't work like that, Promise.all has to take promises (so no await before every one)
     await Promise.all([
       await connection.requestAirdrop(mintAuthority.publicKey, 1e12),
       await connection.requestAirdrop(admin.publicKey, 1e12),

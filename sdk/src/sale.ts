@@ -20,6 +20,7 @@ export const BOND_SEED = 'bondv1'
 
 export const DEFAULT_PUBLIC_KEY = new PublicKey(0)
 
+// I don't think name of this class can be missunderstood easily
 export class Sale {
   public connection: Connection
   public wallet: IWallet
@@ -296,6 +297,7 @@ export class Sale {
   async changeUpBound(changeUpBound: ChangeUpBound, signer?: Keypair) {
     const tx = await this.changeUpBoundTransaction(changeUpBound)
 
+    // this looks like it could be abstracted to a separate method like `this.signAndSend(tx, signer?: Keypair)`
     if (signer === undefined) {
       await signAndSendWallet(this.wallet, tx, this.connection)
     } else {
@@ -355,6 +357,7 @@ export class Sale {
     })
   }
 
+  // when would this be used?
   async claimBondTransaction(claimBond: ClaimBond) {
     const ix = await this.claimBondInstruction(claimBond)
 

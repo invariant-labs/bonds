@@ -91,6 +91,7 @@ describe('create-bond', () => {
     })
   })
 
+  // I think doubling every test just for the frontend syntax is a bit of an overkill
   describe('wallet', () => {
     it('#initBondSale()', async () => {
       const payerBondAccount = await tokenBond.createAccount(wallet.publicKey)

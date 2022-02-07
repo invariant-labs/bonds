@@ -70,6 +70,7 @@ describe('modify-bond-sale', () => {
       bondSalePubkey = await sale.initBondSale(initBondSaleVars, bondInitPayer)
     })
 
+    // failing case with wrong payer needed
     it('#changeVelocity()', async () => {
       const newVelocity = DENOMINATOR.divn(3)
       const changeVelocityVars: ChangeVelocity = {

@@ -17,6 +17,7 @@ pub struct ClaimBond<'info> {
         constraint = token_bond_account.key() == bond.load()?.token_bond_account
     )]
     pub token_bond_account: Account<'info, TokenAccount>,
+
     #[account(mut,
         constraint = owner_bond_account.owner == owner.key(),
         constraint = owner_bond_account.mint == token_bond_account.mint
