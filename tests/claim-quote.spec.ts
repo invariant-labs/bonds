@@ -2,7 +2,7 @@ import * as anchor from '@project-serum/anchor'
 import { Provider, BN } from '@project-serum/anchor'
 import { Token, TOKEN_PROGRAM_ID } from '@solana/spl-token'
 import { Keypair, PublicKey } from '@solana/web3.js'
-import { Sale, Network } from '@invariant-labs-bonds/sdk'
+import { Bonds, Network } from '@invariant-labs-bonds/sdk'
 import { ClaimQuote, CreateBond, InitBondSale } from '@invariant-labs-bonds/sdk/lib/sale'
 import { DENOMINATOR } from '@invariant-labs-bonds/sdk/lib/utils'
 import { assert } from 'chai'
@@ -19,14 +19,14 @@ describe('claim-quote', () => {
   const bondInitPayer = Keypair.generate()
   const bondOwner = Keypair.generate()
 
-  let sale: Sale
+  let sale: Bonds
   let tokenBond: Token
   let tokenQuote: Token
   let bondSalePubkey: PublicKey
   let payerQuoteAccount: PublicKey
 
   before(async () => {
-    sale = await Sale.build(
+    sale = await Bonds.build(
       Network.LOCAL,
       provider.wallet,
       connection,
@@ -34,11 +34,11 @@ describe('claim-quote', () => {
     )
 
     await Promise.all([
-      await connection.requestAirdrop(mintAuthority.publicKey, 1e12),
-      await connection.requestAirdrop(admin.publicKey, 1e12),
-      await connection.requestAirdrop(wallet.publicKey, 1e12),
-      await connection.requestAirdrop(bondInitPayer.publicKey, 1e12),
-      await connection.requestAirdrop(bondOwner.publicKey, 1e12)
+      connection.requestAirdrop(mintAuthority.publicKey, 1e12),
+      connection.requestAirdrop(admin.publicKey, 1e12),
+      connection.requestAirdrop(wallet.publicKey, 1e12),
+      connection.requestAirdrop(bondInitPayer.publicKey, 1e12),
+      connection.requestAirdrop(bondOwner.publicKey, 1e12)
     ])
 
     const tokens = await Promise.all([
@@ -78,7 +78,6 @@ describe('claim-quote', () => {
       const createBondVars: CreateBond = {
         amount: new BN(100),
         bondSale: bondSalePubkey,
-        byAmountIn: false,
         ownerQuoteAccount,
         owner: bondOwner.publicKey
       }
@@ -128,7 +127,6 @@ describe('claim-quote', () => {
       const createBondVars: CreateBond = {
         amount: new BN(100),
         bondSale: bondSalePubkey,
-        byAmountIn: false,
         ownerQuoteAccount
       }
 

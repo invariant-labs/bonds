@@ -1,9 +1,11 @@
+import { BN } from '@project-serum/anchor'
 import { TokenInstructions } from '@project-serum/serum'
 import { Token } from '@solana/spl-token'
 import { Connection, Keypair } from '@solana/web3.js'
 
 export enum ERROR {
-  ACCOUNT_NOT_EXISTS = 'Error: Account does not exist'
+  ACCOUNT_NOT_EXISTS = 'Error: Account does not exist',
+  CONSTRAINT_RAW = '0x7d3'
 }
 
 export const createToken = async (
@@ -44,4 +46,8 @@ export async function assertThrowsAsync(fn: Promise<any>, word?: string) {
     return
   }
   throw new Error('Function did not throw error')
+}
+
+export const almostEqual = (num1: BN, num2: BN, epsilon: BN = new BN(10)) => {
+  return num1.sub(num2).abs().lte(epsilon)
 }

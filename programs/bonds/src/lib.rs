@@ -39,8 +39,8 @@ pub mod bonds {
         )
     }
 
-    pub fn create_bond(ctx: Context<CreateBond>, amount: u64, by_amount_in: bool) -> ProgramResult {
-        instructions::create_bond::handler(ctx, amount, by_amount_in)
+    pub fn create_bond(ctx: Context<CreateBond>, amount: u64) -> ProgramResult {
+        instructions::create_bond::handler(ctx, amount)
     }
 
     pub fn end_bond_sale(ctx: Context<EndBondSale>, nonce: u8) -> ProgramResult {

@@ -2,11 +2,11 @@ import * as anchor from '@project-serum/anchor'
 import { Provider, BN } from '@project-serum/anchor'
 import { Token, TOKEN_PROGRAM_ID } from '@solana/spl-token'
 import { Keypair, PublicKey } from '@solana/web3.js'
-import { Sale, Network } from '@invariant-labs-bonds/sdk'
+import { Bonds, Network } from '@invariant-labs-bonds/sdk'
 import { ChangeUpBound, ChangeVelocity, InitBondSale } from '@invariant-labs-bonds/sdk/lib/sale'
 import { DENOMINATOR } from '@invariant-labs-bonds/sdk/lib/utils'
 import { assert } from 'chai'
-import { createToken } from './testUtils'
+import { assertThrowsAsync, createToken, ERROR } from './testUtils'
 
 describe('modify-bond-sale', () => {
   const provider = Provider.local()
@@ -19,12 +19,12 @@ describe('modify-bond-sale', () => {
   const bondInitPayer = Keypair.generate()
 
   let bondSalePubkey: PublicKey
-  let sale: Sale
+  let sale: Bonds
   let tokenBond: Token
   let tokenQuote: Token
 
   before(async () => {
-    sale = await Sale.build(
+    sale = await Bonds.build(
       Network.LOCAL,
       provider.wallet,
       connection,
@@ -32,10 +32,10 @@ describe('modify-bond-sale', () => {
     )
 
     await Promise.all([
-      await connection.requestAirdrop(mintAuthority.publicKey, 1e12),
-      await connection.requestAirdrop(admin.publicKey, 1e12),
-      await connection.requestAirdrop(wallet.publicKey, 1e12),
-      await connection.requestAirdrop(bondInitPayer.publicKey, 1e12)
+      connection.requestAirdrop(mintAuthority.publicKey, 1e12),
+      connection.requestAirdrop(admin.publicKey, 1e12),
+      connection.requestAirdrop(wallet.publicKey, 1e12),
+      connection.requestAirdrop(bondInitPayer.publicKey, 1e12)
     ])
 
     const tokens = await Promise.all([
@@ -84,6 +84,17 @@ describe('modify-bond-sale', () => {
       assert.ok(bondSale.velocity.v.eq(new BN(DENOMINATOR.divn(3))))
     })
 
+    it('#changeVelocity() wrong payer', async () => {
+      const newVelocity = DENOMINATOR.divn(3)
+      const changeVelocityVars: ChangeVelocity = {
+        bondSale: bondSalePubkey,
+        velocity: newVelocity,
+        payer: admin.publicKey
+      }
+
+      await assertThrowsAsync(sale.changeVelocity(changeVelocityVars, admin), ERROR.CONSTRAINT_RAW)
+    })
+
     it('changeUpBound()', async () => {
       const newUpBound = DENOMINATOR.divn(3)
       const changeUpBoundVars: ChangeUpBound = {
@@ -95,6 +106,17 @@ describe('modify-bond-sale', () => {
       await sale.changeUpBound(changeUpBoundVars, bondInitPayer)
       const bondSale = await sale.getBondSale(bondSalePubkey)
       assert.ok(bondSale.upBound.v.eq(new BN(DENOMINATOR.divn(3))))
+    })
+
+    it('#changeUpBound() wrong payer', async () => {
+      const newUpBound = DENOMINATOR.divn(3)
+      const changeUpBoundVars: ChangeUpBound = {
+        bondSale: bondSalePubkey,
+        upBound: newUpBound,
+        payer: admin.publicKey
+      }
+
+      await assertThrowsAsync(sale.changeUpBound(changeUpBoundVars, admin), ERROR.CONSTRAINT_RAW)
     })
   })
 

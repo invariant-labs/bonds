@@ -2,11 +2,12 @@ import * as anchor from '@project-serum/anchor'
 import { Provider, BN } from '@project-serum/anchor'
 import { Token, TOKEN_PROGRAM_ID } from '@solana/spl-token'
 import { Keypair, PublicKey } from '@solana/web3.js'
-import { Sale, Network } from '@invariant-labs-bonds/sdk'
+// I would go for @invariant-labs-bonds/sdk
+import { Bonds, Network } from '@invariant-labs-bonds/sdk'
 import { ClaimBond, CreateBond, InitBondSale } from '@invariant-labs-bonds/sdk/lib/sale'
 import { DENOMINATOR, sleep } from '@invariant-labs-bonds/sdk/lib/utils'
 import { assert } from 'chai'
-import { createToken } from './testUtils'
+import { almostEqual, createToken } from './testUtils'
 
 describe('claim-bond', () => {
   const provider = Provider.local()
@@ -19,14 +20,14 @@ describe('claim-bond', () => {
   const bondInitPayer = Keypair.generate()
   const bondOwner = Keypair.generate()
 
-  let sale: Sale
+  let sale: Bonds
   let tokenBond: Token
   let tokenQuote: Token
   let bondSalePubkey: PublicKey
   let payerQuoteAccount: PublicKey
 
   before(async () => {
-    sale = await Sale.build(
+    sale = await Bonds.build(
       Network.LOCAL,
       provider.wallet,
       connection,
@@ -34,11 +35,11 @@ describe('claim-bond', () => {
     )
 
     await Promise.all([
-      await connection.requestAirdrop(mintAuthority.publicKey, 1e12),
-      await connection.requestAirdrop(admin.publicKey, 1e12),
-      await connection.requestAirdrop(wallet.publicKey, 1e12),
-      await connection.requestAirdrop(bondInitPayer.publicKey, 1e12),
-      await connection.requestAirdrop(bondOwner.publicKey, 1e12)
+      connection.requestAirdrop(mintAuthority.publicKey, 1e12),
+      connection.requestAirdrop(admin.publicKey, 1e12),
+      connection.requestAirdrop(wallet.publicKey, 1e12),
+      connection.requestAirdrop(bondInitPayer.publicKey, 1e12),
+      connection.requestAirdrop(bondOwner.publicKey, 1e12)
     ])
 
     const tokens = await Promise.all([
@@ -79,7 +80,6 @@ describe('claim-bond', () => {
       const createBondVars: CreateBond = {
         amount: new BN(100),
         bondSale: bondSalePubkey,
-        byAmountIn: false,
         ownerQuoteAccount,
         owner: bondOwner.publicKey
       }
@@ -102,8 +102,8 @@ describe('claim-bond', () => {
       const bondSale = await sale.getBondSale(bondSalePubkey)
       const tokenBondAccount = bondSale.tokenBondAccount
       const amount = (await tokenBond.getAccountInfo(ownerBondAccount)).amount
-      assert.ok(amount.eqn(60))
-      assert.ok((await tokenBond.getAccountInfo(tokenBondAccount)).amount.eqn(940))
+      assert.ok(almostEqual(amount, new BN(60)))
+      assert.ok(almostEqual((await tokenBond.getAccountInfo(tokenBondAccount)).amount, new BN(940)))
     })
 
     it('closeBond()', async () => {
@@ -121,8 +121,15 @@ describe('claim-bond', () => {
       const bondSale = await sale.getBondSale(bondSalePubkey)
       const tokenBondAccount = bondSale.tokenBondAccount
       const amount = (await tokenBond.getAccountInfo(ownerBondAccount)).amount
-      assert.ok(amount.eqn(40))
-      assert.ok((await tokenBond.getAccountInfo(tokenBondAccount)).amount.eqn(900))
+
+      assert.ok(almostEqual(amount, new BN(40)))
+      assert.ok(
+        almostEqual(
+          (await tokenBond.getAccountInfo(tokenBondAccount)).amount,
+          new BN(900),
+          new BN(20)
+        )
+      )
       assert.isUndefined((await sale.getAllBonds(bondSalePubkey, bondOwner.publicKey)).at(0))
     })
   })
@@ -155,7 +162,6 @@ describe('claim-bond', () => {
       const createBondVars: CreateBond = {
         amount: new BN(100),
         bondSale: bondSalePubkey,
-        byAmountIn: false,
         ownerQuoteAccount
       }
 
@@ -176,8 +182,8 @@ describe('claim-bond', () => {
       const bondSale = await sale.getBondSale(bondSalePubkey)
       const tokenBondAccount = bondSale.tokenBondAccount
       const amount = (await tokenBond.getAccountInfo(ownerBondAccount)).amount
-      assert.ok(amount.eqn(60))
-      assert.ok((await tokenBond.getAccountInfo(tokenBondAccount)).amount.eqn(940))
+      assert.ok(almostEqual(amount, new BN(60)))
+      assert.ok(almostEqual((await tokenBond.getAccountInfo(tokenBondAccount)).amount, new BN(940)))
     })
 
     it('closeBond()', async () => {
@@ -194,8 +200,14 @@ describe('claim-bond', () => {
       const bondSale = await sale.getBondSale(bondSalePubkey)
       const tokenBondAccount = bondSale.tokenBondAccount
       const amount = (await tokenBond.getAccountInfo(ownerBondAccount)).amount
-      assert.ok(amount.eqn(40))
-      assert.ok((await tokenBond.getAccountInfo(tokenBondAccount)).amount.eqn(900))
+      assert.ok(almostEqual(amount, new BN(40)))
+      assert.ok(
+        almostEqual(
+          (await tokenBond.getAccountInfo(tokenBondAccount)).amount,
+          new BN(900),
+          new BN(20)
+        )
+      )
       assert.isUndefined((await sale.getAllBonds(bondSalePubkey, wallet.publicKey)).at(0))
     })
   })

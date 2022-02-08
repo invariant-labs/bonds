@@ -161,10 +161,6 @@ export type Bonds = {
         {
           "name": "amount",
           "type": "u64"
-        },
-        {
-          "name": "byAmountIn",
-          "type": "bool"
         }
       ]
     },
@@ -686,10 +682,6 @@ export const IDL: Bonds = {
         {
           "name": "amount",
           "type": "u64"
-        },
-        {
-          "name": "byAmountIn",
-          "type": "bool"
         }
       ]
     },

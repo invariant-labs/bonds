@@ -11,19 +11,19 @@ import {
 } from '@solana/web3.js'
 import { IWallet } from '.'
 
-import { Bonds, IDL } from './idl/bonds'
+import { Bonds as BondsProgram, IDL } from './idl/bonds'
 import { getProgramAddress, Network } from './network'
 
-import { signAndSend, signAndSendWallet } from './utils'
+import { signAndSend } from './utils'
 export const SEED = 'Bonds'
 export const BOND_SEED = 'bondv1'
 
 export const DEFAULT_PUBLIC_KEY = new PublicKey(0)
 
-export class Sale {
+export class Bonds {
   public connection: Connection
   public wallet: IWallet
-  public program: Program<Bonds>
+  public program: Program<BondsProgram>
   public stateAddress: PublicKey = PublicKey.default
   public programAuthority: PublicKey = PublicKey.default
 
@@ -46,8 +46,8 @@ export class Sale {
     wallet: IWallet,
     connection: Connection,
     programId?: PublicKey
-  ): Promise<Sale> {
-    const instance = new Sale(network, wallet, connection, programId)
+  ): Promise<Bonds> {
+    const instance = new Bonds(network, wallet, connection, programId)
     return instance
   }
 
@@ -159,17 +159,19 @@ export class Sale {
     )
 
     if (payer === undefined) {
-      await signAndSendWallet(this.wallet, tx, this.connection, [
+      await signAndSend(
+        tx,
+        this.connection,
+        [bondSaleAddress, bondSaleBondAccount, bondSaleQuoteAccount],
+        this.wallet
+      )
+    } else {
+      await signAndSend(tx, this.connection, [
+        payer,
         bondSaleAddress,
         bondSaleBondAccount,
         bondSaleQuoteAccount
       ])
-    } else {
-      await signAndSend(
-        tx,
-        [payer, bondSaleAddress, bondSaleBondAccount, bondSaleQuoteAccount],
-        this.connection
-      )
     }
     return bondSaleAddress.publicKey
   }
@@ -190,12 +192,12 @@ export class Sale {
   }
 
   async createBondInstruction(createBond: CreateBond, bondPub: PublicKey) {
-    const { bondSale, ownerQuoteAccount, amount, byAmountIn } = createBond
+    const { bondSale, ownerQuoteAccount, amount } = createBond
     const ownerPubkey = createBond.owner ?? this.wallet.publicKey
     const bondSaleStruct = await this.getBondSale(bondSale)
     const { programAuthority } = await this.getProgramAuthority()
 
-    return this.program.instruction.createBond(amount, byAmountIn, {
+    return this.program.instruction.createBond(amount, {
       accounts: {
         bondSale,
         bond: bondPub,
@@ -239,9 +241,9 @@ export class Sale {
     const tx = await this.createBondTransaction(createBond, bond.publicKey)
 
     if (signer === undefined) {
-      await signAndSendWallet(this.wallet, tx, this.connection, [bond])
+      await signAndSend(tx, this.connection, [bond], this.wallet)
     } else {
-      await signAndSend(tx, [signer, bond], this.connection)
+      await signAndSend(tx, this.connection, [signer, bond])
     }
 
     return bond.publicKey
@@ -269,9 +271,9 @@ export class Sale {
     const tx = await this.changeVelocityTransaction(changeVelocity)
 
     if (signer === undefined) {
-      await signAndSendWallet(this.wallet, tx, this.connection)
+      await signAndSend(tx, this.connection, undefined, this.wallet)
     } else {
-      await signAndSend(tx, [signer], this.connection)
+      await signAndSend(tx, this.connection, [signer])
     }
   }
 
@@ -297,9 +299,9 @@ export class Sale {
     const tx = await this.changeUpBoundTransaction(changeUpBound)
 
     if (signer === undefined) {
-      await signAndSendWallet(this.wallet, tx, this.connection)
+      await signAndSend(tx, this.connection, undefined, this.wallet)
     } else {
-      await signAndSend(tx, [signer], this.connection)
+      await signAndSend(tx, this.connection, [signer])
     }
   }
 
@@ -331,9 +333,9 @@ export class Sale {
     const tx = await this.claimQuoteTransaction(claimQuote)
 
     if (signer === undefined) {
-      await signAndSendWallet(this.wallet, tx, this.connection)
+      await signAndSend(tx, this.connection, undefined, this.wallet)
     } else {
-      await signAndSend(tx, [signer], this.connection)
+      await signAndSend(tx, this.connection, [signer])
     }
   }
 
@@ -355,6 +357,7 @@ export class Sale {
     })
   }
 
+  // when would this be used?
   async claimBondTransaction(claimBond: ClaimBond) {
     const ix = await this.claimBondInstruction(claimBond)
 
@@ -365,9 +368,9 @@ export class Sale {
     const tx = await this.claimBondTransaction(claimBond)
 
     if (signer === undefined) {
-      await signAndSendWallet(this.wallet, tx, this.connection)
+      await signAndSend(tx, this.connection, undefined, this.wallet)
     } else {
-      await signAndSend(tx, [signer], this.connection)
+      await signAndSend(tx, this.connection, [signer])
     }
   }
 
@@ -401,9 +404,9 @@ export class Sale {
     const tx = await this.endBondSaleTransaction(endBondSale)
 
     if (signer === undefined) {
-      await signAndSendWallet(this.wallet, tx, this.connection)
+      await signAndSend(tx, this.connection, undefined, this.wallet)
     } else {
-      await signAndSend(tx, [signer], this.connection)
+      await signAndSend(tx, this.connection, [signer])
     }
   }
 }
@@ -427,7 +430,6 @@ export interface CreateBond {
   ownerQuoteAccount: PublicKey
   amount: BN
   owner?: PublicKey
-  byAmountIn: boolean
 }
 
 export interface ChangeVelocity {
@@ -478,12 +480,16 @@ export interface BondSaleStruct {
   payer: PublicKey
   authority: PublicKey
   floorPrice: Decimal
+  previousPrice: Decimal
   upBound: Decimal
   velocity: Decimal
   bondAmount: TokenAmount
   remainingAmount: TokenAmount
   quoteAmount: TokenAmount
   endTime: BN
+  startTime: BN
+  lastTrade: BN
+  distribution: BN
 }
 
 export interface Decimal {

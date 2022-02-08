@@ -21,11 +21,18 @@ pub struct CreateBond<'info> {
     pub bond: AccountLoader<'info, Bond>,
     pub token_bond: Box<Account<'info, Mint>>,
     pub token_quote: Box<Account<'info, Mint>>,
-    #[account(mut)]
+    #[account(mut,
+        constraint = owner_quote_account.owner == owner.key(),
+        constraint = owner_quote_account.mint == token_quote.key()
+    )]
     pub owner_quote_account: Box<Account<'info, TokenAccount>>,
-    #[account(mut)]
+    #[account(mut,
+        constraint = token_bond_account.key() == bond_sale.load()?.token_bond_account
+    )]
     pub token_bond_account: Box<Account<'info, TokenAccount>>,
-    #[account(mut)]
+    #[account(mut,
+        constraint = token_quote_account.key() == bond_sale.load()?.token_quote_account
+    )]
     pub token_quote_account: Box<Account<'info, TokenAccount>>,
     #[account(mut)]
     pub owner: Signer<'info>,
@@ -49,29 +56,25 @@ impl<'info> TransferQuote<'info> for CreateBond<'info> {
     }
 }
 
-pub fn handler(ctx: Context<CreateBond>, amount: u64, by_amount_in: bool) -> ProgramResult {
+pub fn handler(ctx: Context<CreateBond>, amount: u64) -> ProgramResult {
     let bond = &mut ctx.accounts.bond.load_init()?;
     let bond_sale = &mut ctx.accounts.bond_sale.load_mut()?;
 
     let current_time = get_current_timestamp();
     let sell_price = calculate_new_price(bond_sale, current_time, TokenAmount::new(amount));
 
-    let mut buy_amount = 0;
-    let mut quote_amount = 0;
+    let buy_amount;
+    let quote_amount;
 
-    // To be implemented, waiting for a math equation
-    if by_amount_in {
-    } else {
-        require!(
-            amount <= bond_sale.remaining_amount.v,
-            InsufficientTokenAmount
-        );
-        buy_amount = amount;
-        quote_amount = TokenAmount::new(amount)
-            .big_mul(sell_price)
-            .to_token_ceil()
-            .v;
-    }
+    require!(
+        amount <= bond_sale.remaining_amount.v,
+        InsufficientTokenAmount
+    );
+    buy_amount = amount;
+    quote_amount = TokenAmount::new(amount)
+        .big_mul(sell_price)
+        .to_token_ceil()
+        .v;
 
     **bond = Bond {
         token_bond: ctx.accounts.token_bond.key(),

@@ -26,11 +26,13 @@ pub struct InitBondSale<'info> {
     )]
     pub token_quote_account: Box<Account<'info, TokenAccount>>,
     #[account(mut,
-        constraint = payer_bond_account.mint == token_bond.key()
+        constraint = payer_bond_account.mint == token_bond.key(),
+        constraint = payer_bond_account.owner == payer.key()
     )]
     pub payer_bond_account: Box<Account<'info, TokenAccount>>,
     #[account(
-        constraint = payer_quote_account.mint == token_quote.key()
+        constraint = payer_quote_account.mint == token_quote.key(),
+        constraint = payer_quote_account.owner == payer.key()
     )]
     pub payer_quote_account: Box<Account<'info, TokenAccount>>,
     #[account(mut)]
