@@ -102,7 +102,6 @@ describe('claim-bond', () => {
       const bondSale = await sale.getBondSale(bondSalePubkey)
       const tokenBondAccount = bondSale.tokenBondAccount
       const amount = (await tokenBond.getAccountInfo(ownerBondAccount)).amount
-      console.log(amount.toString())
       assert.ok(almostEqual(amount, new BN(60)))
       assert.ok(almostEqual((await tokenBond.getAccountInfo(tokenBondAccount)).amount, new BN(940)))
     })

@@ -6,11 +6,11 @@ import { Bonds, Network } from '@invariant-labs-bonds/sdk'
 import { CreateBond, InitBondSale } from '@invariant-labs-bonds/sdk/lib/sale'
 import { DENOMINATOR, sleep } from '@invariant-labs-bonds/sdk/lib/utils'
 import { assert } from 'chai'
-import { createToken } from './testUtils'
+import { almostEqual, createToken } from './testUtils'
 
 // case with multiple bonds on a single bond sale needed
 
-describe('create-bond', () => {
+describe('multiple-bonds', () => {
   const provider = Provider.local()
   const connection = provider.connection
 
@@ -98,15 +98,18 @@ describe('create-bond', () => {
         ownerQuoteAccount,
         owner: bondOwner.publicKey
       }
-      const bondSale2 = await sale.getBondSale(bondSalePubkey)
-      console.log(bondSale2.previousPrice.v.toString())
+
       const bondPub2 = await sale.createBond(createBondVars2, bondOwner)
-      console.time()
       const bond2 = await sale.getBond(bondPub2)
       assert.ok(bond2.buyAmount.v.eqn(50))
       assert.ok(bond2.owner.toString() === bondOwner.publicKey.toString())
-      console.log((await tokenQuote.getAccountInfo(ownerQuoteAccount)).amount.toString())
-      assert.ok((await tokenQuote.getAccountInfo(ownerQuoteAccount)).amount.eqn(844))
+      assert.ok(
+        almostEqual(
+          (await tokenQuote.getAccountInfo(ownerQuoteAccount)).amount,
+          new BN(844),
+          new BN(1)
+        )
+      )
 
       await sleep(3000)
 
@@ -116,12 +119,17 @@ describe('create-bond', () => {
         ownerQuoteAccount,
         owner: bondOwner.publicKey
       }
-      const bondSale3 = await sale.getBondSale(bondSalePubkey)
-      console.log(bondSale3.previousPrice.v.toString())
-      console.timeEnd()
       const bondPub3 = await sale.createBond(createBondVars3, bondOwner)
       const bond3 = await sale.getBond(bondPub3)
-      console.log((await tokenQuote.getAccountInfo(ownerQuoteAccount)).amount.toString())
+      assert.ok(bond3.buyAmount.v.eqn(111))
+      assert.ok(bond3.owner.toString() === bondOwner.publicKey.toString())
+      assert.ok(
+        almostEqual(
+          (await tokenQuote.getAccountInfo(ownerQuoteAccount)).amount,
+          new BN(722),
+          new BN(2)
+        )
+      )
     })
   })
 })
