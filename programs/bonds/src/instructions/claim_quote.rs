@@ -7,15 +7,17 @@ use crate::{get_signer, interfaces::TransferQuote, structs::BondSale};
 
 #[derive(Accounts)]
 pub struct ClaimQuote<'info> {
-    #[account(mut)]
+    #[account(mut,
+        constraint = bond_sale.load()?.payer == payer.key()
+    )]
     pub bond_sale: AccountLoader<'info, BondSale>,
     #[account(mut,
         constraint = bond_sale_quote_account.mint == bond_sale.load()?.token_quote
     )]
     pub bond_sale_quote_account: Account<'info, TokenAccount>,
-    // no validation of owner
     #[account(mut,
-        constraint = payer_quote_account.mint == bond_sale.load()?.token_quote
+        constraint = payer_quote_account.mint == bond_sale.load()?.token_quote,
+        constraint = payer_quote_account.owner == payer.key()
     )]
     pub payer_quote_account: Account<'info, TokenAccount>,
     pub payer: Signer<'info>,

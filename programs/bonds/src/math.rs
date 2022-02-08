@@ -1,3 +1,4 @@
+use anchor_lang::prelude::*;
 use std::convert::TryInto;
 
 use crate::structs::{BondSale, Decimal, TokenAmount};
@@ -8,6 +9,7 @@ pub fn calculate_new_price(
     buy_amount: TokenAmount,
 ) -> Decimal {
     let delta_time = current_time - bond_sale.last_trade;
+    msg!("delta_time: {}", delta_time);
     let sale_time = bond_sale.end_time - bond_sale.start_time;
     let time_ratio = Decimal::from_integer(delta_time.try_into().unwrap())
         / Decimal::from_integer(sale_time.try_into().unwrap());
@@ -23,6 +25,7 @@ pub fn calculate_new_price(
 
     bond_sale.previous_price = price + jump;
     bond_sale.remaining_amount = bond_sale.remaining_amount - buy_amount;
+    bond_sale.last_trade = current_time;
 
     price + Decimal::from_decimal(50, 2) * jump
 }

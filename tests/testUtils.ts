@@ -1,3 +1,4 @@
+import { BN } from '@project-serum/anchor'
 import { TokenInstructions } from '@project-serum/serum'
 import { Token } from '@solana/spl-token'
 import { Connection, Keypair } from '@solana/web3.js'
@@ -44,4 +45,8 @@ export async function assertThrowsAsync(fn: Promise<any>, word?: string) {
     return
   }
   throw new Error('Function did not throw error')
+}
+
+export const almostEqual = (num1: BN, num2: BN, epsilon: BN = new BN(10)) => {
+  return num1.sub(num2).abs().lte(epsilon)
 }

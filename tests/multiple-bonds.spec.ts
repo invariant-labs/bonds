@@ -4,7 +4,7 @@ import { Token, TOKEN_PROGRAM_ID } from '@solana/spl-token'
 import { Keypair, PublicKey } from '@solana/web3.js'
 import { Bonds, Network } from '@invariant-labs-bonds/sdk'
 import { CreateBond, InitBondSale } from '@invariant-labs-bonds/sdk/lib/sale'
-import { DENOMINATOR } from '@invariant-labs-bonds/sdk/lib/utils'
+import { DENOMINATOR, sleep } from '@invariant-labs-bonds/sdk/lib/utils'
 import { assert } from 'chai'
 import { createToken } from './testUtils'
 
@@ -50,6 +50,7 @@ describe('create-bond', () => {
     tokenBond = new Token(connection, tokens[0].publicKey, TOKEN_PROGRAM_ID, wallet)
     tokenQuote = new Token(connection, tokens[1].publicKey, TOKEN_PROGRAM_ID, wallet)
   })
+
   describe('user', () => {
     it('#initBondSale()', async () => {
       const payerBondAccount = await tokenBond.createAccount(bondInitPayer.publicKey)
@@ -69,11 +70,10 @@ describe('create-bond', () => {
         payer: bondInitPayer.publicKey,
         distribution: new BN(10)
       }
-
       bondSalePubkey = await sale.initBondSale(initBondSaleVars, bondInitPayer)
     })
 
-    it('#createBond()', async () => {
+    it('#createBonds()', async () => {
       const ownerQuoteAccount = await tokenQuote.createAccount(bondOwner.publicKey)
       await tokenQuote.mintTo(ownerQuoteAccount, mintAuthority, [mintAuthority], 1000)
 
@@ -86,50 +86,42 @@ describe('create-bond', () => {
 
       const bondPub = await sale.createBond(createBondVars, bondOwner)
       const bond = await sale.getBond(bondPub)
-
       assert.ok(bond.buyAmount.v.eqn(100))
       assert.ok(bond.owner.toString() === bondOwner.publicKey.toString())
-    })
-  })
+      assert.ok((await tokenQuote.getAccountInfo(ownerQuoteAccount)).amount.eqn(897))
 
-  // I think doubling every test just for the frontend syntax is a bit of an overkill
-  describe('wallet', () => {
-    it('#initBondSale()', async () => {
-      const payerBondAccount = await tokenBond.createAccount(wallet.publicKey)
-      const payerQuoteAccount = await tokenQuote.createAccount(wallet.publicKey)
-      await tokenBond.mintTo(payerBondAccount, mintAuthority, [mintAuthority], 1000)
+      await sleep(500)
 
-      const initBondSaleVars: InitBondSale = {
-        buyAmount: new BN(1000),
-        duration: new BN(100),
-        floorPrice: DENOMINATOR,
-        payerBondAccount,
-        payerQuoteAccount,
-        tokenBond,
-        tokenQuote,
-        upBound: DENOMINATOR.divn(2),
-        velocity: DENOMINATOR.divn(2),
-        distribution: new BN(10)
-      }
-
-      bondSalePubkey = await sale.initBondSale(initBondSaleVars)
-    })
-
-    it('#createBond()', async () => {
-      const ownerQuoteAccount = await tokenQuote.createAccount(wallet.publicKey)
-      await tokenQuote.mintTo(ownerQuoteAccount, mintAuthority, [mintAuthority], 1000)
-
-      const createBondVars: CreateBond = {
-        amount: new BN(100),
+      const createBondVars2: CreateBond = {
+        amount: new BN(50),
         bondSale: bondSalePubkey,
-        ownerQuoteAccount
+        ownerQuoteAccount,
+        owner: bondOwner.publicKey
       }
+      const bondSale2 = await sale.getBondSale(bondSalePubkey)
+      console.log(bondSale2.previousPrice.v.toString())
+      const bondPub2 = await sale.createBond(createBondVars2, bondOwner)
+      console.time()
+      const bond2 = await sale.getBond(bondPub2)
+      assert.ok(bond2.buyAmount.v.eqn(50))
+      assert.ok(bond2.owner.toString() === bondOwner.publicKey.toString())
+      console.log((await tokenQuote.getAccountInfo(ownerQuoteAccount)).amount.toString())
+      assert.ok((await tokenQuote.getAccountInfo(ownerQuoteAccount)).amount.eqn(844))
 
-      const bondPub = await sale.createBond(createBondVars)
-      const bond = await sale.getBond(bondPub)
+      await sleep(3000)
 
-      assert.ok(bond.buyAmount.v.eqn(100))
-      assert.ok(bond.owner.toString() === wallet.publicKey.toString())
+      const createBondVars3: CreateBond = {
+        amount: new BN(111),
+        bondSale: bondSalePubkey,
+        ownerQuoteAccount,
+        owner: bondOwner.publicKey
+      }
+      const bondSale3 = await sale.getBondSale(bondSalePubkey)
+      console.log(bondSale3.previousPrice.v.toString())
+      console.timeEnd()
+      const bondPub3 = await sale.createBond(createBondVars3, bondOwner)
+      const bond3 = await sale.getBond(bondPub3)
+      console.log((await tokenQuote.getAccountInfo(ownerQuoteAccount)).amount.toString())
     })
   })
 })
