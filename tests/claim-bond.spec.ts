@@ -7,7 +7,7 @@ import { ClaimBond, CreateBond, InitBondSale } from '@invariant-labs/bonds-sdk/l
 import { DENOMINATOR, sleep } from '@invariant-labs/bonds-sdk/lib/utils'
 import { assert } from 'chai'
 import { almostEqual, createToken } from './testUtils'
-import { Bonds } from '@invariant-labs/bonds-sdk/lib/sale'
+import { Bonds } from '@invariant-labs/bonds-sdk/src'
 
 describe('claim-bond', () => {
   const provider = Provider.local()

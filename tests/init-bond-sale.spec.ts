@@ -7,7 +7,7 @@ import { InitBondSale } from '@invariant-labs/bonds-sdk/lib/sale'
 import { DENOMINATOR } from '@invariant-labs/bonds-sdk/lib/utils'
 import { assert } from 'chai'
 import { createToken } from './testUtils'
-import { Bonds } from '@invariant-labs/bonds-sdk/lib/sale'
+import { Bonds } from '@invariant-labs/bonds-sdk/src'
 
 describe('init-bond-sale', () => {
   const provider = Provider.local()

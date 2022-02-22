@@ -7,7 +7,7 @@ import { ChangeUpBound, ChangeVelocity, InitBondSale } from '@invariant-labs/bon
 import { DENOMINATOR } from '@invariant-labs/bonds-sdk/lib/utils'
 import { assert } from 'chai'
 import { assertThrowsAsync, createToken, ERROR } from './testUtils'
-import { Bonds } from '@invariant-labs/bonds-sdk/lib/sale'
+import { Bonds } from '@invariant-labs/bonds-sdk/src'
 
 describe('modify-bond-sale', () => {
   const provider = Provider.local()

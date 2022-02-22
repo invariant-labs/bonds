@@ -7,7 +7,7 @@ import { assert } from 'chai'
 import { assertThrowsAsync, createToken, ERROR } from './testUtils'
 import { DENOMINATOR } from '@invariant-labs/bonds-sdk/lib/utils'
 import { CreateBond, EndBondSale, InitBondSale } from '@invariant-labs/bonds-sdk/src/sale'
-import { Bonds } from '@invariant-labs/bonds-sdk/lib/sale'
+import { Bonds } from '@invariant-labs/bonds-sdk/src'
 
 describe('end-bond-sale', () => {
   const provider = Provider.local()

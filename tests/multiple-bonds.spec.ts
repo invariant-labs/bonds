@@ -7,9 +7,7 @@ import { CreateBond, InitBondSale } from '@invariant-labs/bonds-sdk/lib/sale'
 import { DENOMINATOR, sleep } from '@invariant-labs/bonds-sdk/lib/utils'
 import { assert } from 'chai'
 import { almostEqual, createToken } from './testUtils'
-import { Bonds } from '@invariant-labs/bonds-sdk/lib/sale'
-
-// case with multiple bonds on a single bond sale needed
+import { Bonds } from '@invariant-labs/bonds-sdk/src'
 
 describe('multiple-bonds', () => {
   const provider = Provider.local()

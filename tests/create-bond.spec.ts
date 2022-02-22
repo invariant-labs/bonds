@@ -7,9 +7,7 @@ import { CreateBond, InitBondSale } from '@invariant-labs/bonds-sdk/lib/sale'
 import { DENOMINATOR } from '@invariant-labs/bonds-sdk/lib/utils'
 import { assert } from 'chai'
 import { createToken } from './testUtils'
-import { Bonds } from '@invariant-labs/bonds-sdk/lib/sale'
-
-// case with multiple bonds on a single bond sale needed
+import { Bonds } from '@invariant-labs/bonds-sdk/src'
 
 describe('create-bond', () => {
   const provider = Provider.local()
@@ -93,7 +91,6 @@ describe('create-bond', () => {
     })
   })
 
-  // I think doubling every test just for the frontend syntax is a bit of an overkill
   describe('wallet', () => {
     it('#initBondSale()', async () => {
       const payerBondAccount = await tokenBond.createAccount(wallet.publicKey)
