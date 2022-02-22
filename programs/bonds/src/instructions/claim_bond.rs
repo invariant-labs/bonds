@@ -62,8 +62,9 @@ pub fn handler(ctx: Context<ClaimBond>, nonce: u8) -> ProgramResult {
         )?;
     }
 
-    let bond = *ctx.accounts.bond.load()?;
+    let mut bond = *ctx.accounts.bond.load_mut()?;
     if bond.last_claim > bond.distribution_end {
+        bond = Default::default();
         close(
             ctx.accounts.bond.to_account_info(),
             ctx.accounts.owner.to_account_info(),
