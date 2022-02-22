@@ -86,7 +86,7 @@ impl<'info> CloseTokenAccount<'info> for EndBondSale<'info> {
 pub fn handler(ctx: Context<EndBondSale>, nonce: u8) -> ProgramResult {
     let signer: &[&[&[u8]]] = get_signer!(nonce);
     {
-        let bond_sale = *ctx.accounts.bond_sale.load_mut()?;
+        let bond_sale = *ctx.accounts.bond_sale.load()?;
         if bond_sale.quote_amount.v != 0 {
             transfer(
                 ctx.accounts.transfer_quote().with_signer(signer),
@@ -108,6 +108,10 @@ pub fn handler(ctx: Context<EndBondSale>, nonce: u8) -> ProgramResult {
         .to_account_info()
         .try_borrow_mut_lamports()?;
 
+    {
+        let mut bond_sale = ctx.accounts.bond_sale.load_mut()?;
+        *bond_sale = Default::default();
+    } 
     close(
         ctx.accounts.bond_sale.to_account_info(),
         ctx.accounts.payer.to_account_info(),
@@ -147,6 +151,7 @@ pub fn handler(ctx: Context<EndBondSale>, nonce: u8) -> ProgramResult {
         .try_borrow_mut_lamports()? = initial_lamports;
 
     if ctx.accounts.token_bond_account.amount == 0 {
+        
         close(
             ctx.accounts.token_bond_account.to_account_info(),
             ctx.accounts.authority.to_account_info(),
