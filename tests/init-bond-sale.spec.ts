@@ -2,11 +2,12 @@ import * as anchor from '@project-serum/anchor'
 import { Provider, BN } from '@project-serum/anchor'
 import { Token, TOKEN_PROGRAM_ID } from '@solana/spl-token'
 import { Keypair } from '@solana/web3.js'
-import { Bonds, Network } from '@invariant-labs-bonds/sdk'
-import { InitBondSale } from '@invariant-labs-bonds/sdk/lib/sale'
-import { DENOMINATOR } from '@invariant-labs-bonds/sdk/lib/utils'
+import { Network } from '@invariant-labs/bonds-sdk'
+import { InitBondSale } from '@invariant-labs/bonds-sdk/lib/sale'
+import { DENOMINATOR } from '@invariant-labs/bonds-sdk/lib/utils'
 import { assert } from 'chai'
 import { createToken } from './testUtils'
+import { Bonds } from '@invariant-labs/bonds-sdk/lib/sale'
 
 describe('init-bond-sale', () => {
   const provider = Provider.local()

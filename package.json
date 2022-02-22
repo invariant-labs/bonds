@@ -18,7 +18,7 @@
     "ts-mocha": "^9.0.0"
   },
   "devDependencies": {
-    "@invariant-labs-bonds/sdk": "file:sdk",
+    "@invariant-labs/bonds-sdk": "file:sdk",
     "@types/chai": "^4.2.21",
     "@types/mocha": "^9.0.0",
     "chai": "^4.3.4",

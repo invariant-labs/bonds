@@ -2,12 +2,12 @@ import * as anchor from '@project-serum/anchor'
 import { Provider, BN } from '@project-serum/anchor'
 import { Token, TOKEN_PROGRAM_ID } from '@solana/spl-token'
 import { Keypair, PublicKey } from '@solana/web3.js'
-// I would go for @invariant-labs-bonds/sdk
-import { Bonds, Network } from '@invariant-labs-bonds/sdk'
-import { ClaimBond, CreateBond, InitBondSale } from '@invariant-labs-bonds/sdk/lib/sale'
-import { DENOMINATOR, sleep } from '@invariant-labs-bonds/sdk/lib/utils'
+import { Network } from '@invariant-labs/bonds-sdk'
+import { ClaimBond, CreateBond, InitBondSale } from '@invariant-labs/bonds-sdk/lib/sale'
+import { DENOMINATOR, sleep } from '@invariant-labs/bonds-sdk/lib/utils'
 import { assert } from 'chai'
 import { almostEqual, createToken } from './testUtils'
+import { Bonds } from '@invariant-labs/bonds-sdk/lib/sale'
 
 describe('claim-bond', () => {
   const provider = Provider.local()
