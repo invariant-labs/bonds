@@ -9,7 +9,6 @@ pub fn calculate_new_price(
     buy_amount: TokenAmount,
 ) -> Decimal {
     let delta_time = current_time - bond_sale.last_trade;
-    msg!("delta_time: {}", delta_time);
     let sale_time = bond_sale.end_time - bond_sale.start_time;
     let time_ratio = Decimal::from_integer(delta_time.try_into().unwrap())
         / Decimal::from_integer(sale_time.try_into().unwrap());

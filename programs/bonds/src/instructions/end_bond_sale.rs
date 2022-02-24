@@ -111,7 +111,7 @@ pub fn handler(ctx: Context<EndBondSale>, nonce: u8) -> ProgramResult {
     {
         let mut bond_sale = ctx.accounts.bond_sale.load_mut()?;
         *bond_sale = Default::default();
-    } 
+    }
     close(
         ctx.accounts.bond_sale.to_account_info(),
         ctx.accounts.payer.to_account_info(),
@@ -151,7 +151,6 @@ pub fn handler(ctx: Context<EndBondSale>, nonce: u8) -> ProgramResult {
         .try_borrow_mut_lamports()? = initial_lamports;
 
     if ctx.accounts.token_bond_account.amount == 0 {
-        
         close(
             ctx.accounts.token_bond_account.to_account_info(),
             ctx.accounts.authority.to_account_info(),

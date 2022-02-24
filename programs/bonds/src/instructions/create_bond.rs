@@ -4,6 +4,7 @@ use anchor_spl::token::{Mint, TokenAccount, Transfer};
 use bond_sale::BondSale;
 
 use crate::math::calculate_new_price;
+use crate::structs::Decimal;
 use crate::utils::get_current_timestamp;
 use crate::{
     interfaces::TransferQuote,
@@ -56,12 +57,14 @@ impl<'info> TransferQuote<'info> for CreateBond<'info> {
     }
 }
 
-pub fn handler(ctx: Context<CreateBond>, amount: u64) -> ProgramResult {
+pub fn handler(ctx: Context<CreateBond>, amount: u64, price_limit: u128) -> ProgramResult {
     let bond = &mut ctx.accounts.bond.load_init()?;
     let bond_sale = &mut ctx.accounts.bond_sale.load_mut()?;
 
     let current_time = get_current_timestamp();
     let sell_price = calculate_new_price(bond_sale, current_time, TokenAmount::new(amount));
+
+    require!(sell_price.v.le(&price_limit), PriceLimitExceeded);
 
     let buy_amount;
     let quote_amount;

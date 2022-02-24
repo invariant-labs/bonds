@@ -3,11 +3,6 @@ import { TokenInstructions } from '@project-serum/serum'
 import { Token } from '@solana/spl-token'
 import { Connection, Keypair } from '@solana/web3.js'
 
-export enum ERROR {
-  ACCOUNT_NOT_EXISTS = 'Error: Account does not exist',
-  CONSTRAINT_RAW = '0x7d3'
-}
-
 export const createToken = async (
   connection: Connection,
   payer: Keypair,

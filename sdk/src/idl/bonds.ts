@@ -161,6 +161,10 @@ export type Bonds = {
         {
           "name": "amount",
           "type": "u64"
+        },
+        {
+          "name": "priceLimit",
+          "type": "u128"
         }
       ]
     },
@@ -515,6 +519,11 @@ export type Bonds = {
       "code": 6002,
       "name": "DistributionEnded",
       "msg": "Distribution ended"
+    },
+    {
+      "code": 6003,
+      "name": "PriceLimitExceeded",
+      "msg": "Actual price exceeded price limit"
     }
   ]
 };
@@ -682,6 +691,10 @@ export const IDL: Bonds = {
         {
           "name": "amount",
           "type": "u64"
+        },
+        {
+          "name": "priceLimit",
+          "type": "u128"
         }
       ]
     },
@@ -1036,6 +1049,11 @@ export const IDL: Bonds = {
       "code": 6002,
       "name": "DistributionEnded",
       "msg": "Distribution ended"
+    },
+    {
+      "code": 6003,
+      "name": "PriceLimitExceeded",
+      "msg": "Actual price exceeded price limit"
     }
   ]
 };
