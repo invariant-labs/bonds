@@ -17,12 +17,6 @@ const provider = Provider.local('https://api.devnet.solana.com', {
 const connection = provider.connection
 
 const buy = async (bonds: Bonds, buyer: Keypair, bondSalePub: PublicKey) => {
-  const invariantToken = new Token(
-    connection,
-    new PublicKey(MOCK_TOKENS.INVT),
-    TOKEN_PROGRAM_ID,
-    MINTER
-  )
   const usdcToken = new Token(connection, new PublicKey(MOCK_TOKENS.USDC), TOKEN_PROGRAM_ID, MINTER)
 
   const buyerQuoteAccount = await usdcToken.createAccount(buyer.publicKey)
