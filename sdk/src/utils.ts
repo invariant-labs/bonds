@@ -7,6 +7,13 @@ import {
   sendAndConfirmRawTransaction
 } from '@solana/web3.js'
 import { IWallet } from '.'
+import { Decimal } from './sale'
+
+export enum ERROR {
+  ACCOUNT_NOT_EXISTS = 'Error: Account does not exist',
+  CONSTRAINT_RAW = '0x7d3',
+  PRICE_LIMIT_EXCEEDED = '0x1773'
+}
 
 export const DECIMAL = 12
 export const DENOMINATOR = new BN(10).pow(new BN(DECIMAL))
@@ -42,4 +49,12 @@ export const signAndSend = async (
 
 export const sleep = async (ms: number) => {
   return await new Promise(resolve => setTimeout(resolve, ms))
+}
+
+export const toDecimal = (x: number, decimals: number = 0): Decimal => {
+  return { v: DENOMINATOR.muln(x).div(new BN(10).pow(new BN(decimals))) }
+}
+
+export const toScale = (num: BN, scale: number) => {
+  return num.mul(new BN(10).pow(new BN(scale)))
 }

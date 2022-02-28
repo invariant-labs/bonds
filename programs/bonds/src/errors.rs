@@ -8,4 +8,6 @@ pub enum ErrorCode {
     InsufficientTokenAmount = 1, // 1771
     #[msg("Distribution ended")]
     DistributionEnded = 2, // 1772
+    #[msg("Actual price exceeded price limit")]
+    PriceLimitExceeded = 3, // 1773
 }

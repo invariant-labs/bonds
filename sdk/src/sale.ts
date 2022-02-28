@@ -192,12 +192,12 @@ export class Bonds {
   }
 
   async createBondInstruction(createBond: CreateBond, bondPub: PublicKey) {
-    const { bondSale, ownerQuoteAccount, amount } = createBond
+    const { bondSale, ownerQuoteAccount, amount, priceLimit } = createBond
     const ownerPubkey = createBond.owner ?? this.wallet.publicKey
     const bondSaleStruct = await this.getBondSale(bondSale)
     const { programAuthority } = await this.getProgramAuthority()
 
-    return this.program.instruction.createBond(amount, {
+    return this.program.instruction.createBond(amount, priceLimit, {
       accounts: {
         bondSale,
         bond: bondPub,
@@ -428,6 +428,7 @@ export interface InitBondSale {
 export interface CreateBond {
   bondSale: PublicKey
   ownerQuoteAccount: PublicKey
+  priceLimit: BN
   amount: BN
   owner?: PublicKey
 }

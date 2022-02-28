@@ -4,9 +4,9 @@ import { Token, TOKEN_PROGRAM_ID } from '@solana/spl-token'
 import { Keypair, PublicKey } from '@solana/web3.js'
 import { Network } from '@invariant-labs/bonds-sdk'
 import { ChangeUpBound, ChangeVelocity, InitBondSale } from '@invariant-labs/bonds-sdk/lib/sale'
-import { DENOMINATOR } from '@invariant-labs/bonds-sdk/lib/utils'
+import { DENOMINATOR, ERROR } from '@invariant-labs/bonds-sdk/lib/utils'
 import { assert } from 'chai'
-import { assertThrowsAsync, createToken, ERROR } from './testUtils'
+import { assertThrowsAsync, createToken } from './testUtils'
 import { Bonds } from '@invariant-labs/bonds-sdk/src'
 
 describe('modify-bond-sale', () => {

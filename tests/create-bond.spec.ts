@@ -4,10 +4,11 @@ import { Token, TOKEN_PROGRAM_ID } from '@solana/spl-token'
 import { Keypair, PublicKey } from '@solana/web3.js'
 import { Network } from '@invariant-labs/bonds-sdk'
 import { CreateBond, InitBondSale } from '@invariant-labs/bonds-sdk/lib/sale'
-import { DENOMINATOR } from '@invariant-labs/bonds-sdk/lib/utils'
+import { DENOMINATOR, toDecimal } from '@invariant-labs/bonds-sdk/lib/utils'
 import { assert } from 'chai'
 import { createToken } from './testUtils'
 import { Bonds } from '@invariant-labs/bonds-sdk/src'
+import { calculatePriceAfterSlippage } from '@invariant-labs/bonds-sdk/lib/math'
 
 describe('create-bond', () => {
   const provider = Provider.local()
@@ -20,13 +21,13 @@ describe('create-bond', () => {
   const bondInitPayer = Keypair.generate()
   const bondOwner = Keypair.generate()
 
-  let sale: Bonds
+  let bonds: Bonds
   let tokenBond: Token
   let tokenQuote: Token
   let bondSalePubkey: PublicKey
 
   before(async () => {
-    sale = await Bonds.build(
+    bonds = await Bonds.build(
       Network.LOCAL,
       provider.wallet,
       connection,
@@ -69,22 +70,24 @@ describe('create-bond', () => {
         distribution: new BN(10)
       }
 
-      bondSalePubkey = await sale.initBondSale(initBondSaleVars, bondInitPayer)
+      bondSalePubkey = await bonds.initBondSale(initBondSaleVars, bondInitPayer)
     })
 
     it('#createBond()', async () => {
       const ownerQuoteAccount = await tokenQuote.createAccount(bondOwner.publicKey)
       await tokenQuote.mintTo(ownerQuoteAccount, mintAuthority, [mintAuthority], 1000)
+      const bondSale = await bonds.getBondSale(bondSalePubkey)
 
       const createBondVars: CreateBond = {
         amount: new BN(100),
+        priceLimit: calculatePriceAfterSlippage(bondSale.previousPrice, toDecimal(1, 1)).v,
         bondSale: bondSalePubkey,
         ownerQuoteAccount,
         owner: bondOwner.publicKey
       }
 
-      const bondPub = await sale.createBond(createBondVars, bondOwner)
-      const bond = await sale.getBond(bondPub)
+      const bondPub = await bonds.createBond(createBondVars, bondOwner)
+      const bond = await bonds.getBond(bondPub)
 
       assert.ok(bond.buyAmount.v.eqn(100))
       assert.ok(bond.owner.toString() === bondOwner.publicKey.toString())
@@ -110,21 +113,23 @@ describe('create-bond', () => {
         distribution: new BN(10)
       }
 
-      bondSalePubkey = await sale.initBondSale(initBondSaleVars)
+      bondSalePubkey = await bonds.initBondSale(initBondSaleVars)
     })
 
     it('#createBond()', async () => {
       const ownerQuoteAccount = await tokenQuote.createAccount(wallet.publicKey)
       await tokenQuote.mintTo(ownerQuoteAccount, mintAuthority, [mintAuthority], 1000)
+      const bondSale = await bonds.getBondSale(bondSalePubkey)
 
       const createBondVars: CreateBond = {
         amount: new BN(100),
+        priceLimit: calculatePriceAfterSlippage(bondSale.previousPrice, toDecimal(1, 1)).v,
         bondSale: bondSalePubkey,
         ownerQuoteAccount
       }
 
-      const bondPub = await sale.createBond(createBondVars)
-      const bond = await sale.getBond(bondPub)
+      const bondPub = await bonds.createBond(createBondVars)
+      const bond = await bonds.getBond(bondPub)
 
       assert.ok(bond.buyAmount.v.eqn(100))
       assert.ok(bond.owner.toString() === wallet.publicKey.toString())
