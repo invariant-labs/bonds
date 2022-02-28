@@ -4,10 +4,11 @@ import { Token, TOKEN_PROGRAM_ID } from '@solana/spl-token'
 import { Keypair, PublicKey } from '@solana/web3.js'
 import { Network } from '@invariant-labs/bonds-sdk'
 import { ClaimQuote, CreateBond, InitBondSale } from '@invariant-labs/bonds-sdk/lib/sale'
-import { DENOMINATOR } from '@invariant-labs/bonds-sdk/lib/utils'
+import { DENOMINATOR, toDecimal } from '@invariant-labs/bonds-sdk/lib/utils'
 import { assert } from 'chai'
 import { createToken } from './testUtils'
 import { Bonds } from '@invariant-labs/bonds-sdk/src'
+import { calculatePriceAfterSlippage } from '@invariant-labs/bonds-sdk/lib/math'
 
 describe('claim-quote', () => {
   const provider = Provider.local()
@@ -20,14 +21,14 @@ describe('claim-quote', () => {
   const bondInitPayer = Keypair.generate()
   const bondOwner = Keypair.generate()
 
-  let sale: Bonds
+  let bonds: Bonds
   let tokenBond: Token
   let tokenQuote: Token
   let bondSalePubkey: PublicKey
   let payerQuoteAccount: PublicKey
 
   before(async () => {
-    sale = await Bonds.build(
+    bonds = await Bonds.build(
       Network.LOCAL,
       provider.wallet,
       connection,
@@ -70,20 +71,23 @@ describe('claim-quote', () => {
         distribution: new BN(20)
       }
 
-      bondSalePubkey = await sale.initBondSale(initBondSaleVars, bondInitPayer)
+      bondSalePubkey = await bonds.initBondSale(initBondSaleVars, bondInitPayer)
     })
 
     it('#createBond()', async () => {
       const ownerQuoteAccount = await tokenQuote.createAccount(bondOwner.publicKey)
       await tokenQuote.mintTo(ownerQuoteAccount, mintAuthority, [mintAuthority], 1000)
+      const bondSale = await bonds.getBondSale(bondSalePubkey)
+
       const createBondVars: CreateBond = {
         amount: new BN(100),
+        priceLimit: calculatePriceAfterSlippage(bondSale.previousPrice, toDecimal(1, 1)).v,
         bondSale: bondSalePubkey,
         ownerQuoteAccount,
         owner: bondOwner.publicKey
       }
 
-      await sale.createBond(createBondVars, bondOwner)
+      await bonds.createBond(createBondVars, bondOwner)
     })
 
     it('#claimQuote()', async () => {
@@ -92,9 +96,9 @@ describe('claim-quote', () => {
         payerQuoteAccount,
         payer: bondInitPayer.publicKey
       }
-      await sale.claimQuote(claimQuoteVars, bondInitPayer)
+      await bonds.claimQuote(claimQuoteVars, bondInitPayer)
 
-      const bondSale = await sale.getBondSale(bondSalePubkey)
+      const bondSale = await bonds.getBondSale(bondSalePubkey)
       assert.ok(bondSale.quoteAmount.v.eqn(0))
       assert.ok((await tokenQuote.getAccountInfo(payerQuoteAccount)).amount.eqn(103))
     })
@@ -119,19 +123,22 @@ describe('claim-quote', () => {
         distribution: new BN(20)
       }
 
-      bondSalePubkey = await sale.initBondSale(initBondSaleVars)
+      bondSalePubkey = await bonds.initBondSale(initBondSaleVars)
     })
 
     it('#createBond()', async () => {
       const ownerQuoteAccount = await tokenQuote.createAccount(wallet.publicKey)
       await tokenQuote.mintTo(ownerQuoteAccount, mintAuthority, [mintAuthority], 1000)
+      const bondSale = await bonds.getBondSale(bondSalePubkey)
+
       const createBondVars: CreateBond = {
         amount: new BN(100),
+        priceLimit: calculatePriceAfterSlippage(bondSale.previousPrice, toDecimal(1, 1)).v,
         bondSale: bondSalePubkey,
         ownerQuoteAccount
       }
 
-      await sale.createBond(createBondVars)
+      await bonds.createBond(createBondVars)
     })
 
     it('#claimQuote()', async () => {
@@ -139,9 +146,9 @@ describe('claim-quote', () => {
         bondSale: bondSalePubkey,
         payerQuoteAccount
       }
-      await sale.claimQuote(claimQuoteVars)
+      await bonds.claimQuote(claimQuoteVars)
 
-      const bondSale = await sale.getBondSale(bondSalePubkey)
+      const bondSale = await bonds.getBondSale(bondSalePubkey)
       assert.ok(bondSale.quoteAmount.v.eqn(0))
       assert.ok((await tokenQuote.getAccountInfo(payerQuoteAccount)).amount.eqn(103))
     })

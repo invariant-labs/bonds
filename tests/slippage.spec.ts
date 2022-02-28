@@ -4,12 +4,10 @@ import { Token, TOKEN_PROGRAM_ID } from '@solana/spl-token'
 import { Keypair, PublicKey } from '@solana/web3.js'
 import { Network } from '@invariant-labs/bonds-sdk'
 import { CreateBond, InitBondSale } from '@invariant-labs/bonds-sdk/lib/sale'
-import { DENOMINATOR, toDecimal } from '@invariant-labs/bonds-sdk/lib/utils'
-import { assert } from 'chai'
+import { DENOMINATOR, toDecimal, ERROR } from '@invariant-labs/bonds-sdk/lib/utils'
 import { assertThrowsAsync, createToken } from './testUtils'
 import { Bonds } from '@invariant-labs/bonds-sdk/src'
-import { calculatePriceAfterSlippage, calculateSellPrice } from '@invariant-labs/bonds-sdk/src/math'
-import { ERROR } from '@invariant-labs/bonds-sdk/lib/utils'
+import { calculatePriceAfterSlippage } from '@invariant-labs/bonds-sdk/src/math'
 
 describe('slippage', () => {
   const provider = Provider.local()
@@ -88,7 +86,7 @@ describe('slippage', () => {
         owner: bondOwner.publicKey
       }
 
-      const bondPub = await bonds.createBond(createBondVars, bondOwner)
+      await bonds.createBond(createBondVars, bondOwner)
     })
   })
 
@@ -118,7 +116,6 @@ describe('slippage', () => {
     it('#createBond()', async () => {
       const ownerQuoteAccount = await tokenQuote.createAccount(bondOwner.publicKey)
       await tokenQuote.mintTo(ownerQuoteAccount, mintAuthority, [mintAuthority], 1000)
-      const bondSale = await bonds.getBondSale(bondSalePubkey)
 
       const createBondVars: CreateBond = {
         amount: new BN(100),
@@ -128,7 +125,7 @@ describe('slippage', () => {
         owner: bondOwner.publicKey
       }
 
-      const bondPub = await bonds.createBond(createBondVars, bondOwner)
+      await bonds.createBond(createBondVars, bondOwner)
     })
   })
 
@@ -168,7 +165,10 @@ describe('slippage', () => {
         owner: bondOwner.publicKey
       }
 
-      assertThrowsAsync(bonds.createBond(createBondVars, bondOwner), ERROR.PRICE_LIMIT_EXCEEDED)
+      await assertThrowsAsync(
+        bonds.createBond(createBondVars, bondOwner),
+        ERROR.PRICE_LIMIT_EXCEEDED
+      )
     })
   })
 })
