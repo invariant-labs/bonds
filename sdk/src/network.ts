@@ -13,3 +13,9 @@ export const getProgramAddress = (network: Network) => {
       throw new Error('Unknown network')
   }
 }
+
+export const MOCK_TOKENS = {
+  INVT: '7419i15RMBxn6c4aETP8V2wrPd9C5kdCdk4inYDtph1i',
+  USDC: '7AUnkVAWnkkh5Za3xLnSdgEuhs8SDuHuaqTAGErh44zc',
+  USDT: 'UAA13oafJZkQv1LMZD8xShownp3QTqUhzyk5rWXm74f'
+}
