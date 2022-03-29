@@ -80,7 +80,7 @@ export type Bonds = {
           "type": "u128"
         },
         {
-          "name": "bondAmount",
+          "name": "supply",
           "type": "u64"
         },
         {
@@ -88,7 +88,7 @@ export type Bonds = {
           "type": "u64"
         },
         {
-          "name": "distribution",
+          "name": "vestingTime",
           "type": "u64"
         }
       ]
@@ -367,7 +367,7 @@ export type Bonds = {
             "type": "publicKey"
           },
           {
-            "name": "buyAmount",
+            "name": "bondAmount",
             "type": {
               "defined": "TokenAmount"
             }
@@ -377,11 +377,11 @@ export type Bonds = {
             "type": "u64"
           },
           {
-            "name": "distributionStart",
+            "name": "vestingStart",
             "type": "u64"
           },
           {
-            "name": "distributionEnd",
+            "name": "vestingEnd",
             "type": "u64"
           }
         ]
@@ -441,7 +441,7 @@ export type Bonds = {
             }
           },
           {
-            "name": "bondAmount",
+            "name": "supply",
             "type": {
               "defined": "TokenAmount"
             }
@@ -471,7 +471,7 @@ export type Bonds = {
             "type": "u64"
           },
           {
-            "name": "distribution",
+            "name": "vestingTime",
             "type": "u64"
           }
         ]
@@ -517,8 +517,8 @@ export type Bonds = {
     },
     {
       "code": 6002,
-      "name": "DistributionEnded",
-      "msg": "Distribution ended"
+      "name": "VestingEnded",
+      "msg": "Vesting ended"
     },
     {
       "code": 6003,
@@ -610,7 +610,7 @@ export const IDL: Bonds = {
           "type": "u128"
         },
         {
-          "name": "bondAmount",
+          "name": "supply",
           "type": "u64"
         },
         {
@@ -618,7 +618,7 @@ export const IDL: Bonds = {
           "type": "u64"
         },
         {
-          "name": "distribution",
+          "name": "vestingTime",
           "type": "u64"
         }
       ]
@@ -897,7 +897,7 @@ export const IDL: Bonds = {
             "type": "publicKey"
           },
           {
-            "name": "buyAmount",
+            "name": "bondAmount",
             "type": {
               "defined": "TokenAmount"
             }
@@ -907,11 +907,11 @@ export const IDL: Bonds = {
             "type": "u64"
           },
           {
-            "name": "distributionStart",
+            "name": "vestingStart",
             "type": "u64"
           },
           {
-            "name": "distributionEnd",
+            "name": "vestingEnd",
             "type": "u64"
           }
         ]
@@ -971,7 +971,7 @@ export const IDL: Bonds = {
             }
           },
           {
-            "name": "bondAmount",
+            "name": "supply",
             "type": {
               "defined": "TokenAmount"
             }
@@ -1001,7 +1001,7 @@ export const IDL: Bonds = {
             "type": "u64"
           },
           {
-            "name": "distribution",
+            "name": "vestingTime",
             "type": "u64"
           }
         ]
@@ -1047,8 +1047,8 @@ export const IDL: Bonds = {
     },
     {
       "code": 6002,
-      "name": "DistributionEnded",
-      "msg": "Distribution ended"
+      "name": "VestingEnded",
+      "msg": "Vesting ended"
     },
     {
       "code": 6003,

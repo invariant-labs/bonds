@@ -16,17 +16,32 @@ pub struct BondSale {
     pub previous_price: Decimal,
     pub up_bound: Decimal,
     pub velocity: Decimal,
-    pub bond_amount: TokenAmount,
+    pub supply: TokenAmount,
     pub remaining_amount: TokenAmount,
     pub quote_amount: TokenAmount,
     pub end_time: u64,
     pub start_time: u64,
     pub last_trade: u64,
-    pub distribution: u64,
+    pub vesting_time: u64,
 }
 
 impl BondSale {
     pub fn calculate_ceil_price(&self) -> Decimal {
         (Decimal::one() + self.up_bound) * self.floor_price
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_calculate_ceil_price() {
+        {
+            let mut bond_sale = BondSale::default();
+            bond_sale.floor_price = Decimal::from_integer(1);
+            bond_sale.up_bound = Decimal::from_integer(2);
+            assert_eq!(bond_sale.calculate_ceil_price(), Decimal::from_integer(3));
+        }
     }
 }

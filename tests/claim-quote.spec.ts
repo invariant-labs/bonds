@@ -8,7 +8,7 @@ import { DENOMINATOR, toDecimal } from '@invariant-labs/bonds-sdk/lib/utils'
 import { assert } from 'chai'
 import { createToken } from './testUtils'
 import { Bonds } from '@invariant-labs/bonds-sdk/src'
-import { calculatePriceAfterSlippage } from '@invariant-labs/bonds-sdk/lib/math'
+import { getPriceAfterSlippage } from '@invariant-labs/bonds-sdk/lib/math'
 
 describe('claim-quote', () => {
   const provider = Provider.local()
@@ -58,7 +58,7 @@ describe('claim-quote', () => {
       await tokenBond.mintTo(payerBondAccount, mintAuthority, [mintAuthority], 1000)
 
       const initBondSaleVars: InitBondSale = {
-        buyAmount: new BN(1000),
+        supply: new BN(1000),
         duration: new BN(100),
         floorPrice: DENOMINATOR,
         payerBondAccount,
@@ -68,7 +68,7 @@ describe('claim-quote', () => {
         upBound: DENOMINATOR.divn(2),
         velocity: DENOMINATOR.divn(2),
         payer: bondInitPayer.publicKey,
-        distribution: new BN(20)
+        vestingTime: new BN(20)
       }
 
       bondSalePubkey = await bonds.initBondSale(initBondSaleVars, bondInitPayer)
@@ -81,7 +81,7 @@ describe('claim-quote', () => {
 
       const createBondVars: CreateBond = {
         amount: new BN(100),
-        priceLimit: calculatePriceAfterSlippage(bondSale.previousPrice, toDecimal(1, 1)).v,
+        priceLimit: getPriceAfterSlippage(bondSale.previousPrice, toDecimal(1, 1)),
         bondSale: bondSalePubkey,
         ownerQuoteAccount,
         owner: bondOwner.publicKey
@@ -111,7 +111,7 @@ describe('claim-quote', () => {
       await tokenBond.mintTo(payerBondAccount, mintAuthority, [mintAuthority], 1000)
 
       const initBondSaleVars: InitBondSale = {
-        buyAmount: new BN(1000),
+        supply: new BN(1000),
         duration: new BN(100),
         floorPrice: DENOMINATOR,
         payerBondAccount,
@@ -120,7 +120,7 @@ describe('claim-quote', () => {
         tokenQuote,
         upBound: DENOMINATOR.divn(2),
         velocity: DENOMINATOR.divn(2),
-        distribution: new BN(20)
+        vestingTime: new BN(20)
       }
 
       bondSalePubkey = await bonds.initBondSale(initBondSaleVars)
@@ -133,7 +133,7 @@ describe('claim-quote', () => {
 
       const createBondVars: CreateBond = {
         amount: new BN(100),
-        priceLimit: calculatePriceAfterSlippage(bondSale.previousPrice, toDecimal(1, 1)).v,
+        priceLimit: getPriceAfterSlippage(bondSale.previousPrice, toDecimal(1, 1)),
         bondSale: bondSalePubkey,
         ownerQuoteAccount
       }

@@ -14,7 +14,7 @@ pub fn calculate_new_price(
         / Decimal::from_integer(sale_time.try_into().unwrap());
 
     let delta_price = bond_sale.velocity * bond_sale.up_bound * bond_sale.floor_price * time_ratio;
-    let supply_ratio = buy_amount.percent(bond_sale.bond_amount);
+    let supply_ratio = buy_amount.percent(bond_sale.supply);
 
     let price = match { bond_sale.previous_price } < { bond_sale.floor_price + delta_price } {
         true => bond_sale.floor_price,
@@ -26,7 +26,7 @@ pub fn calculate_new_price(
     bond_sale.remaining_amount = bond_sale.remaining_amount - buy_amount;
     bond_sale.last_trade = current_time;
 
-    price + Decimal::from_decimal(50, 2) * jump
+    Decimal::from_decimal(50, 2) * jump + price
 }
 
 #[cfg(test)]
@@ -40,7 +40,7 @@ mod tests {
             previous_price: Decimal::from_integer(2),
             up_bound: Decimal::from_decimal(50, 2),
             velocity: Decimal::one(),
-            bond_amount: TokenAmount::new(50),
+            supply: TokenAmount::new(50),
             remaining_amount: TokenAmount::new(20),
             quote_amount: TokenAmount::new(25),
             end_time: 604800, // second in a week
@@ -51,7 +51,7 @@ mod tests {
         // supply cannot be equal to 0
         {
             let mut bond_sale = BondSale {
-                bond_amount: TokenAmount::new(0),
+                supply: TokenAmount::new(0),
                 ..nonpanic_bond_sale
             };
             calculate_new_price(&mut bond_sale, 20, TokenAmount::new(2));
@@ -88,7 +88,7 @@ mod tests {
             previous_price: Decimal::from_integer(2),
             up_bound: Decimal::from_decimal(50, 2),
             velocity: Decimal::one(),
-            bond_amount: TokenAmount::new(50),
+            supply: TokenAmount::new(50),
             remaining_amount: TokenAmount::new(20),
             quote_amount: TokenAmount::new(25),
             end_time: 604800, // seconds in a week
@@ -103,7 +103,7 @@ mod tests {
             let mut bond_sale = BondSale {
                 previous_price: Decimal::from_integer(2),
                 up_bound: Decimal::from_decimal(50, 2),
-                bond_amount: TokenAmount::new(100),
+                supply: TokenAmount::new(100),
                 remaining_amount: TokenAmount::new(20),
                 ..nonpanic_bond_sale
             };
@@ -123,7 +123,7 @@ mod tests {
         // if delta_time = sale_time and buy_amount = 0, then trade_price = new_price = floor_price
         {
             let mut bond_sale = BondSale {
-                bond_amount: TokenAmount::new(50),
+                supply: TokenAmount::new(50),
                 remaining_amount: TokenAmount::new(50),
                 previous_price: Decimal::from_integer(3), // ==ceil price
                 up_bound: Decimal::from_decimal(50, 2),
@@ -149,7 +149,7 @@ mod tests {
         // if delta_time = sale_time/2, doubled velocity and buy_amount = 0, then trade_price = new_price = floor_price
         {
             let mut bond_sale = BondSale {
-                bond_amount: TokenAmount::new(100),
+                supply: TokenAmount::new(100),
                 remaining_amount: TokenAmount::new(50),
                 previous_price: Decimal::from_integer(3), // ==ceil price
                 up_bound: Decimal::from_decimal(50, 2),
@@ -175,7 +175,7 @@ mod tests {
         // instantly taken 100% of supply
         {
             let mut bond_sale = BondSale {
-                bond_amount: TokenAmount::new(50),
+                supply: TokenAmount::new(50),
                 remaining_amount: TokenAmount::new(50),
                 ..nonpanic_bond_sale
             };
@@ -193,7 +193,7 @@ mod tests {
             assert_eq!({ bond_sale.remaining_amount }, TokenAmount::new(0));
         }
         /*
-        bond_amount = 1_000_000
+        supply = 1_000_000
         floor_price = 2
         sale_time = 1week
         up_bound = 300%
@@ -202,7 +202,7 @@ mod tests {
         */
         {
             let mut bond_sale = BondSale {
-                bond_amount: TokenAmount::new(1_000_000),
+                supply: TokenAmount::new(1_000_000),
                 remaining_amount: TokenAmount::new(1_000_000),
                 floor_price: Decimal::from_integer(2),
                 end_time: 604800,

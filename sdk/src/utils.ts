@@ -44,15 +44,15 @@ export const signAndSend = async (
   }
 
   const rawTx = tx.serialize()
-  return await sendAndConfirmRawTransaction(connection, rawTx, opts || Provider.defaultOptions())
+  return await sendAndConfirmRawTransaction(connection, rawTx, opts ?? Provider.defaultOptions())
 }
 
 export const sleep = async (ms: number) => {
   return await new Promise(resolve => setTimeout(resolve, ms))
 }
 
-export const toDecimal = (x: number, decimals: number = 0): Decimal => {
-  return { v: DENOMINATOR.muln(x).div(new BN(10).pow(new BN(decimals))) }
+export const toDecimal = (x: BN, decimals: number = 0): Decimal => {
+  return { v: DENOMINATOR.mul(x).div(new BN(10).pow(new BN(decimals))) }
 }
 
 export const toScale = (num: BN, scale: number) => {

@@ -55,7 +55,7 @@ describe('modify-bond-sale', () => {
       await tokenBond.mintTo(payerBondAccount, mintAuthority, [mintAuthority], 1000)
 
       const initBondSaleVars: InitBondSale = {
-        buyAmount: new BN(1000),
+        supply: new BN(1000),
         duration: new BN(100),
         floorPrice: DENOMINATOR,
         payerBondAccount,
@@ -65,7 +65,7 @@ describe('modify-bond-sale', () => {
         upBound: DENOMINATOR.divn(2),
         velocity: DENOMINATOR.divn(2),
         payer: bondInitPayer.publicKey,
-        distribution: new BN(10)
+        vestingTime: new BN(10)
       }
 
       bondSalePubkey = await sale.initBondSale(initBondSaleVars, bondInitPayer)
@@ -128,7 +128,7 @@ describe('modify-bond-sale', () => {
       await tokenBond.mintTo(payerBondAccount, mintAuthority, [mintAuthority], 1000)
 
       const initBondSaleVars: InitBondSale = {
-        buyAmount: new BN(1000),
+        supply: new BN(1000),
         duration: new BN(100),
         floorPrice: DENOMINATOR,
         payerBondAccount,
@@ -137,7 +137,7 @@ describe('modify-bond-sale', () => {
         tokenQuote,
         upBound: DENOMINATOR.divn(2),
         velocity: DENOMINATOR.divn(2),
-        distribution: new BN(10)
+        vestingTime: new BN(10)
       }
 
       bondSalePubkey = await sale.initBondSale(initBondSaleVars)

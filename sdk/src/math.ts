@@ -1,16 +1,13 @@
 import { BN } from '@project-serum/anchor'
-import { BondSaleStruct, Decimal } from './sale'
+import { BondSaleStruct, BondStruct, Decimal } from './sale'
 import { DECIMAL, DENOMINATOR, toDecimal, toScale } from './utils'
 
-export const calculatePriceAfterSlippage = (priceSqrt: Decimal, slippage: Decimal) => {
-  const multiplier = slippage.v.add(DENOMINATOR)
-
-  return { v: priceSqrt.v.mul(multiplier).div(DENOMINATOR) }
+export const getPriceAfterSlippage = (price: Decimal, slippage: Decimal) => {
+  return price.v.mul(slippage.v.add(DENOMINATOR)).div(DENOMINATOR)
 }
 
 export const calculateSellPrice = (bondSale: BondSaleStruct, amount: BN) => {
   const currentTime = new BN(Math.floor(Date.now() / 1000))
-  console.log(currentTime.toString())
   const deltaTime = toScale(currentTime.sub(bondSale.lastTrade), DECIMAL)
   const saleTime = toScale(bondSale.endTime.sub(bondSale.startTime), DECIMAL)
   const timeRatio = decimalDiv(deltaTime, saleTime)
@@ -19,7 +16,7 @@ export const calculateSellPrice = (bondSale: BondSaleStruct, amount: BN) => {
     decimalMul(decimalMul(bondSale.velocity.v, bondSale.upBound.v), bondSale.floorPrice.v),
     timeRatio
   )
-  const supplyRatio = amount.mul(DENOMINATOR).div(bondSale.bondAmount.v)
+  const supplyRatio = amount.mul(DENOMINATOR).div(bondSale.supply.v)
 
   let price: BN
   if (bondSale.previousPrice.v.lt(bondSale.floorPrice.v)) {
@@ -30,7 +27,25 @@ export const calculateSellPrice = (bondSale: BondSaleStruct, amount: BN) => {
 
   const jump = decimalMul(decimalMul(supplyRatio, bondSale.upBound.v), bondSale.floorPrice.v)
 
-  return price.add(decimalMul(toDecimal(5, 1).v, jump))
+  return price.add(decimalMul(toDecimal(new BN(5), 1).v, jump))
+}
+
+export const calculateAmountToClaim = (bond: BondStruct) => {
+  const currentTime = new BN(Math.floor(Date.now() / 1000))
+
+  let timeDelta: BN
+  if (currentTime.lt(bond.vestingEnd)) {
+    timeDelta = currentTime.sub(bond.lastClaim)
+  } else {
+    timeDelta = bond.vestingEnd.sub(bond.lastClaim)
+  }
+
+  const duration = bond.vestingEnd.sub(bond.vestingStart)
+  const fraction = decimalDiv(toDecimal(timeDelta, 0).v, toDecimal(duration, 0).v)
+
+  const amountToClaim = decimalMul(bond.bondAmount.v, fraction)
+
+  return amountToClaim
 }
 
 export const decimalMul = (one: BN, two: BN) => {
@@ -39,4 +54,8 @@ export const decimalMul = (one: BN, two: BN) => {
 
 export const decimalDiv = (one: BN, two: BN) => {
   return one.mul(DENOMINATOR).div(two)
+}
+
+export const getCeilPrice = (upBound: Decimal, floorPrice: Decimal) => {
+  return toDecimal(new BN(1), 0).v.add(upBound.v).mul(floorPrice.v).div(DENOMINATOR)
 }
