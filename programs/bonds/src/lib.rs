@@ -19,6 +19,10 @@ pub const SEED: &str = "Bonds";
 pub mod bonds {
     use super::*;
 
+    pub fn create_state(ctx: Context<CreateState>, bump: u8, nonce: u8) -> ProgramResult {
+        instructions::create_state::handler(ctx, bump, nonce)
+    }
+
     pub fn init_bond_sale(
         ctx: Context<InitBondSale>,
         floor_price: u128,
@@ -61,5 +65,13 @@ pub mod bonds {
 
     pub fn claim_bond(ctx: Context<ClaimBond>, nonce: u8) -> ProgramResult {
         instructions::claim_bond::handler(ctx, nonce)
+    }
+
+    pub fn change_fee(ctx: Context<ChangeFee>, new_fee: u128) -> ProgramResult {
+        instructions::change_fee::handler(ctx, new_fee)
+    }
+
+    pub fn withdraw_fee(ctx: Context<WithdrawFee>) -> ProgramResult {
+        instructions::withdraw_fee::handler(ctx)
     }
 }

@@ -4,7 +4,6 @@ use anchor_spl::token::{Mint, TokenAccount, Transfer};
 use bond_sale::BondSale;
 
 use crate::math::calculate_new_price;
-use crate::structs::Decimal;
 use crate::utils::get_current_timestamp;
 use crate::{
     interfaces::TransferQuote,
@@ -37,7 +36,6 @@ pub struct CreateBond<'info> {
     pub token_quote_account: Box<Account<'info, TokenAccount>>,
     #[account(mut)]
     pub owner: Signer<'info>,
-    pub authority: AccountInfo<'info>,
     pub token_program: AccountInfo<'info>,
     #[account(address = system_program::ID)]
     pub system_program: AccountInfo<'info>,
@@ -85,7 +83,6 @@ pub fn handler(ctx: Context<CreateBond>, amount: u64, price_limit: u128) -> Prog
         token_bond: ctx.accounts.token_bond.key(),
         token_bond_account: ctx.accounts.token_bond_account.key(),
         owner: ctx.accounts.owner.key(),
-        authority: ctx.accounts.authority.key(),
         bond_amount: TokenAmount::new(buy_amount),
         last_claim: get_current_timestamp(),
         vesting_start: get_current_timestamp(),

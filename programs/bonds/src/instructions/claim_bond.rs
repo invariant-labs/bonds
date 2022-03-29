@@ -4,13 +4,15 @@ use anchor_spl::token::{transfer, TokenAccount, Transfer};
 use crate::{
     get_signer,
     interfaces::TransferBond,
-    structs::Bond,
+    structs::{Bond, State},
     utils::{close, get_current_timestamp},
     SEED,
 };
 
 #[derive(Accounts)]
 pub struct ClaimBond<'info> {
+    #[account(seeds = [b"statev1"], bump = state.load()?.bump)]
+    pub state: AccountLoader<'info, State>,
     #[account(mut)]
     pub bond: AccountLoader<'info, Bond>,
     #[account(mut,
@@ -28,7 +30,7 @@ pub struct ClaimBond<'info> {
     )]
     pub owner: Signer<'info>,
     #[account(
-        constraint = authority.key == &bond.load()?.authority
+        constraint = authority.key() == state.load()?.authority
     )]
     pub authority: AccountInfo<'info>,
     pub token_program: AccountInfo<'info>,

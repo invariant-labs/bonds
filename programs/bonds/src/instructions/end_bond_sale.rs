@@ -4,13 +4,15 @@ use anchor_spl::token::{close_account, transfer, CloseAccount, TokenAccount, Tra
 use crate::{
     get_signer,
     interfaces::{CloseTokenAccount, TransferBond, TransferQuote},
-    structs::BondSale,
+    structs::{BondSale, State},
     utils::close,
     SEED,
 };
 
 #[derive(Accounts)]
 pub struct EndBondSale<'info> {
+    #[account(seeds = [b"statev1"], bump = state.load()?.bump)]
+    pub state: AccountLoader<'info, State>,
     #[account(mut)]
     pub bond_sale: AccountLoader<'info, BondSale>,
     #[account(mut,
@@ -31,7 +33,9 @@ pub struct EndBondSale<'info> {
         constraint = payer_bond_account.mint == bond_sale.load()?.token_bond
     )]
     pub payer_bond_account: Account<'info, TokenAccount>,
-    #[account(mut)]
+    #[account(mut,
+        constraint = authority.key() == state.load()?.authority
+    )]
     pub authority: AccountInfo<'info>,
     #[account(mut,
         constraint = payer.key() == bond_sale.load()?.payer

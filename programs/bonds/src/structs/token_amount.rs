@@ -1,7 +1,7 @@
 use crate::structs::decimal::{Decimal, DENOMINATOR};
 use crate::uint::U256;
 use anchor_lang::prelude::*;
-use std::ops::{Add, Sub};
+use std::ops::{Add, AddAssign, Sub, SubAssign};
 
 #[zero_copy]
 #[derive(Default, Debug, PartialEq, Eq, PartialOrd, Ord, AnchorDeserialize, AnchorSerialize)]
@@ -82,6 +82,18 @@ impl Sub for TokenAmount {
         TokenAmount {
             v: self.v.checked_sub(other.v).unwrap(),
         }
+    }
+}
+
+impl AddAssign for TokenAmount {
+    fn add_assign(&mut self, other: TokenAmount) {
+        self.v = self.v.checked_add(other.v).unwrap();
+    }
+}
+
+impl SubAssign for TokenAmount {
+    fn sub_assign(&mut self, other: TokenAmount) {
+        self.v = self.v.checked_sub(other.v).unwrap();
     }
 }
 
