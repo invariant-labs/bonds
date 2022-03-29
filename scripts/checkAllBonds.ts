@@ -1,8 +1,6 @@
 import { Network, Bonds } from '@invariant-labs/bonds-sdk'
 import { calculateAmountToClaim } from '@invariant-labs/bonds-sdk/lib/math'
-import { MOCK_TOKENS } from '@invariant-labs/bonds-sdk/lib/network'
 import { Provider } from '@project-serum/anchor'
-import { Token } from '@solana/spl-token'
 import { clusterApiUrl, PublicKey } from '@solana/web3.js'
 
 require('dotenv').config()
@@ -13,10 +11,9 @@ const provider = Provider.local(clusterApiUrl('devnet'), {
 })
 
 const connection = provider.connection
-const bondToken = new PublicKey(MOCK_TOKENS.INVT)
 
 const checkAllBonds = async (bonds: Bonds) => {
-  const allBonds = await bonds.getAllBonds(bondToken)
+  const allBonds = await bonds.getAllBonds(bondSalePubEnd04April)
 
   for (const bond of allBonds) {
     console.log('amountToClaim: ', calculateAmountToClaim(bond).toString())

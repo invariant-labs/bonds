@@ -80,7 +80,7 @@ describe('slippage', () => {
 
       const createBondVars: CreateBond = {
         amount: new BN(100),
-        priceLimit: getPriceAfterSlippage(bondSale.previousPrice, toDecimal(5, 2)),
+        priceLimit: getPriceAfterSlippage(bondSale.previousPrice, toDecimal(new BN(5), 2)),
         bondSale: bondSalePubkey,
         ownerQuoteAccount,
         owner: bondOwner.publicKey
@@ -159,7 +159,7 @@ describe('slippage', () => {
 
       const createBondVars: CreateBond = {
         amount: new BN(100),
-        priceLimit: getPriceAfterSlippage(bondSale.previousPrice, toDecimal(-5, 1)),
+        priceLimit: getPriceAfterSlippage(bondSale.previousPrice, toDecimal(new BN(-5), 1)),
         bondSale: bondSalePubkey,
         ownerQuoteAccount,
         owner: bondOwner.publicKey

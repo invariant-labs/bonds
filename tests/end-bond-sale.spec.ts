@@ -82,7 +82,7 @@ describe('end-bond-sale', () => {
 
       const createBondVars: CreateBond = {
         amount: new BN(100),
-        priceLimit: getPriceAfterSlippage(bondSale.previousPrice, toDecimal(1, 1)),
+        priceLimit: getPriceAfterSlippage(bondSale.previousPrice, toDecimal(new BN(1), 1)),
         bondSale: bondSalePubkey,
         ownerQuoteAccount,
         owner: bondOwner.publicKey
@@ -135,7 +135,7 @@ describe('end-bond-sale', () => {
 
       const createBondVars: CreateBond = {
         amount: new BN(100),
-        priceLimit: getPriceAfterSlippage(bondSale.previousPrice, toDecimal(1, 1)),
+        priceLimit: getPriceAfterSlippage(bondSale.previousPrice, toDecimal(new BN(1), 1)),
         bondSale: bondSalePubkey,
         ownerQuoteAccount
       }

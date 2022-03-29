@@ -351,6 +351,10 @@ export type Bonds = {
         "kind": "struct",
         "fields": [
           {
+            "name": "bondSale",
+            "type": "publicKey"
+          },
+          {
             "name": "tokenBond",
             "type": "publicKey"
           },
@@ -880,6 +884,10 @@ export const IDL: Bonds = {
       "type": {
         "kind": "struct",
         "fields": [
+          {
+            "name": "bondSale",
+            "type": "publicKey"
+          },
           {
             "name": "tokenBond",
             "type": "publicKey"

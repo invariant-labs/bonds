@@ -180,22 +180,22 @@ export class Bonds {
     return (await this.program.account.bond.fetch(bondPub)) as BondStruct
   }
 
-  async getAllOwnerBonds(tokenBond: PublicKey, owner: PublicKey) {
+  async getAllOwnerBonds(bondSale: PublicKey, owner: PublicKey) {
     return await this.program.account.bond.all([
       {
-        memcmp: { bytes: bs58.encode(tokenBond.toBuffer()), offset: 8 }
+        memcmp: { bytes: bs58.encode(bondSale.toBuffer()), offset: 8 }
       },
       {
-        memcmp: { bytes: bs58.encode(owner.toBuffer()), offset: 40 }
+        memcmp: { bytes: bs58.encode(owner.toBuffer()), offset: 72 }
       }
     ])
   }
 
-  async getAllBonds(tokenBond: PublicKey) {
+  async getAllBonds(bondSale: PublicKey) {
     return (
       await this.program.account.bond.all([
         {
-          memcmp: { bytes: bs58.encode(tokenBond.toBuffer()), offset: 8 }
+          memcmp: { bytes: bs58.encode(bondSale.toBuffer()), offset: 8 }
         }
       ])
     ).map(b => b.account) as BondStruct[]
@@ -350,9 +350,9 @@ export class Bonds {
   }
 
   async claimBondInstruction(claimBond: ClaimBond) {
-    const { tokenBond, ownerBondAccount, bondId } = claimBond
+    const { bondSale, ownerBondAccount, bondId } = claimBond
     const owner = claimBond.owner ?? this.wallet.publicKey
-    const bond = (await this.getAllOwnerBonds(tokenBond, owner)).at(bondId.toNumber())
+    const bond = (await this.getAllOwnerBonds(bondSale, owner)).at(bondId.toNumber())
     const { programAuthority, nonce } = await this.getProgramAuthority()
 
     return this.program.instruction.claimBond(nonce, {
@@ -462,7 +462,7 @@ export interface ClaimQuote {
 }
 
 export interface ClaimBond {
-  tokenBond: PublicKey
+  bondSale: PublicKey
   ownerBondAccount: PublicKey
   owner?: PublicKey
   bondId: BN
@@ -475,6 +475,7 @@ export interface EndBondSale {
   payer?: PublicKey
 }
 export interface BondStruct {
+  bondSale: PublicKey
   tokenBond: PublicKey
   owner: PublicKey
   tokenBondAccount: PublicKey

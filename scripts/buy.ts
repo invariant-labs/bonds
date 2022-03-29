@@ -30,7 +30,7 @@ const buy = async (bonds: Bonds, buyer: Keypair, bondSalePub: PublicKey) => {
   const bondSale = await bonds.getBondSale(bondSalePubEnd04April)
   const priceSale = getPriceAfterSlippage(
     { v: calculateSellPrice(bondSale, new BN(6030)) },
-    toDecimal(1, 1)
+    toDecimal(new BN(1), 1)
   )
   console.log('priceSale: ', priceSale.toString())
   const ceilPrice = getCeilPrice(bondSale.upBound, bondSale.floorPrice)
