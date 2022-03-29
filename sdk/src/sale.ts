@@ -80,9 +80,9 @@ export class Bonds {
       floorPrice,
       upBound,
       velocity,
-      buyAmount,
+      supply,
       duration,
-      distribution
+      vestingTime
     } = initBondSale
     const payerPubkey = initBondSale.payer ?? this.wallet.publicKey
 
@@ -92,9 +92,9 @@ export class Bonds {
       floorPrice,
       upBound,
       velocity,
-      buyAmount,
+      supply,
       duration,
-      distribution,
+      vestingTime,
       {
         accounts: {
           bondSale: bondSalePub,
@@ -180,7 +180,7 @@ export class Bonds {
     return (await this.program.account.bond.fetch(bondPub)) as BondStruct
   }
 
-  async getAllBonds(tokenBond: PublicKey, owner: PublicKey) {
+  async getAllOwnerBonds(tokenBond: PublicKey, owner: PublicKey) {
     return await this.program.account.bond.all([
       {
         memcmp: { bytes: bs58.encode(tokenBond.toBuffer()), offset: 8 }
@@ -189,6 +189,16 @@ export class Bonds {
         memcmp: { bytes: bs58.encode(owner.toBuffer()), offset: 40 }
       }
     ])
+  }
+
+  async getAllBonds(tokenBond: PublicKey) {
+    return (
+      await this.program.account.bond.all([
+        {
+          memcmp: { bytes: bs58.encode(tokenBond.toBuffer()), offset: 8 }
+        }
+      ])
+    ).map(b => b.account) as BondStruct[]
   }
 
   async createBondInstruction(createBond: CreateBond, bondPub: PublicKey) {
@@ -342,7 +352,7 @@ export class Bonds {
   async claimBondInstruction(claimBond: ClaimBond) {
     const { tokenBond, ownerBondAccount, bondId } = claimBond
     const owner = claimBond.owner ?? this.wallet.publicKey
-    const bond = (await this.getAllBonds(tokenBond, owner)).at(bondId.toNumber())
+    const bond = (await this.getAllOwnerBonds(tokenBond, owner)).at(bondId.toNumber())
     const { programAuthority, nonce } = await this.getProgramAuthority()
 
     return this.program.instruction.claimBond(nonce, {
@@ -420,9 +430,9 @@ export interface InitBondSale {
   floorPrice: BN
   upBound: BN
   velocity: BN
-  buyAmount: BN
+  supply: BN
   duration: BN
-  distribution: BN
+  vestingTime: BN
 }
 
 export interface CreateBond {
@@ -468,9 +478,11 @@ export interface BondStruct {
   tokenBond: PublicKey
   owner: PublicKey
   tokenBondAccount: PublicKey
-  buyAmount: TokenAmount
+  authority: PublicKey
+  bondAmount: TokenAmount
   lastClaim: BN
-  distributionEnd: BN
+  vestingStart: BN
+  vestingEnd: BN
 }
 
 export interface BondSaleStruct {
@@ -484,13 +496,13 @@ export interface BondSaleStruct {
   previousPrice: Decimal
   upBound: Decimal
   velocity: Decimal
-  bondAmount: TokenAmount
+  supply: TokenAmount
   remainingAmount: TokenAmount
   quoteAmount: TokenAmount
   endTime: BN
   startTime: BN
   lastTrade: BN
-  distribution: BN
+  vestingTime: BN
 }
 
 export interface Decimal {

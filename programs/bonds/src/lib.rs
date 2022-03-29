@@ -12,7 +12,7 @@ use anchor_lang::prelude::*;
 use errors::*;
 use instructions::*;
 
-declare_id!("R9PatsTac3Y3UpC7ihYMMgzAQCe1tXnVvkSQ8DtLWUc");
+declare_id!("A8jXJ4XTwjTo4yPoAWu8iiHHvoCM8c91NWBcjKsc886g");
 pub const SEED: &str = "Bonds";
 
 #[program]
@@ -24,18 +24,18 @@ pub mod bonds {
         floor_price: u128,
         up_bound: u128,
         velocity: u128,
-        bond_amount: u64,
+        supply: u64,
         duration: u64,
-        distribution: u64,
+        vesting_time: u64,
     ) -> ProgramResult {
         instructions::init_bond_sale::handler(
             ctx,
             floor_price,
             up_bound,
             velocity,
-            bond_amount,
+            supply,
             duration,
-            distribution,
+            vesting_time,
         )
     }
 

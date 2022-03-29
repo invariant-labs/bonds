@@ -7,7 +7,7 @@ import { CreateBond, InitBondSale } from '@invariant-labs/bonds-sdk/lib/sale'
 import { DENOMINATOR, toDecimal, ERROR } from '@invariant-labs/bonds-sdk/lib/utils'
 import { assertThrowsAsync, createToken } from './testUtils'
 import { Bonds } from '@invariant-labs/bonds-sdk/src'
-import { calculatePriceAfterSlippage } from '@invariant-labs/bonds-sdk/src/math'
+import { getPriceAfterSlippage } from '@invariant-labs/bonds-sdk/src/math'
 
 describe('slippage', () => {
   const provider = Provider.local()
@@ -57,7 +57,7 @@ describe('slippage', () => {
       await tokenBond.mintTo(payerBondAccount, mintAuthority, [mintAuthority], 1000)
 
       const initBondSaleVars: InitBondSale = {
-        buyAmount: new BN(1000),
+        supply: new BN(1000),
         duration: new BN(100),
         floorPrice: DENOMINATOR,
         payerBondAccount,
@@ -67,7 +67,7 @@ describe('slippage', () => {
         upBound: DENOMINATOR.divn(2),
         velocity: DENOMINATOR.divn(2),
         payer: bondInitPayer.publicKey,
-        distribution: new BN(10)
+        vestingTime: new BN(10)
       }
 
       bondSalePubkey = await bonds.initBondSale(initBondSaleVars, bondInitPayer)
@@ -80,7 +80,7 @@ describe('slippage', () => {
 
       const createBondVars: CreateBond = {
         amount: new BN(100),
-        priceLimit: calculatePriceAfterSlippage(bondSale.previousPrice, toDecimal(5, 2)).v,
+        priceLimit: getPriceAfterSlippage(bondSale.previousPrice, toDecimal(5, 2)),
         bondSale: bondSalePubkey,
         ownerQuoteAccount,
         owner: bondOwner.publicKey
@@ -97,7 +97,7 @@ describe('slippage', () => {
       await tokenBond.mintTo(payerBondAccount, mintAuthority, [mintAuthority], 1000)
 
       const initBondSaleVars: InitBondSale = {
-        buyAmount: new BN(1000),
+        supply: new BN(1000),
         duration: new BN(100),
         floorPrice: DENOMINATOR,
         payerBondAccount,
@@ -107,7 +107,7 @@ describe('slippage', () => {
         upBound: DENOMINATOR.divn(2),
         velocity: DENOMINATOR.divn(2),
         payer: bondInitPayer.publicKey,
-        distribution: new BN(10)
+        vestingTime: new BN(10)
       }
 
       bondSalePubkey = await bonds.initBondSale(initBondSaleVars, bondInitPayer)
@@ -136,7 +136,7 @@ describe('slippage', () => {
       await tokenBond.mintTo(payerBondAccount, mintAuthority, [mintAuthority], 1000)
 
       const initBondSaleVars: InitBondSale = {
-        buyAmount: new BN(1000),
+        supply: new BN(1000),
         duration: new BN(100),
         floorPrice: DENOMINATOR,
         payerBondAccount,
@@ -146,7 +146,7 @@ describe('slippage', () => {
         upBound: DENOMINATOR.divn(2),
         velocity: DENOMINATOR.divn(2),
         payer: bondInitPayer.publicKey,
-        distribution: new BN(10)
+        vestingTime: new BN(10)
       }
 
       bondSalePubkey = await bonds.initBondSale(initBondSaleVars, bondInitPayer)
@@ -159,7 +159,7 @@ describe('slippage', () => {
 
       const createBondVars: CreateBond = {
         amount: new BN(100),
-        priceLimit: calculatePriceAfterSlippage(bondSale.previousPrice, toDecimal(-5, 1)).v,
+        priceLimit: getPriceAfterSlippage(bondSale.previousPrice, toDecimal(-5, 1)),
         bondSale: bondSalePubkey,
         ownerQuoteAccount,
         owner: bondOwner.publicKey

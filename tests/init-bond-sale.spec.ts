@@ -53,7 +53,7 @@ describe('init-bond-sale', () => {
     await tokenBond.mintTo(payerBondAccount, mintAuthority, [mintAuthority], 1000)
 
     const initBondSaleVars: InitBondSale = {
-      buyAmount: new BN(1000),
+      supply: new BN(1000),
       duration: new BN(100),
       floorPrice: DENOMINATOR,
       payerBondAccount,
@@ -63,7 +63,7 @@ describe('init-bond-sale', () => {
       upBound: DENOMINATOR.divn(2),
       velocity: DENOMINATOR.divn(2),
       payer: bondInitPayer.publicKey,
-      distribution: new BN(10)
+      vestingTime: new BN(10)
     }
 
     const bondSalePubkey = await sale.initBondSale(initBondSaleVars, bondInitPayer)
@@ -73,7 +73,7 @@ describe('init-bond-sale', () => {
       bondSale.authority.toString() ===
         (await sale.getProgramAuthority()).programAuthority.toString()
     )
-    assert.ok(bondSale.bondAmount.v.eqn(1000))
+    assert.ok(bondSale.supply.v.eqn(1000))
     assert.ok(bondSale.floorPrice.v.eq(DENOMINATOR))
     assert.ok(bondSale.payer.toString() === bondInitPayer.publicKey.toString())
     assert.ok(bondSale.quoteAmount.v.eqn(0))
@@ -90,7 +90,7 @@ describe('init-bond-sale', () => {
     await tokenBond.mintTo(payerBondAccount, mintAuthority, [mintAuthority], 1000)
 
     const initBondSaleVars: InitBondSale = {
-      buyAmount: new BN(1000),
+      supply: new BN(1000),
       duration: new BN(100),
       floorPrice: DENOMINATOR,
       payerBondAccount,
@@ -99,7 +99,7 @@ describe('init-bond-sale', () => {
       tokenQuote,
       upBound: DENOMINATOR.divn(2),
       velocity: DENOMINATOR.divn(2),
-      distribution: new BN(10)
+      vestingTime: new BN(10)
     }
 
     const bondSalePubkey = await sale.initBondSale(initBondSaleVars)
@@ -109,7 +109,7 @@ describe('init-bond-sale', () => {
       bondSale.authority.toString() ===
         (await sale.getProgramAuthority()).programAuthority.toString()
     )
-    assert.ok(bondSale.bondAmount.v.eqn(1000))
+    assert.ok(bondSale.supply.v.eqn(1000))
     assert.ok(bondSale.floorPrice.v.eq(DENOMINATOR))
     assert.ok(bondSale.payer.toString() === wallet.publicKey.toString())
     assert.ok(bondSale.quoteAmount.v.eqn(0))

@@ -62,9 +62,9 @@ pub fn handler(
     floor_price: u128,
     up_bound: u128,
     velocity: u128,
-    bond_amount: u64,
+    supply: u64,
     duration: u64,
-    distribution: u64,
+    vesting_time: u64,
 ) -> ProgramResult {
     let bond_sale = &mut ctx.accounts.bond_sale.load_init()?;
 
@@ -73,8 +73,8 @@ pub fn handler(
     let token_quote_address = &ctx.accounts.token_quote.key();
 
     **bond_sale = BondSale {
-        token_bond: token_bond_address.key(),
-        token_quote: token_quote_address.key(),
+        token_bond: *token_bond_address,
+        token_quote: *token_quote_address,
         token_bond_account: ctx.accounts.token_bond_account.key(),
         token_quote_account: ctx.accounts.token_quote_account.key(),
         payer: ctx.accounts.payer.key(),
@@ -83,14 +83,14 @@ pub fn handler(
         previous_price: Decimal::new(floor_price),
         up_bound: Decimal::new(up_bound),
         velocity: Decimal::new(velocity),
-        bond_amount: TokenAmount::new(bond_amount),
-        remaining_amount: TokenAmount::new(bond_amount),
+        supply: TokenAmount::new(supply),
+        remaining_amount: TokenAmount::new(supply),
         quote_amount: TokenAmount::new(0),
         end_time: current_time + duration,
         start_time: current_time,
         last_trade: current_time,
-        distribution,
+        vesting_time,
     };
-    token::transfer(ctx.accounts.transfer_bond(), bond_amount)?;
+    token::transfer(ctx.accounts.transfer_bond(), supply)?;
     Ok(())
 }

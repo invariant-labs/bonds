@@ -13,6 +13,9 @@ module.exports = {
     '@typescript-eslint/restrict-plus-operands': 'off',
     '@typescript-eslint/strict-boolean-expressions': 'off',
     '@typescript-eslint/prefer-nullish-coalescing': 'off',
+    '@typescript-eslint/no-var-requires': 'off',
+    'spaced-comment': 'off',
+    '@typescript-eslint/no-floating-promises': 'off',
     'prettier/prettier': ['error']
   }
 }

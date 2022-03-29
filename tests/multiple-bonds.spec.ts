@@ -8,7 +8,7 @@ import { DENOMINATOR, sleep, toDecimal } from '@invariant-labs/bonds-sdk/lib/uti
 import { assert } from 'chai'
 import { almostEqual, createToken } from './testUtils'
 import { Bonds } from '@invariant-labs/bonds-sdk/src'
-import { calculatePriceAfterSlippage } from '@invariant-labs/bonds-sdk/lib/math'
+import { getPriceAfterSlippage } from '@invariant-labs/bonds-sdk/lib/math'
 
 describe('multiple-bonds', () => {
   const provider = Provider.local()
@@ -58,7 +58,7 @@ describe('multiple-bonds', () => {
       await tokenBond.mintTo(payerBondAccount, mintAuthority, [mintAuthority], 1000)
 
       const initBondSaleVars: InitBondSale = {
-        buyAmount: new BN(1000),
+        supply: new BN(1000),
         duration: new BN(100),
         floorPrice: DENOMINATOR,
         payerBondAccount,
@@ -68,7 +68,7 @@ describe('multiple-bonds', () => {
         upBound: DENOMINATOR.divn(2),
         velocity: DENOMINATOR.divn(2),
         payer: bondInitPayer.publicKey,
-        distribution: new BN(10)
+        vestingTime: new BN(10)
       }
       bondSalePubkey = await bonds.initBondSale(initBondSaleVars, bondInitPayer)
     })
@@ -80,7 +80,7 @@ describe('multiple-bonds', () => {
       const bondSale = await bonds.getBondSale(bondSalePubkey)
       const createBondVars: CreateBond = {
         amount: new BN(100),
-        priceLimit: calculatePriceAfterSlippage(bondSale.previousPrice, toDecimal(1, 1)).v,
+        priceLimit: getPriceAfterSlippage(bondSale.previousPrice, toDecimal(1, 1)),
         bondSale: bondSalePubkey,
         ownerQuoteAccount,
         owner: bondOwner.publicKey
@@ -88,7 +88,7 @@ describe('multiple-bonds', () => {
 
       const bondPub = await bonds.createBond(createBondVars, bondOwner)
       const bond = await bonds.getBond(bondPub)
-      assert.ok(bond.buyAmount.v.eqn(100))
+      assert.ok(bond.bondAmount.v.eqn(100))
       assert.ok(bond.owner.toString() === bondOwner.publicKey.toString())
       assert.ok((await tokenQuote.getAccountInfo(ownerQuoteAccount)).amount.eqn(897))
 
@@ -97,7 +97,7 @@ describe('multiple-bonds', () => {
       const bondSale2 = await bonds.getBondSale(bondSalePubkey)
       const createBondVars2: CreateBond = {
         amount: new BN(50),
-        priceLimit: calculatePriceAfterSlippage(bondSale2.previousPrice, toDecimal(1, 1)).v,
+        priceLimit: getPriceAfterSlippage(bondSale2.previousPrice, toDecimal(1, 1)),
         bondSale: bondSalePubkey,
         ownerQuoteAccount,
         owner: bondOwner.publicKey
@@ -105,7 +105,7 @@ describe('multiple-bonds', () => {
 
       const bondPub2 = await bonds.createBond(createBondVars2, bondOwner)
       const bond2 = await bonds.getBond(bondPub2)
-      assert.ok(bond2.buyAmount.v.eqn(50))
+      assert.ok(bond2.bondAmount.v.eqn(50))
       assert.ok(bond2.owner.toString() === bondOwner.publicKey.toString())
       assert.ok(
         almostEqual(
@@ -120,14 +120,14 @@ describe('multiple-bonds', () => {
       const bondSale3 = await bonds.getBondSale(bondSalePubkey)
       const createBondVars3: CreateBond = {
         amount: new BN(111),
-        priceLimit: calculatePriceAfterSlippage(bondSale3.previousPrice, toDecimal(1, 1)).v,
+        priceLimit: getPriceAfterSlippage(bondSale3.previousPrice, toDecimal(1, 1)),
         bondSale: bondSalePubkey,
         ownerQuoteAccount,
         owner: bondOwner.publicKey
       }
       const bondPub3 = await bonds.createBond(createBondVars3, bondOwner)
       const bond3 = await bonds.getBond(bondPub3)
-      assert.ok(bond3.buyAmount.v.eqn(111))
+      assert.ok(bond3.bondAmount.v.eqn(111))
       assert.ok(bond3.owner.toString() === bondOwner.publicKey.toString())
       assert.ok(
         almostEqual(
