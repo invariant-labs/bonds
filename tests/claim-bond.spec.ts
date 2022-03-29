@@ -82,7 +82,7 @@ describe('claim-bond', () => {
 
       const createBondVars: CreateBond = {
         amount: new BN(100),
-        priceLimit: getPriceAfterSlippage(bondSale.previousPrice, toDecimal(1, 1)),
+        priceLimit: getPriceAfterSlippage(bondSale.previousPrice, toDecimal(new BN(1), 1)),
         bondSale: bondSalePubkey,
         ownerQuoteAccount,
         owner: bondOwner.publicKey
@@ -97,8 +97,8 @@ describe('claim-bond', () => {
       const ownerBondAccount = await tokenBond.createAccount(bondOwner.publicKey)
       const claimBondVars: ClaimBond = {
         ownerBondAccount,
+        bondSale: bondSalePubkey,
         bondId: new BN(0),
-        tokenBond: tokenBond.publicKey,
         owner: bondOwner.publicKey
       }
       await bonds.claimBond(claimBondVars, bondOwner)
@@ -117,7 +117,7 @@ describe('claim-bond', () => {
       const claimBondVars: ClaimBond = {
         ownerBondAccount,
         bondId: new BN(0),
-        tokenBond: tokenBond.publicKey,
+        bondSale: bondSalePubkey,
         owner: bondOwner.publicKey
       }
       await bonds.claimBond(claimBondVars, bondOwner)
@@ -134,7 +134,7 @@ describe('claim-bond', () => {
           new BN(20)
         )
       )
-      assert.isUndefined((await bonds.getAllBonds(bondSalePubkey, bondOwner.publicKey)).at(0))
+      assert.isUndefined((await bonds.getAllOwnerBonds(bondSalePubkey, bondOwner.publicKey)).at(0))
     })
   })
 
@@ -167,7 +167,7 @@ describe('claim-bond', () => {
 
       const createBondVars: CreateBond = {
         amount: new BN(100),
-        priceLimit: getPriceAfterSlippage(bondSale.previousPrice, toDecimal(1, 1)),
+        priceLimit: getPriceAfterSlippage(bondSale.previousPrice, toDecimal(new BN(1), 1)),
         bondSale: bondSalePubkey,
         ownerQuoteAccount
       }
@@ -182,7 +182,7 @@ describe('claim-bond', () => {
       const claimBondVars: ClaimBond = {
         ownerBondAccount,
         bondId: new BN(0),
-        tokenBond: tokenBond.publicKey
+        bondSale: bondSalePubkey
       }
       await bonds.claimBond(claimBondVars)
 
@@ -200,7 +200,7 @@ describe('claim-bond', () => {
       const claimBondVars: ClaimBond = {
         ownerBondAccount,
         bondId: new BN(0),
-        tokenBond: tokenBond.publicKey
+        bondSale: bondSalePubkey
       }
       await bonds.claimBond(claimBondVars)
 
@@ -215,7 +215,7 @@ describe('claim-bond', () => {
           new BN(20)
         )
       )
-      assert.isUndefined((await bonds.getAllBonds(bondSalePubkey, wallet.publicKey)).at(0))
+      assert.isUndefined((await bonds.getAllOwnerBonds(bondSalePubkey, wallet.publicKey)).at(0))
     })
   })
 })

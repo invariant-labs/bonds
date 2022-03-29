@@ -10,6 +10,7 @@ use super::TokenAmount;
 #[repr(packed)]
 #[derive(Debug, Default)]
 pub struct Bond {
+    pub bond_sale: Pubkey,
     pub token_bond: Pubkey,
     pub owner: Pubkey,
     pub token_bond_account: Pubkey,

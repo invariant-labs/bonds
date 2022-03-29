@@ -81,6 +81,7 @@ pub fn handler(ctx: Context<CreateBond>, amount: u64, price_limit: u128) -> Prog
         .v;
 
     **bond = Bond {
+        bond_sale: ctx.accounts.bond_sale.key(),
         token_bond: ctx.accounts.token_bond.key(),
         token_bond_account: ctx.accounts.token_bond_account.key(),
         owner: ctx.accounts.owner.key(),
