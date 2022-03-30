@@ -4,13 +4,15 @@ use anchor_spl::token::{close_account, transfer, CloseAccount, TokenAccount, Tra
 use crate::{
     get_signer,
     interfaces::{CloseTokenAccount, TransferBond, TransferQuote},
-    structs::BondSale,
+    structs::{BondSale, State},
     utils::close,
     SEED,
 };
 
 #[derive(Accounts)]
 pub struct EndBondSale<'info> {
+    #[account(seeds = [b"statev1"], bump = state.load()?.bump)]
+    pub state: AccountLoader<'info, State>,
     #[account(mut)]
     pub bond_sale: AccountLoader<'info, BondSale>,
     #[account(mut,
@@ -31,7 +33,9 @@ pub struct EndBondSale<'info> {
         constraint = payer_bond_account.mint == bond_sale.load()?.token_bond
     )]
     pub payer_bond_account: Account<'info, TokenAccount>,
-    #[account(mut)]
+    #[account(mut,
+        constraint = authority.key() == state.load()?.authority
+    )]
     pub authority: AccountInfo<'info>,
     #[account(mut,
         constraint = payer.key() == bond_sale.load()?.payer
@@ -83,8 +87,9 @@ impl<'info> CloseTokenAccount<'info> for EndBondSale<'info> {
     }
 }
 
-pub fn handler(ctx: Context<EndBondSale>, nonce: u8) -> ProgramResult {
-    let signer: &[&[&[u8]]] = get_signer!(nonce);
+pub fn handler(ctx: Context<EndBondSale>) -> ProgramResult {
+    let state = ctx.accounts.state.load()?;
+    let signer: &[&[&[u8]]] = get_signer!(state.nonce);
     {
         let bond_sale = *ctx.accounts.bond_sale.load()?;
         if bond_sale.quote_amount.v != 0 {

@@ -7,3 +7,7 @@ pub trait TransferBond<'info> {
 pub trait TransferQuote<'info> {
     fn transfer_quote(&self) -> CpiContext<'_, '_, '_, 'info, Transfer<'info>>;
 }
+
+pub trait TransferFee<'info> {
+    fn transfer_fee(&self) -> CpiContext<'_, '_, '_, 'info, Transfer<'info>>;
+}

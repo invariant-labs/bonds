@@ -4,11 +4,13 @@ use anchor_spl::token::{self, Transfer};
 use anchor_spl::token::{Mint, TokenAccount};
 
 use crate::interfaces::TransferBond;
-use crate::structs::{BondSale, Decimal, TokenAmount};
+use crate::structs::{BondSale, Decimal, State, TokenAmount};
 use crate::utils::get_current_timestamp;
 
 #[derive(Accounts)]
 pub struct InitBondSale<'info> {
+    #[account(seeds = [b"statev1"], bump = state.load()?.bump)]
+    pub state: AccountLoader<'info, State>,
     #[account(zero)]
     pub bond_sale: AccountLoader<'info, BondSale>,
     pub token_bond: Box<Account<'info, Mint>>,
@@ -37,6 +39,9 @@ pub struct InitBondSale<'info> {
     pub payer_quote_account: Box<Account<'info, TokenAccount>>,
     #[account(mut)]
     pub payer: Signer<'info>,
+    #[account(
+        constraint = authority.key() == state.load()?.authority
+    )]
     pub authority: AccountInfo<'info>,
     pub token_program: AccountInfo<'info>,
     #[account(address = system_program::ID)]
@@ -78,7 +83,8 @@ pub fn handler(
         token_bond_account: ctx.accounts.token_bond_account.key(),
         token_quote_account: ctx.accounts.token_quote_account.key(),
         payer: ctx.accounts.payer.key(),
-        authority: ctx.accounts.authority.key(),
+        fee: Decimal::from_decimal(1, 2),
+        fee_amount: TokenAmount::new(0),
         floor_price: Decimal::new(floor_price),
         previous_price: Decimal::new(floor_price),
         up_bound: Decimal::new(up_bound),

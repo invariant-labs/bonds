@@ -4,7 +4,6 @@ use anchor_spl::token::{Mint, TokenAccount, Transfer};
 use bond_sale::BondSale;
 
 use crate::math::calculate_new_price;
-use crate::structs::Decimal;
 use crate::utils::get_current_timestamp;
 use crate::{
     interfaces::TransferQuote,
@@ -37,7 +36,6 @@ pub struct CreateBond<'info> {
     pub token_quote_account: Box<Account<'info, TokenAccount>>,
     #[account(mut)]
     pub owner: Signer<'info>,
-    pub authority: AccountInfo<'info>,
     pub token_program: AccountInfo<'info>,
     #[account(address = system_program::ID)]
     pub system_program: AccountInfo<'info>,
@@ -75,25 +73,25 @@ pub fn handler(ctx: Context<CreateBond>, amount: u64, price_limit: u128) -> Prog
         InsufficientTokenAmount
     );
     buy_amount = amount;
-    quote_amount = TokenAmount::new(amount)
-        .big_mul(sell_price)
-        .to_token_ceil()
-        .v;
+    quote_amount = TokenAmount::new(amount).big_mul(sell_price).to_token_ceil();
+    let fee = quote_amount.big_mul(bond_sale.fee).to_token_ceil();
+    let quote_after_fee = quote_amount - fee;
 
     **bond = Bond {
         bond_sale: ctx.accounts.bond_sale.key(),
         token_bond: ctx.accounts.token_bond.key(),
         token_bond_account: ctx.accounts.token_bond_account.key(),
         owner: ctx.accounts.owner.key(),
-        authority: ctx.accounts.authority.key(),
         bond_amount: TokenAmount::new(buy_amount),
         last_claim: get_current_timestamp(),
         vesting_start: get_current_timestamp(),
         vesting_end: get_current_timestamp() + bond_sale.vesting_time,
     };
 
-    token::transfer(ctx.accounts.transfer_quote(), quote_amount)?;
+    token::transfer(ctx.accounts.transfer_quote(), quote_amount.v)?;
 
-    bond_sale.quote_amount = bond_sale.quote_amount + TokenAmount::new(quote_amount);
+    bond_sale.quote_amount += quote_after_fee;
+    bond_sale.fee_amount += fee;
+
     Ok(())
 }

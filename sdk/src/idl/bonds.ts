@@ -3,8 +3,48 @@ export type Bonds = {
   "name": "bonds",
   "instructions": [
     {
+      "name": "createState",
+      "accounts": [
+        {
+          "name": "state",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "admin",
+          "isMut": false,
+          "isSigner": true
+        },
+        {
+          "name": "programAuthority",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "bump",
+          "type": "u8"
+        },
+        {
+          "name": "nonce",
+          "type": "u8"
+        }
+      ]
+    },
+    {
       "name": "initBondSale",
       "accounts": [
+        {
+          "name": "state",
+          "isMut": false,
+          "isSigner": false
+        },
         {
           "name": "bondSale",
           "isMut": true,
@@ -137,11 +177,6 @@ export type Bonds = {
           "isSigner": true
         },
         {
-          "name": "authority",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
           "name": "tokenProgram",
           "isMut": false,
           "isSigner": false
@@ -171,6 +206,11 @@ export type Bonds = {
     {
       "name": "endBondSale",
       "accounts": [
+        {
+          "name": "state",
+          "isMut": false,
+          "isSigner": false
+        },
         {
           "name": "bondSale",
           "isMut": true,
@@ -212,12 +252,7 @@ export type Bonds = {
           "isSigner": false
         }
       ],
-      "args": [
-        {
-          "name": "nonce",
-          "type": "u8"
-        }
-      ]
+      "args": []
     },
     {
       "name": "changeVelocity",
@@ -265,6 +300,11 @@ export type Bonds = {
       "name": "claimQuote",
       "accounts": [
         {
+          "name": "state",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
           "name": "bondSale",
           "isMut": true,
           "isSigner": false
@@ -295,16 +335,16 @@ export type Bonds = {
           "isSigner": false
         }
       ],
-      "args": [
-        {
-          "name": "nonce",
-          "type": "u8"
-        }
-      ]
+      "args": []
     },
     {
       "name": "claimBond",
       "accounts": [
+        {
+          "name": "state",
+          "isMut": false,
+          "isSigner": false
+        },
         {
           "name": "bond",
           "isMut": true,
@@ -336,12 +376,74 @@ export type Bonds = {
           "isSigner": false
         }
       ],
+      "args": []
+    },
+    {
+      "name": "changeFee",
+      "accounts": [
+        {
+          "name": "state",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "bondSale",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "admin",
+          "isMut": false,
+          "isSigner": true
+        }
+      ],
       "args": [
         {
-          "name": "nonce",
-          "type": "u8"
+          "name": "newFee",
+          "type": "u128"
         }
       ]
+    },
+    {
+      "name": "withdrawFee",
+      "accounts": [
+        {
+          "name": "state",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "bondSale",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "tokenQuoteAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "adminQuoteAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "admin",
+          "isMut": false,
+          "isSigner": true
+        },
+        {
+          "name": "authority",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "tokenProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": []
     }
   ],
   "accounts": [
@@ -364,10 +466,6 @@ export type Bonds = {
           },
           {
             "name": "tokenBondAccount",
-            "type": "publicKey"
-          },
-          {
-            "name": "authority",
             "type": "publicKey"
           },
           {
@@ -417,8 +515,16 @@ export type Bonds = {
             "type": "publicKey"
           },
           {
-            "name": "authority",
-            "type": "publicKey"
+            "name": "fee",
+            "type": {
+              "defined": "Decimal"
+            }
+          },
+          {
+            "name": "feeAmount",
+            "type": {
+              "defined": "TokenAmount"
+            }
           },
           {
             "name": "floorPrice",
@@ -477,6 +583,30 @@ export type Bonds = {
           {
             "name": "vestingTime",
             "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "state",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "admin",
+            "type": "publicKey"
+          },
+          {
+            "name": "authority",
+            "type": "publicKey"
+          },
+          {
+            "name": "nonce",
+            "type": "u8"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
           }
         ]
       }
@@ -537,8 +667,48 @@ export const IDL: Bonds = {
   "name": "bonds",
   "instructions": [
     {
+      "name": "createState",
+      "accounts": [
+        {
+          "name": "state",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "admin",
+          "isMut": false,
+          "isSigner": true
+        },
+        {
+          "name": "programAuthority",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "bump",
+          "type": "u8"
+        },
+        {
+          "name": "nonce",
+          "type": "u8"
+        }
+      ]
+    },
+    {
       "name": "initBondSale",
       "accounts": [
+        {
+          "name": "state",
+          "isMut": false,
+          "isSigner": false
+        },
         {
           "name": "bondSale",
           "isMut": true,
@@ -671,11 +841,6 @@ export const IDL: Bonds = {
           "isSigner": true
         },
         {
-          "name": "authority",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
           "name": "tokenProgram",
           "isMut": false,
           "isSigner": false
@@ -705,6 +870,11 @@ export const IDL: Bonds = {
     {
       "name": "endBondSale",
       "accounts": [
+        {
+          "name": "state",
+          "isMut": false,
+          "isSigner": false
+        },
         {
           "name": "bondSale",
           "isMut": true,
@@ -746,12 +916,7 @@ export const IDL: Bonds = {
           "isSigner": false
         }
       ],
-      "args": [
-        {
-          "name": "nonce",
-          "type": "u8"
-        }
-      ]
+      "args": []
     },
     {
       "name": "changeVelocity",
@@ -799,6 +964,11 @@ export const IDL: Bonds = {
       "name": "claimQuote",
       "accounts": [
         {
+          "name": "state",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
           "name": "bondSale",
           "isMut": true,
           "isSigner": false
@@ -829,16 +999,16 @@ export const IDL: Bonds = {
           "isSigner": false
         }
       ],
-      "args": [
-        {
-          "name": "nonce",
-          "type": "u8"
-        }
-      ]
+      "args": []
     },
     {
       "name": "claimBond",
       "accounts": [
+        {
+          "name": "state",
+          "isMut": false,
+          "isSigner": false
+        },
         {
           "name": "bond",
           "isMut": true,
@@ -870,12 +1040,74 @@ export const IDL: Bonds = {
           "isSigner": false
         }
       ],
+      "args": []
+    },
+    {
+      "name": "changeFee",
+      "accounts": [
+        {
+          "name": "state",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "bondSale",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "admin",
+          "isMut": false,
+          "isSigner": true
+        }
+      ],
       "args": [
         {
-          "name": "nonce",
-          "type": "u8"
+          "name": "newFee",
+          "type": "u128"
         }
       ]
+    },
+    {
+      "name": "withdrawFee",
+      "accounts": [
+        {
+          "name": "state",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "bondSale",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "tokenQuoteAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "adminQuoteAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "admin",
+          "isMut": false,
+          "isSigner": true
+        },
+        {
+          "name": "authority",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "tokenProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": []
     }
   ],
   "accounts": [
@@ -898,10 +1130,6 @@ export const IDL: Bonds = {
           },
           {
             "name": "tokenBondAccount",
-            "type": "publicKey"
-          },
-          {
-            "name": "authority",
             "type": "publicKey"
           },
           {
@@ -951,8 +1179,16 @@ export const IDL: Bonds = {
             "type": "publicKey"
           },
           {
-            "name": "authority",
-            "type": "publicKey"
+            "name": "fee",
+            "type": {
+              "defined": "Decimal"
+            }
+          },
+          {
+            "name": "feeAmount",
+            "type": {
+              "defined": "TokenAmount"
+            }
           },
           {
             "name": "floorPrice",
@@ -1011,6 +1247,30 @@ export const IDL: Bonds = {
           {
             "name": "vestingTime",
             "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "state",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "admin",
+            "type": "publicKey"
+          },
+          {
+            "name": "authority",
+            "type": "publicKey"
+          },
+          {
+            "name": "nonce",
+            "type": "u8"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
           }
         ]
       }

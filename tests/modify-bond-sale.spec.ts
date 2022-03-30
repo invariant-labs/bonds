@@ -46,6 +46,8 @@ describe('modify-bond-sale', () => {
 
     tokenBond = new Token(connection, tokens[0].publicKey, TOKEN_PROGRAM_ID, wallet)
     tokenQuote = new Token(connection, tokens[1].publicKey, TOKEN_PROGRAM_ID, wallet)
+
+    await sale.createState(admin.publicKey, admin)
   })
 
   describe('initBondPayer', () => {
