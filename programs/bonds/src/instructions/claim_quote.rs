@@ -48,17 +48,14 @@ pub fn handler(ctx: Context<ClaimQuote>) -> ProgramResult {
     let state = ctx.accounts.state.load()?;
 
     let quote_amount = bond_sale.quote_amount;
-    let fee = quote_amount.big_mul(bond_sale.fee).to_token_ceil();
-    let quote_after_fee = quote_amount - fee;
 
     let signer: &[&[&[u8]]] = get_signer!(state.nonce);
     transfer(
         ctx.accounts.transfer_quote().with_signer(signer),
-        quote_after_fee.v,
+        quote_amount.v,
     )?;
 
     bond_sale.quote_amount = TokenAmount::new(0);
-    bond_sale.fee_amount += fee;
 
     Ok(())
 }

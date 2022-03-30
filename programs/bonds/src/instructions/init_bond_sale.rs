@@ -83,7 +83,7 @@ pub fn handler(
         token_bond_account: ctx.accounts.token_bond_account.key(),
         token_quote_account: ctx.accounts.token_quote_account.key(),
         payer: ctx.accounts.payer.key(),
-        fee: Decimal::from_decimal(1, 1),
+        fee: Decimal::from_decimal(1, 2),
         fee_amount: TokenAmount::new(0),
         floor_price: Decimal::new(floor_price),
         previous_price: Decimal::new(floor_price),

@@ -73,10 +73,9 @@ pub fn handler(ctx: Context<CreateBond>, amount: u64, price_limit: u128) -> Prog
         InsufficientTokenAmount
     );
     buy_amount = amount;
-    quote_amount = TokenAmount::new(amount)
-        .big_mul(sell_price)
-        .to_token_ceil()
-        .v;
+    quote_amount = TokenAmount::new(amount).big_mul(sell_price).to_token_ceil();
+    let fee = quote_amount.big_mul(bond_sale.fee).to_token_ceil();
+    let quote_after_fee = quote_amount - fee;
 
     **bond = Bond {
         bond_sale: ctx.accounts.bond_sale.key(),
@@ -89,8 +88,10 @@ pub fn handler(ctx: Context<CreateBond>, amount: u64, price_limit: u128) -> Prog
         vesting_end: get_current_timestamp() + bond_sale.vesting_time,
     };
 
-    token::transfer(ctx.accounts.transfer_quote(), quote_amount)?;
+    token::transfer(ctx.accounts.transfer_quote(), quote_amount.v)?;
 
-    bond_sale.quote_amount = bond_sale.quote_amount + TokenAmount::new(quote_amount);
+    bond_sale.quote_amount += quote_after_fee;
+    bond_sale.fee_amount += fee;
+
     Ok(())
 }

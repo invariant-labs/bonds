@@ -619,7 +619,8 @@ export interface BondSaleStruct {
   tokenBondAccount: PublicKey
   tokenQuoteAccount: PublicKey
   payer: PublicKey
-  authority: PublicKey
+  fee: Decimal
+  feeAmount: TokenAmount
   floorPrice: Decimal
   previousPrice: Decimal
   upBound: Decimal

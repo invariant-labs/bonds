@@ -45,6 +45,8 @@ describe('init-bond-sale', () => {
 
     tokenBond = new Token(connection, tokens[0].publicKey, TOKEN_PROGRAM_ID, wallet)
     tokenQuote = new Token(connection, tokens[1].publicKey, TOKEN_PROGRAM_ID, wallet)
+
+    await sale.createState(admin.publicKey, admin)
   })
 
   it('#initBondSale()', async () => {
@@ -69,10 +71,6 @@ describe('init-bond-sale', () => {
     const bondSalePubkey = await sale.initBondSale(initBondSaleVars, bondInitPayer)
     const bondSale = await sale.getBondSale(bondSalePubkey)
 
-    assert.ok(
-      bondSale.authority.toString() ===
-        (await sale.getProgramAuthority()).programAuthority.toString()
-    )
     assert.ok(bondSale.supply.v.eqn(1000))
     assert.ok(bondSale.floorPrice.v.eq(DENOMINATOR))
     assert.ok(bondSale.payer.toString() === bondInitPayer.publicKey.toString())
@@ -105,10 +103,6 @@ describe('init-bond-sale', () => {
     const bondSalePubkey = await sale.initBondSale(initBondSaleVars)
     const bondSale = await sale.getBondSale(bondSalePubkey)
 
-    assert.ok(
-      bondSale.authority.toString() ===
-        (await sale.getProgramAuthority()).programAuthority.toString()
-    )
     assert.ok(bondSale.supply.v.eqn(1000))
     assert.ok(bondSale.floorPrice.v.eq(DENOMINATOR))
     assert.ok(bondSale.payer.toString() === wallet.publicKey.toString())
