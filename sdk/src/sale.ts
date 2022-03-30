@@ -468,6 +468,72 @@ export class Bonds {
       await signAndSend(tx, this.connection, [signer])
     }
   }
+
+  async changeFeeInstruction(changeFee: ChangeFee) {
+    const { bondSale, newFee } = changeFee
+    const { stateAddress } = await this.getStateAddress()
+    const admin = changeFee.admin ?? this.wallet.publicKey
+
+    return this.program.instruction.changeFee(newFee, {
+      accounts: {
+        state: stateAddress,
+        bondSale,
+        admin
+      }
+    })
+  }
+
+  async changeFeeTransaction(changeFee: ChangeFee) {
+    const ix = await this.changeFeeInstruction(changeFee)
+
+    return new Transaction().add(ix)
+  }
+
+  async changeFee(changeFee: ChangeFee, signer?: Keypair) {
+    const tx = await this.changeFeeTransaction(changeFee)
+
+    if (signer === undefined) {
+      await signAndSend(tx, this.connection, undefined, this.wallet)
+    } else {
+      await signAndSend(tx, this.connection, [signer])
+    }
+  }
+
+  async withdrawFeeInstruction(withdrawFee: WithdrawFee) {
+    const { bondSale, adminQuoteAccount } = withdrawFee
+    const { stateAddress } = await this.getStateAddress()
+    const admin = withdrawFee.admin ?? this.wallet.publicKey
+    const bondSaleStruct = await this.getBondSale(bondSale)
+    const { programAuthority } = await this.getProgramAuthority()
+
+    return this.program.instruction.withdrawFee({
+      accounts: {
+        state: stateAddress,
+        bondSale,
+        tokenQuoteAccount: bondSaleStruct.tokenQuoteAccount,
+        adminQuoteAccount,
+        admin,
+        authority: programAuthority,
+        tokenProgram: TOKEN_PROGRAM_ID
+      }
+    })
+  }
+
+  async withdrawFeeTransaction(withdrawFee: WithdrawFee) {
+    const ix = await this.withdrawFeeInstruction(withdrawFee)
+
+    return new Transaction().add(ix)
+  }
+
+  async withdrawFee(withdrawFee: WithdrawFee, signer?: Keypair) {
+    const tx = await this.withdrawFeeTransaction(withdrawFee)
+
+    if (signer === undefined) {
+      await signAndSend(tx, this.connection, undefined, this.wallet)
+    } else {
+      await signAndSend(tx, this.connection, [signer])
+    }
+  }
 }
 
 export interface InitBondSale {
@@ -522,6 +588,18 @@ export interface EndBondSale {
   payerQuoteAccount: PublicKey
   payerBondAccount: PublicKey
   payer?: PublicKey
+}
+
+export interface ChangeFee {
+  bondSale: PublicKey
+  admin?: PublicKey
+  newFee: BN
+}
+
+export interface WithdrawFee {
+  bondSale: PublicKey
+  adminQuoteAccount: PublicKey
+  admin?: PublicKey
 }
 export interface BondStruct {
   bondSale: PublicKey
