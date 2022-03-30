@@ -47,8 +47,8 @@ pub mod bonds {
         instructions::create_bond::handler(ctx, amount, price_limit)
     }
 
-    pub fn end_bond_sale(ctx: Context<EndBondSale>, nonce: u8) -> ProgramResult {
-        instructions::end_bond_sale::handler(ctx, nonce)
+    pub fn end_bond_sale(ctx: Context<EndBondSale>) -> ProgramResult {
+        instructions::end_bond_sale::handler(ctx)
     }
 
     pub fn change_velocity(ctx: Context<ChangeVelocity>, velocity: u128) -> ProgramResult {
@@ -59,12 +59,12 @@ pub mod bonds {
         instructions::change_up_bound::handler(ctx, up_bound)
     }
 
-    pub fn claim_quote(ctx: Context<ClaimQuote>, nonce: u8) -> ProgramResult {
-        instructions::claim_quote::handler(ctx, nonce)
+    pub fn claim_quote(ctx: Context<ClaimQuote>) -> ProgramResult {
+        instructions::claim_quote::handler(ctx)
     }
 
-    pub fn claim_bond(ctx: Context<ClaimBond>, nonce: u8) -> ProgramResult {
-        instructions::claim_bond::handler(ctx, nonce)
+    pub fn claim_bond(ctx: Context<ClaimBond>) -> ProgramResult {
+        instructions::claim_bond::handler(ctx)
     }
 
     pub fn change_fee(ctx: Context<ChangeFee>, new_fee: u128) -> ProgramResult {

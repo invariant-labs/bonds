@@ -87,8 +87,9 @@ impl<'info> CloseTokenAccount<'info> for EndBondSale<'info> {
     }
 }
 
-pub fn handler(ctx: Context<EndBondSale>, nonce: u8) -> ProgramResult {
-    let signer: &[&[&[u8]]] = get_signer!(nonce);
+pub fn handler(ctx: Context<EndBondSale>) -> ProgramResult {
+    let state = ctx.accounts.state.load()?;
+    let signer: &[&[&[u8]]] = get_signer!(state.nonce);
     {
         let bond_sale = *ctx.accounts.bond_sale.load()?;
         if bond_sale.quote_amount.v != 0 {

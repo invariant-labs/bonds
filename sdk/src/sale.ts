@@ -17,6 +17,7 @@ import { getProgramAddress, Network } from './network'
 import { signAndSend } from './utils'
 export const SEED = 'Bonds'
 export const BOND_SEED = 'bondv1'
+export const STATE_SEED = 'statev1'
 
 export const DEFAULT_PUBLIC_KEY = new PublicKey(0)
 
@@ -66,6 +67,48 @@ export class Bonds {
     return (await this.program.account.bondSale.fetch(bondSalePubkey)) as BondSaleStruct
   }
 
+  async getStateAddress() {
+    const [stateAddress, bump] = await PublicKey.findProgramAddress(
+      [Buffer.from(STATE_SEED)],
+      this.program.programId
+    )
+
+    return {
+      stateAddress,
+      bump
+    }
+  }
+
+  async createStateInstruction(admin: PublicKey) {
+    const { stateAddress, bump } = await this.getStateAddress()
+    const { programAuthority, nonce } = await this.getProgramAuthority()
+
+    return this.program.instruction.createState(bump, nonce, {
+      accounts: {
+        state: stateAddress,
+        admin,
+        programAuthority,
+        systemProgram: SystemProgram.programId
+      }
+    })
+  }
+
+  async createStateTransaction(admin: PublicKey) {
+    const ix = await this.createStateInstruction(admin)
+
+    return new Transaction().add(ix)
+  }
+
+  async createState(admin: PublicKey, signer: Keypair) {
+    const tx = await this.createStateTransaction(admin)
+
+    if (signer === undefined) {
+      await signAndSend(tx, this.connection, undefined, this.wallet)
+    } else {
+      await signAndSend(tx, this.connection, [signer])
+    }
+  }
+
   async initBondSaleInstruction(
     initBondSale: InitBondSale,
     bondSalePub: PublicKey,
@@ -85,6 +128,7 @@ export class Bonds {
       vestingTime
     } = initBondSale
     const payerPubkey = initBondSale.payer ?? this.wallet.publicKey
+    const { stateAddress } = await this.getStateAddress()
 
     const { programAuthority } = await this.getProgramAuthority()
 
@@ -97,6 +141,7 @@ export class Bonds {
       vestingTime,
       {
         accounts: {
+          state: stateAddress,
           bondSale: bondSalePub,
           tokenBond: tokenBond.publicKey,
           tokenQuote: tokenQuote.publicKey,
@@ -205,7 +250,6 @@ export class Bonds {
     const { bondSale, ownerQuoteAccount, amount, priceLimit } = createBond
     const ownerPubkey = createBond.owner ?? this.wallet.publicKey
     const bondSaleStruct = await this.getBondSale(bondSale)
-    const { programAuthority } = await this.getProgramAuthority()
 
     return this.program.instruction.createBond(amount, priceLimit, {
       accounts: {
@@ -217,7 +261,6 @@ export class Bonds {
         tokenBondAccount: bondSaleStruct.tokenBondAccount,
         tokenQuoteAccount: bondSaleStruct.tokenQuoteAccount,
         owner: ownerPubkey,
-        authority: programAuthority,
         tokenProgram: TOKEN_PROGRAM_ID,
         systemProgram: SystemProgram.programId,
         rent: SYSVAR_RENT_PUBKEY
@@ -319,10 +362,12 @@ export class Bonds {
     const { bondSale, payerQuoteAccount } = claimQuote
     const payerPubkey = claimQuote.payer ?? this.wallet.publicKey
     const bondSaleQuoteAccount = (await this.getBondSale(bondSale)).tokenQuoteAccount
-    const { programAuthority, nonce } = await this.getProgramAuthority()
+    const { programAuthority } = await this.getProgramAuthority()
+    const { stateAddress } = await this.getStateAddress()
 
-    return this.program.instruction.claimQuote(nonce, {
+    return this.program.instruction.claimQuote({
       accounts: {
+        state: stateAddress,
         bondSale: bondSale,
         bondSaleQuoteAccount,
         payerQuoteAccount,
@@ -353,10 +398,12 @@ export class Bonds {
     const { bondSale, ownerBondAccount, bondId } = claimBond
     const owner = claimBond.owner ?? this.wallet.publicKey
     const bond = (await this.getAllOwnerBonds(bondSale, owner)).at(bondId.toNumber())
-    const { programAuthority, nonce } = await this.getProgramAuthority()
+    const { programAuthority } = await this.getProgramAuthority()
+    const { stateAddress } = await this.getStateAddress()
 
-    return this.program.instruction.claimBond(nonce, {
+    return this.program.instruction.claimBond({
       accounts: {
+        state: stateAddress,
         bond: bond.publicKey,
         tokenBondAccount: bond.account.tokenBondAccount,
         ownerBondAccount,
@@ -386,12 +433,14 @@ export class Bonds {
 
   async endBondSaleInstruction(endBondSale: EndBondSale) {
     const { bondSale, payerQuoteAccount, payerBondAccount } = endBondSale
-    const { programAuthority, nonce } = await this.getProgramAuthority()
+    const { programAuthority } = await this.getProgramAuthority()
     const bondSaleStruct = await this.getBondSale(bondSale)
     const payerPubkey = endBondSale.payer ?? this.wallet.publicKey
+    const { stateAddress } = await this.getStateAddress()
 
-    return this.program.instruction.endBondSale(nonce, {
+    return this.program.instruction.endBondSale({
       accounts: {
+        state: stateAddress,
         bondSale,
         tokenQuoteAccount: bondSaleStruct.tokenQuoteAccount,
         tokenBondAccount: bondSaleStruct.tokenBondAccount,

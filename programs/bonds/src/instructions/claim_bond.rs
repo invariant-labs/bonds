@@ -49,15 +49,16 @@ impl<'info> TransferBond<'info> for ClaimBond<'info> {
     }
 }
 
-pub fn handler(ctx: Context<ClaimBond>, nonce: u8) -> ProgramResult {
+pub fn handler(ctx: Context<ClaimBond>) -> ProgramResult {
     {
         let mut bond = ctx.accounts.bond.load_mut()?;
+        let state = ctx.accounts.state.load()?;
 
         let current_time = get_current_timestamp();
         let amount_to_claim = bond.get_amount_to_claim(current_time).unwrap();
         bond.last_claim = current_time;
 
-        let signer: &[&[&[u8]]] = get_signer!(nonce);
+        let signer: &[&[&[u8]]] = get_signer!(state.nonce);
         transfer(
             ctx.accounts.transfer_bond().with_signer(signer),
             amount_to_claim.v,

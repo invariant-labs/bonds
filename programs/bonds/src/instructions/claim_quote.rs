@@ -43,14 +43,15 @@ impl<'info> TransferQuote<'info> for ClaimQuote<'info> {
     }
 }
 
-pub fn handler(ctx: Context<ClaimQuote>, nonce: u8) -> ProgramResult {
+pub fn handler(ctx: Context<ClaimQuote>) -> ProgramResult {
     let mut bond_sale = ctx.accounts.bond_sale.load_mut()?;
+    let state = ctx.accounts.state.load()?;
 
     let quote_amount = bond_sale.quote_amount;
     let fee = quote_amount.big_mul(bond_sale.fee).to_token_ceil();
     let quote_after_fee = quote_amount - fee;
 
-    let signer: &[&[&[u8]]] = get_signer!(nonce);
+    let signer: &[&[&[u8]]] = get_signer!(state.nonce);
     transfer(
         ctx.accounts.transfer_quote().with_signer(signer),
         quote_after_fee.v,
