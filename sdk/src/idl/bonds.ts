@@ -237,6 +237,11 @@ export type Bonds = {
           "isSigner": false
         },
         {
+          "name": "adminQuoteAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
           "name": "authority",
           "isMut": true,
           "isSigner": false
@@ -897,6 +902,11 @@ export const IDL: Bonds = {
         },
         {
           "name": "payerBondAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "adminQuoteAccount",
           "isMut": true,
           "isSigner": false
         },

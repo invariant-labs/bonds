@@ -3,19 +3,13 @@ import { Provider, BN } from '@project-serum/anchor'
 import { Token, TOKEN_PROGRAM_ID } from '@solana/spl-token'
 import { Keypair, PublicKey } from '@solana/web3.js'
 import { Network } from '@invariant-labs/bonds-sdk'
-import {
-  ClaimQuote,
-  CreateBond,
-  InitBondSale,
-  WithdrawFee
-} from '@invariant-labs/bonds-sdk/lib/sale'
+import { ChangeFee, InitBondSale } from '@invariant-labs/bonds-sdk/lib/sale'
 import { DENOMINATOR, toDecimal } from '@invariant-labs/bonds-sdk/lib/utils'
 import { assert } from 'chai'
-import { assertThrowsAsync, createToken } from './testUtils'
+import { createToken } from './testUtils'
 import { Bonds } from '@invariant-labs/bonds-sdk/src'
-import { getPriceAfterSlippage } from '@invariant-labs/bonds-sdk/lib/math'
 
-describe('withdraw-fee', () => {
+describe('claim-quote', () => {
   const provider = Provider.local()
   const connection = provider.connection
 
@@ -31,7 +25,6 @@ describe('withdraw-fee', () => {
   let tokenQuote: Token
   let bondSalePubkey: PublicKey
   let payerQuoteAccount: PublicKey
-  let adminQuoteAccount: PublicKey
 
   before(async () => {
     bonds = await Bonds.build(
@@ -59,7 +52,8 @@ describe('withdraw-fee', () => {
 
     await bonds.createState(admin.publicKey, admin)
   })
-  describe('withdraw-fee', () => {
+
+  describe('changeFee', () => {
     it('#initBondSale()', async () => {
       const payerBondAccount = await tokenBond.createAccount(bondInitPayer.publicKey)
       payerQuoteAccount = await tokenQuote.createAccount(bondInitPayer.publicKey)
@@ -82,34 +76,18 @@ describe('withdraw-fee', () => {
       bondSalePubkey = await bonds.initBondSale(initBondSaleVars, bondInitPayer)
     })
 
-    it('#createBond()', async () => {
-      const ownerQuoteAccount = await tokenQuote.createAccount(bondOwner.publicKey)
-      await tokenQuote.mintTo(ownerQuoteAccount, mintAuthority, [mintAuthority], 1000)
+    it('#changeFee()', async () => {
+      const newFee = toDecimal(new BN(1), 1)
+
+      const changeFeeVars: ChangeFee = {
+        bondSale: bondSalePubkey,
+        admin: admin.publicKey,
+        newFee: newFee.v
+      }
+      await bonds.changeFee(changeFeeVars, admin)
+
       const bondSale = await bonds.getBondSale(bondSalePubkey)
-
-      const createBondVars: CreateBond = {
-        amount: new BN(100),
-        priceLimit: getPriceAfterSlippage(bondSale.previousPrice, toDecimal(new BN(1), 1)),
-        bondSale: bondSalePubkey,
-        ownerQuoteAccount,
-        owner: bondOwner.publicKey
-      }
-
-      await bonds.createBond(createBondVars, bondOwner)
-    })
-
-    it('#withdrawFee()', async () => {
-      adminQuoteAccount = await tokenQuote.createAccount(admin.publicKey)
-
-      const withdrawFeeVars: WithdrawFee = {
-        bondSale: bondSalePubkey,
-        adminQuoteAccount,
-        admin: admin.publicKey
-      }
-
-      await bonds.withdrawFee(withdrawFeeVars, admin)
-
-      assert.ok((await tokenQuote.getAccountInfo(adminQuoteAccount)).amount.eqn(2))
+      assert.ok(bondSale.fee.v.eq(newFee.v))
     })
   })
 })
