@@ -94,16 +94,19 @@ describe('end-bond-sale', () => {
     })
 
     it('#endBondSale()', async () => {
+      const adminQuoteAccount = await tokenQuote.createAccount(admin.publicKey)
+
       const endBondSaleVars: EndBondSale = {
         bondSale: bondSalePubkey,
         payerQuoteAccount,
         payerBondAccount,
+        adminQuoteAccount,
         payer: bondInitPayer.publicKey
       }
 
       await bonds.endBondSale(endBondSaleVars, bondInitPayer)
       assert.ok((await tokenBond.getAccountInfo(payerBondAccount)).amount.eqn(900))
-      assert.ok((await tokenQuote.getAccountInfo(payerQuoteAccount)).amount.eqn(103))
+      assert.ok((await tokenQuote.getAccountInfo(payerQuoteAccount)).amount.eqn(101))
       await assertThrowsAsync(bonds.getBondSale(bondSalePubkey), ERROR.ACCOUNT_NOT_EXISTS)
     })
   })
@@ -146,15 +149,18 @@ describe('end-bond-sale', () => {
     })
 
     it('#endBondSale()', async () => {
+      const adminQuoteAccount = await tokenQuote.createAccount(admin.publicKey)
+
       const endBondSaleVars: EndBondSale = {
         bondSale: bondSalePubkey,
+        adminQuoteAccount,
         payerQuoteAccount,
         payerBondAccount
       }
 
       await bonds.endBondSale(endBondSaleVars)
       assert.ok((await tokenBond.getAccountInfo(payerBondAccount)).amount.eqn(900))
-      assert.ok((await tokenQuote.getAccountInfo(payerQuoteAccount)).amount.eqn(103))
+      assert.ok((await tokenQuote.getAccountInfo(payerQuoteAccount)).amount.eqn(101))
       await assertThrowsAsync(bonds.getBondSale(bondSalePubkey), ERROR.ACCOUNT_NOT_EXISTS)
     })
   })

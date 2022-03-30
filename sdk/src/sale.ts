@@ -432,7 +432,7 @@ export class Bonds {
   }
 
   async endBondSaleInstruction(endBondSale: EndBondSale) {
-    const { bondSale, payerQuoteAccount, payerBondAccount } = endBondSale
+    const { bondSale, payerQuoteAccount, payerBondAccount, adminQuoteAccount } = endBondSale
     const { programAuthority } = await this.getProgramAuthority()
     const bondSaleStruct = await this.getBondSale(bondSale)
     const payerPubkey = endBondSale.payer ?? this.wallet.publicKey
@@ -446,6 +446,7 @@ export class Bonds {
         tokenBondAccount: bondSaleStruct.tokenBondAccount,
         payerQuoteAccount,
         payerBondAccount,
+        adminQuoteAccount,
         authority: programAuthority,
         payer: payerPubkey,
         tokenProgram: TOKEN_PROGRAM_ID
@@ -587,6 +588,7 @@ export interface EndBondSale {
   bondSale: PublicKey
   payerQuoteAccount: PublicKey
   payerBondAccount: PublicKey
+  adminQuoteAccount: PublicKey
   payer?: PublicKey
 }
 

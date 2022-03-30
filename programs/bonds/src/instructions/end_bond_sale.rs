@@ -3,7 +3,7 @@ use anchor_spl::token::{close_account, transfer, CloseAccount, TokenAccount, Tra
 
 use crate::{
     get_signer,
-    interfaces::{CloseTokenAccount, TransferBond, TransferQuote},
+    interfaces::{CloseTokenAccount, TransferBond, TransferFee, TransferQuote},
     structs::{BondSale, State},
     utils::close,
     SEED,
@@ -18,21 +18,26 @@ pub struct EndBondSale<'info> {
     #[account(mut,
         constraint = token_quote_account.key() == bond_sale.load()?.token_quote_account,
     )]
-    pub token_quote_account: Account<'info, TokenAccount>,
+    pub token_quote_account: Box<Account<'info, TokenAccount>>,
     #[account(mut,
         constraint = token_bond_account.key() == bond_sale.load()?.token_bond_account,
     )]
-    pub token_bond_account: Account<'info, TokenAccount>,
+    pub token_bond_account: Box<Account<'info, TokenAccount>>,
     #[account(mut,
         constraint = &payer_quote_account.owner == payer.key,
         constraint = payer_quote_account.mint == bond_sale.load()?.token_quote
     )]
-    pub payer_quote_account: Account<'info, TokenAccount>,
+    pub payer_quote_account: Box<Account<'info, TokenAccount>>,
     #[account(mut,
         constraint = &payer_bond_account.owner == payer.key,
         constraint = payer_bond_account.mint == bond_sale.load()?.token_bond
     )]
-    pub payer_bond_account: Account<'info, TokenAccount>,
+    pub payer_bond_account: Box<Account<'info, TokenAccount>>,
+    #[account(mut,
+        constraint = admin_quote_account.owner == state.load()?.admin,
+        constraint = admin_quote_account.mint == bond_sale.load()?.token_quote
+    )]
+    pub admin_quote_account: Box<Account<'info, TokenAccount>>,
     #[account(mut,
         constraint = authority.key() == state.load()?.authority
     )]
@@ -70,6 +75,19 @@ impl<'info> TransferBond<'info> for EndBondSale<'info> {
     }
 }
 
+impl<'info> TransferFee<'info> for EndBondSale<'info> {
+    fn transfer_fee(&self) -> CpiContext<'_, '_, '_, 'info, Transfer<'info>> {
+        CpiContext::new(
+            self.token_program.to_account_info(),
+            Transfer {
+                from: self.token_quote_account.to_account_info(),
+                to: self.admin_quote_account.to_account_info(),
+                authority: self.authority.to_account_info().clone(),
+            },
+        )
+    }
+}
+
 impl<'info> CloseTokenAccount<'info> for EndBondSale<'info> {
     fn close(
         &self,
@@ -92,16 +110,25 @@ pub fn handler(ctx: Context<EndBondSale>) -> ProgramResult {
     let signer: &[&[&[u8]]] = get_signer!(state.nonce);
     {
         let bond_sale = *ctx.accounts.bond_sale.load()?;
+
         if bond_sale.quote_amount.v != 0 {
             transfer(
                 ctx.accounts.transfer_quote().with_signer(signer),
                 bond_sale.quote_amount.v,
             )?;
         }
+
         if bond_sale.remaining_amount.v != 0 {
             transfer(
                 ctx.accounts.transfer_bond().with_signer(signer),
                 bond_sale.remaining_amount.v,
+            )?;
+        }
+
+        if bond_sale.fee_amount.v != 0 {
+            transfer(
+                ctx.accounts.transfer_fee().with_signer(signer),
+                bond_sale.fee_amount.v,
             )?;
         }
     }
@@ -122,44 +149,48 @@ pub fn handler(ctx: Context<EndBondSale>) -> ProgramResult {
         ctx.accounts.payer.to_account_info(),
     )?;
 
-    diff += **ctx
-        .accounts
-        .payer
-        .to_account_info()
-        .try_borrow_mut_lamports()?
-        - initial_lamports;
-    **ctx
-        .accounts
-        .payer
-        .to_account_info()
-        .try_borrow_mut_lamports()? = initial_lamports;
+    if ctx.accounts.token_quote_account.amount == 0 {
+        diff += **ctx
+            .accounts
+            .payer
+            .to_account_info()
+            .try_borrow_mut_lamports()?
+            - initial_lamports;
+        **ctx
+            .accounts
+            .payer
+            .to_account_info()
+            .try_borrow_mut_lamports()? = initial_lamports;
 
-    close_account(
-        ctx.accounts
-            .close(
-                ctx.accounts.token_quote_account.to_account_info(),
-                ctx.accounts.payer.to_account_info(),
-            )
-            .with_signer(signer),
-    )?;
-
-    diff += **ctx
-        .accounts
-        .payer
-        .to_account_info()
-        .try_borrow_mut_lamports()?
-        - initial_lamports;
-    **ctx
-        .accounts
-        .payer
-        .to_account_info()
-        .try_borrow_mut_lamports()? = initial_lamports;
+        close_account(
+            ctx.accounts
+                .close(
+                    ctx.accounts.token_quote_account.to_account_info(),
+                    ctx.accounts.payer.to_account_info(),
+                )
+                .with_signer(signer),
+        )?;
+    }
 
     if ctx.accounts.token_bond_account.amount == 0 {
-        close(
-            ctx.accounts.token_bond_account.to_account_info(),
-            ctx.accounts.authority.to_account_info(),
-        )?;
+        diff += **ctx
+            .accounts
+            .payer
+            .to_account_info()
+            .try_borrow_mut_lamports()?
+            - initial_lamports;
+        **ctx
+            .accounts
+            .payer
+            .to_account_info()
+            .try_borrow_mut_lamports()? = initial_lamports;
+
+        if ctx.accounts.token_bond_account.amount == 0 {
+            close(
+                ctx.accounts.token_bond_account.to_account_info(),
+                ctx.accounts.authority.to_account_info(),
+            )?;
+        }
     }
 
     **ctx
