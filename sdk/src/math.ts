@@ -19,7 +19,7 @@ export const calculateSellPrice = (bondSale: BondSaleStruct, amount: BN) => {
   const supplyRatio = amount.mul(DENOMINATOR).div(bondSale.supply.v)
 
   let price: BN
-  if (bondSale.previousPrice.v.lt(bondSale.floorPrice.v)) {
+  if (bondSale.previousPrice.v.lt(bondSale.floorPrice.v.add(deltaPrice))) {
     price = bondSale.floorPrice.v
   } else {
     price = bondSale.previousPrice.v.sub(deltaPrice)

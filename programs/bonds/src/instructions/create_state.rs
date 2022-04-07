@@ -4,7 +4,7 @@ use crate::structs::State;
 
 #[derive(Accounts)]
 pub struct CreateState<'info> {
-    #[account(init, seeds = [b"statev1"], payer = admin, bump)]
+    #[account(init, seeds = [b"statev1".as_ref()], payer = admin, bump)]
     pub state: AccountLoader<'info, State>,
     pub admin: Signer<'info>,
     pub program_authority: AccountInfo<'info>,
