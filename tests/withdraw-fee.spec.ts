@@ -3,15 +3,10 @@ import { Provider, BN } from '@project-serum/anchor'
 import { Token, TOKEN_PROGRAM_ID } from '@solana/spl-token'
 import { Keypair, PublicKey } from '@solana/web3.js'
 import { Network } from '@invariant-labs/bonds-sdk'
-import {
-  ClaimQuote,
-  CreateBond,
-  InitBondSale,
-  WithdrawFee
-} from '@invariant-labs/bonds-sdk/lib/sale'
+import { CreateBond, InitBondSale, WithdrawFee } from '@invariant-labs/bonds-sdk/lib/sale'
 import { DENOMINATOR, toDecimal } from '@invariant-labs/bonds-sdk/lib/utils'
 import { assert } from 'chai'
-import { assertThrowsAsync, createToken } from './testUtils'
+import { createToken } from './testUtils'
 import { Bonds } from '@invariant-labs/bonds-sdk/src'
 import { getPriceAfterSlippage } from '@invariant-labs/bonds-sdk/lib/math'
 

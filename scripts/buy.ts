@@ -5,16 +5,17 @@ import {
   getPriceAfterSlippage
 } from '@invariant-labs/bonds-sdk/lib/math'
 import { MOCK_TOKENS } from '@invariant-labs/bonds-sdk/lib/network'
-import { CreateBond } from '@invariant-labs/bonds-sdk/lib/sale'
+import { BondSaleStruct, BondStruct, CreateBond } from '@invariant-labs/bonds-sdk/lib/sale'
 import { toDecimal } from '@invariant-labs/bonds-sdk/lib/utils'
 import { BN, Provider } from '@project-serum/anchor'
 import { Token, TOKEN_PROGRAM_ID } from '@solana/spl-token'
 import { clusterApiUrl, Keypair, PublicKey } from '@solana/web3.js'
+import { assert } from 'chai'
 import { MINTER } from './minter'
 
 require('dotenv').config()
 
-const bondSalePubEnd04April = new PublicKey('ABdmXApueWFhz1EzPPNr2EiJ4B8r3nqfKEtGgcXkSVuH')
+const bondSalePub = new PublicKey('4xYUgeAZ5SzpXEY5n9wJoAswwMCthvfyJ1KcdcR3TVDB')
 const provider = Provider.local(clusterApiUrl('devnet'), {
   skipPreflight: true
 })
@@ -27,27 +28,56 @@ const buy = async (bonds: Bonds, buyer: Keypair, bondSalePub: PublicKey) => {
 
   await usdcToken.mintTo(buyerQuoteAccount, MINTER, [MINTER], 100_000)
 
-  const bondSale = await bonds.getBondSale(bondSalePubEnd04April)
+  let bondSaleBefore: BondSaleStruct
+  while (true) {
+    try {
+      bondSaleBefore = await bonds.getBondSale(bondSalePub)
+      break
+    } catch (error) {}
+  }
+
   const priceSale = getPriceAfterSlippage(
-    { v: calculateSellPrice(bondSale, new BN(6030)) },
+    { v: calculateSellPrice(bondSaleBefore, new BN(6030)) },
     toDecimal(new BN(1), 1)
   )
-  console.log('priceSale: ', priceSale.toString())
-  const ceilPrice = getCeilPrice(bondSale.upBound, bondSale.floorPrice)
+
+  const amount = new BN(6030)
+  const ceilPrice = getCeilPrice(bondSaleBefore.upBound, bondSaleBefore.floorPrice)
   const createBondVars: CreateBond = {
-    amount: new BN(6030),
+    amount,
     bondSale: bondSalePub,
     ownerQuoteAccount: buyerQuoteAccount,
     priceLimit: priceSale.gte(ceilPrice) ? ceilPrice : priceSale,
     owner: buyer.publicKey
   }
 
-  await bonds.createBond(createBondVars, buyer)
+  const bondPubkey = await bonds.createBond(createBondVars, buyer)
+
+  let bond: BondStruct
+  while (true) {
+    try {
+      bond = await bonds.getBond(bondPubkey)
+      break
+    } catch (error) {}
+  }
+
+  let bondSaleAfter: BondSaleStruct
+  while (true) {
+    try {
+      bondSaleAfter = await bonds.getBondSale(bondSalePub)
+      break
+    } catch (error) {}
+  }
+
+  const tokenBondDiff = bondSaleBefore.remainingAmount.v.sub(bondSaleAfter.remainingAmount.v)
+  assert.ok(bond.bondAmount.v.eq(amount))
+  assert.ok(bond.vestingEnd.sub(bond.vestingStart).eq(bondSaleAfter.vestingTime))
+  assert.ok(tokenBondDiff.eq(amount))
 }
 
 const main = async () => {
   const bonds = await Bonds.build(Network.DEV, provider.wallet, connection)
-  await buy(bonds, MINTER, bondSalePubEnd04April)
+  await buy(bonds, MINTER, bondSalePub)
 }
 
 main()

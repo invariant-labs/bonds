@@ -6,9 +6,9 @@ export enum Network {
 export const getProgramAddress = (network: Network) => {
   switch (network) {
     case Network.LOCAL:
-      return 'A8jXJ4XTwjTo4yPoAWu8iiHHvoCM8c91NWBcjKsc886g'
+      return '2PAZiQGBhxQx45UsEcjn9iufTXZgrTD1q9ZdNBVR6YEc'
     case Network.DEV:
-      return 'A8jXJ4XTwjTo4yPoAWu8iiHHvoCM8c91NWBcjKsc886g'
+      return '2PAZiQGBhxQx45UsEcjn9iufTXZgrTD1q9ZdNBVR6YEc'
     default:
       throw new Error('Unknown network')
   }

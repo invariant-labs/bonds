@@ -5,7 +5,7 @@ import { clusterApiUrl, PublicKey } from '@solana/web3.js'
 
 require('dotenv').config()
 
-const bondSalePubEnd04April = new PublicKey('ABdmXApueWFhz1EzPPNr2EiJ4B8r3nqfKEtGgcXkSVuH')
+const bondSalePub = new PublicKey('4xYUgeAZ5SzpXEY5n9wJoAswwMCthvfyJ1KcdcR3TVDB')
 const provider = Provider.local(clusterApiUrl('devnet'), {
   skipPreflight: true
 })
@@ -13,7 +13,7 @@ const provider = Provider.local(clusterApiUrl('devnet'), {
 const connection = provider.connection
 
 const checkAllBonds = async (bonds: Bonds) => {
-  const allBonds = await bonds.getAllBonds(bondSalePubEnd04April)
+  const allBonds = await bonds.getAllBonds(bondSalePub)
 
   for (const bond of allBonds) {
     console.log('amountToClaim: ', calculateAmountToClaim(bond).toString())
