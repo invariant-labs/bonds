@@ -17,6 +17,7 @@ pub fn handler(ctx: Context<CreateState>, bump: u8, nonce: u8) -> ProgramResult 
     *state = State {
         admin: ctx.accounts.admin.key(),
         authority: ctx.accounts.program_authority.key(),
+        next_bond_sale: 0,
         bump,
         nonce,
     };

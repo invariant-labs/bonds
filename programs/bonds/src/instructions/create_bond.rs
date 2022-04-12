@@ -84,7 +84,7 @@ pub fn handler(ctx: Context<CreateBond>, amount: u64, price_limit: u128) -> Prog
         last_claim: get_current_timestamp(),
         vesting_start: get_current_timestamp(),
         vesting_end: get_current_timestamp() + bond_sale.vesting_time,
-        id: bond_sale.id,
+        id: bond_sale.next_bond,
     };
 
     token::transfer(ctx.accounts.transfer_quote(), quote_amount.v)?;
