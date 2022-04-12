@@ -18,6 +18,7 @@ pub struct Bond {
     pub last_claim: u64,
     pub vesting_start: u64,
     pub vesting_end: u64,
+    pub id: u128,
 }
 
 impl Bond {

@@ -490,6 +490,10 @@ export type Bonds = {
           {
             "name": "vestingEnd",
             "type": "u64"
+          },
+          {
+            "name": "id",
+            "type": "u128"
           }
         ]
       }
@@ -588,6 +592,10 @@ export type Bonds = {
           {
             "name": "vestingTime",
             "type": "u64"
+          },
+          {
+            "name": "id",
+            "type": "u128"
           }
         ]
       }
@@ -1159,6 +1167,10 @@ export const IDL: Bonds = {
           {
             "name": "vestingEnd",
             "type": "u64"
+          },
+          {
+            "name": "id",
+            "type": "u128"
           }
         ]
       }
@@ -1257,6 +1269,10 @@ export const IDL: Bonds = {
           {
             "name": "vestingTime",
             "type": "u64"
+          },
+          {
+            "name": "id",
+            "type": "u128"
           }
         ]
       }

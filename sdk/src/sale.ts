@@ -221,11 +221,21 @@ export class Bonds {
     return bondSaleAddress.publicKey
   }
 
-  async getBond(bondPub: PublicKey) {
+  async getBondByAddress(bondPub: PublicKey) {
     return (await this.program.account.bond.fetch(bondPub)) as BondStruct
   }
 
-  async getAllOwnerBonds(bondSale: PublicKey, owner: PublicKey) {
+  async getBondById(id: BN) {
+    return (
+      await this.program.account.bond.all([
+        {
+          memcmp: { bytes: bs58.encode(id.toBuffer()), offset: 168 }
+        }
+      ])
+    )[0]
+  }
+
+  async getAllOwnerBondsInBondSale(bondSale: PublicKey, owner: PublicKey) {
     return await this.program.account.bond.all([
       {
         memcmp: { bytes: bs58.encode(bondSale.toBuffer()), offset: 8 }
@@ -236,14 +246,24 @@ export class Bonds {
     ])
   }
 
+  async getAllOwnerBonds(owner: PublicKey) {
+    return await this.program.account.bond.all([
+      {
+        memcmp: { bytes: bs58.encode(owner.toBuffer()), offset: 72 }
+      }
+    ])
+  }
+
   async getAllBonds(bondSale: PublicKey) {
-    return (
-      await this.program.account.bond.all([
-        {
-          memcmp: { bytes: bs58.encode(bondSale.toBuffer()), offset: 8 }
-        }
-      ])
-    ).map(b => b.account) as BondStruct[]
+    return await this.program.account.bond.all([
+      {
+        memcmp: { bytes: bs58.encode(bondSale.toBuffer()), offset: 8 }
+      }
+    ])
+  }
+
+  async getAllBondSales() {
+    return (await this.program.account.bondSale.all([])).map(b => b.account) as BondSaleStruct[]
   }
 
   async createBondInstruction(createBond: CreateBond, bondPub: PublicKey) {
@@ -395,9 +415,9 @@ export class Bonds {
   }
 
   async claimBondInstruction(claimBond: ClaimBond) {
-    const { bondSale, ownerBondAccount, bondId } = claimBond
+    const { ownerBondAccount, bondId } = claimBond
     const owner = claimBond.owner ?? this.wallet.publicKey
-    const bond = (await this.getAllOwnerBonds(bondSale, owner)).at(bondId.toNumber())
+    const bond = await this.getBondById(bondId)
     const { programAuthority } = await this.getProgramAuthority()
     const { stateAddress } = await this.getStateAddress()
 
@@ -578,7 +598,6 @@ export interface ClaimQuote {
 }
 
 export interface ClaimBond {
-  bondSale: PublicKey
   ownerBondAccount: PublicKey
   owner?: PublicKey
   bondId: BN
@@ -613,6 +632,7 @@ export interface BondStruct {
   lastClaim: BN
   vestingStart: BN
   vestingEnd: BN
+  id: BN
 }
 
 export interface BondSaleStruct {
@@ -634,6 +654,7 @@ export interface BondSaleStruct {
   startTime: BN
   lastTrade: BN
   vestingTime: BN
+  id: BN
 }
 
 export interface Decimal {

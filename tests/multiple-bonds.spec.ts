@@ -89,7 +89,7 @@ describe('multiple-bonds', () => {
       }
 
       const bondPub = await bonds.createBond(createBondVars, bondOwner)
-      const bond = await bonds.getBond(bondPub)
+      const bond = await bonds.getBondByAddress(bondPub)
       assert.ok(bond.bondAmount.v.eqn(100))
       assert.ok(bond.owner.toString() === bondOwner.publicKey.toString())
       assert.ok((await tokenQuote.getAccountInfo(ownerQuoteAccount)).amount.eqn(897))
@@ -106,7 +106,7 @@ describe('multiple-bonds', () => {
       }
 
       const bondPub2 = await bonds.createBond(createBondVars2, bondOwner)
-      const bond2 = await bonds.getBond(bondPub2)
+      const bond2 = await bonds.getBondByAddress(bondPub2)
       assert.ok(bond2.bondAmount.v.eqn(50))
       assert.ok(bond2.owner.toString() === bondOwner.publicKey.toString())
       assert.ok(
@@ -128,7 +128,7 @@ describe('multiple-bonds', () => {
         owner: bondOwner.publicKey
       }
       const bondPub3 = await bonds.createBond(createBondVars3, bondOwner)
-      const bond3 = await bonds.getBond(bondPub3)
+      const bond3 = await bonds.getBondByAddress(bondPub3)
       assert.ok(bond3.bondAmount.v.eqn(111))
       assert.ok(bond3.owner.toString() === bondOwner.publicKey.toString())
       assert.ok(
