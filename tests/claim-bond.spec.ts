@@ -99,7 +99,6 @@ describe('claim-bond', () => {
       const ownerBondAccount = await tokenBond.createAccount(bondOwner.publicKey)
       const claimBondVars: ClaimBond = {
         ownerBondAccount,
-        bondSale: bondSalePubkey,
         bondId: new BN(0),
         owner: bondOwner.publicKey
       }
@@ -119,7 +118,6 @@ describe('claim-bond', () => {
       const claimBondVars: ClaimBond = {
         ownerBondAccount,
         bondId: new BN(0),
-        bondSale: bondSalePubkey,
         owner: bondOwner.publicKey
       }
       await bonds.claimBond(claimBondVars, bondOwner)
@@ -136,7 +134,7 @@ describe('claim-bond', () => {
           new BN(20)
         )
       )
-      assert.isUndefined((await bonds.getAllOwnerBonds(bondSalePubkey, bondOwner.publicKey)).at(0))
+      assert.isUndefined((await bonds.getAllOwnerBonds(bondOwner.publicKey)).at(0))
     })
   })
 
@@ -183,8 +181,7 @@ describe('claim-bond', () => {
       const ownerBondAccount = await tokenBond.createAccount(wallet.publicKey)
       const claimBondVars: ClaimBond = {
         ownerBondAccount,
-        bondId: new BN(0),
-        bondSale: bondSalePubkey
+        bondId: new BN(0)
       }
       await bonds.claimBond(claimBondVars)
 
@@ -201,8 +198,7 @@ describe('claim-bond', () => {
       const ownerBondAccount = await tokenBond.createAccount(wallet.publicKey)
       const claimBondVars: ClaimBond = {
         ownerBondAccount,
-        bondId: new BN(0),
-        bondSale: bondSalePubkey
+        bondId: new BN(0)
       }
       await bonds.claimBond(claimBondVars)
 
@@ -217,7 +213,7 @@ describe('claim-bond', () => {
           new BN(20)
         )
       )
-      assert.isUndefined((await bonds.getAllOwnerBonds(bondSalePubkey, wallet.publicKey)).at(0))
+      assert.isUndefined((await bonds.getAllOwnerBonds(wallet.publicKey)).at(0))
     })
   })
 })

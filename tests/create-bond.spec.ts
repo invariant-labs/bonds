@@ -89,7 +89,7 @@ describe('create-bond', () => {
       }
 
       const bondPub = await bonds.createBond(createBondVars, bondOwner)
-      const bond = await bonds.getBond(bondPub)
+      const bond = await bonds.getBondByAddress(bondPub)
 
       assert.ok(bond.bondAmount.v.eqn(100))
       assert.ok(bond.owner.toString() === bondOwner.publicKey.toString())
@@ -131,7 +131,7 @@ describe('create-bond', () => {
       }
 
       const bondPub = await bonds.createBond(createBondVars)
-      const bond = await bonds.getBond(bondPub)
+      const bond = await bonds.getBondByAddress(bondPub)
 
       assert.ok(bond.bondAmount.v.eqn(100))
       assert.ok(bond.owner.toString() === wallet.publicKey.toString())

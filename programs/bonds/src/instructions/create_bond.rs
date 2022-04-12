@@ -61,8 +61,6 @@ pub fn handler(ctx: Context<CreateBond>, amount: u64, price_limit: u128) -> Prog
 
     let current_time = get_current_timestamp();
     let sell_price = calculate_new_price(bond_sale, current_time, TokenAmount::new(amount));
-    msg!("price_limit: {}", price_limit);
-    msg!("sell_price: {}", sell_price.v);
     require!(sell_price.v.le(&price_limit), PriceLimitExceeded);
 
     let buy_amount;
@@ -86,12 +84,14 @@ pub fn handler(ctx: Context<CreateBond>, amount: u64, price_limit: u128) -> Prog
         last_claim: get_current_timestamp(),
         vesting_start: get_current_timestamp(),
         vesting_end: get_current_timestamp() + bond_sale.vesting_time,
+        id: bond_sale.id,
     };
 
     token::transfer(ctx.accounts.transfer_quote(), quote_amount.v)?;
 
     bond_sale.quote_amount += quote_after_fee;
     bond_sale.fee_amount += fee;
+    bond_sale.id += 1;
 
     Ok(())
 }

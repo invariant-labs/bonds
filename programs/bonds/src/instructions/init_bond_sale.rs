@@ -96,6 +96,7 @@ pub fn handler(
         start_time: current_time,
         last_trade: current_time,
         vesting_time,
+        id: 0,
     };
     token::transfer(ctx.accounts.transfer_bond(), supply)?;
     Ok(())
