@@ -24,6 +24,7 @@ pub struct BondSale {
     pub start_time: u64,
     pub last_trade: u64,
     pub vesting_time: u64,
+    pub next_bond: u128,
     pub id: u128,
 }
 

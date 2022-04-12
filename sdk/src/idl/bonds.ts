@@ -42,7 +42,7 @@ export type Bonds = {
       "accounts": [
         {
           "name": "state",
-          "isMut": false,
+          "isMut": true,
           "isSigner": false
         },
         {
@@ -594,6 +594,10 @@ export type Bonds = {
             "type": "u64"
           },
           {
+            "name": "nextBond",
+            "type": "u128"
+          },
+          {
             "name": "id",
             "type": "u128"
           }
@@ -612,6 +616,10 @@ export type Bonds = {
           {
             "name": "authority",
             "type": "publicKey"
+          },
+          {
+            "name": "nextBondSale",
+            "type": "u128"
           },
           {
             "name": "nonce",
@@ -719,7 +727,7 @@ export const IDL: Bonds = {
       "accounts": [
         {
           "name": "state",
-          "isMut": false,
+          "isMut": true,
           "isSigner": false
         },
         {
@@ -1271,6 +1279,10 @@ export const IDL: Bonds = {
             "type": "u64"
           },
           {
+            "name": "nextBond",
+            "type": "u128"
+          },
+          {
             "name": "id",
             "type": "u128"
           }
@@ -1289,6 +1301,10 @@ export const IDL: Bonds = {
           {
             "name": "authority",
             "type": "publicKey"
+          },
+          {
+            "name": "nextBondSale",
+            "type": "u128"
           },
           {
             "name": "nonce",

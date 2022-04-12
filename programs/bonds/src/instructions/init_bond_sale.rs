@@ -9,7 +9,7 @@ use crate::utils::get_current_timestamp;
 
 #[derive(Accounts)]
 pub struct InitBondSale<'info> {
-    #[account(seeds = [b"statev1"], bump = state.load()?.bump)]
+    #[account(mut, seeds = [b"statev1"], bump = state.load()?.bump)]
     pub state: AccountLoader<'info, State>,
     #[account(zero)]
     pub bond_sale: AccountLoader<'info, BondSale>,
@@ -72,6 +72,7 @@ pub fn handler(
     vesting_time: u64,
 ) -> ProgramResult {
     let bond_sale = &mut ctx.accounts.bond_sale.load_init()?;
+    let mut state = ctx.accounts.state.load_mut()?;
 
     let current_time = get_current_timestamp();
     let token_bond_address = &ctx.accounts.token_bond.key();
@@ -96,8 +97,12 @@ pub fn handler(
         start_time: current_time,
         last_trade: current_time,
         vesting_time,
-        id: 0,
+        id: state.next_bond_sale,
+        next_bond: 0,
     };
+
+    state.next_bond_sale += 1;
+
     token::transfer(ctx.accounts.transfer_bond(), supply)?;
     Ok(())
 }

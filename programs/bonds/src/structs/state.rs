@@ -6,6 +6,7 @@ use anchor_lang::prelude::*;
 pub struct State {
     pub admin: Pubkey,
     pub authority: Pubkey,
+    pub next_bond_sale: u128,
     pub nonce: u8,
     pub bump: u8,
 }

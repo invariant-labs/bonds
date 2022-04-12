@@ -266,6 +266,16 @@ export class Bonds {
     return (await this.program.account.bondSale.all([])).map(b => b.account) as BondSaleStruct[]
   }
 
+  async getBondSaleById(id: BN) {
+    return (
+      await this.program.account.bondSale.all([
+        {
+          memcmp: { bytes: bs58.encode(id.toBuffer()), offset: 328 }
+        }
+      ])
+    )[0]
+  }
+
   async createBondInstruction(createBond: CreateBond, bondPub: PublicKey) {
     const { bondSale, ownerQuoteAccount, amount, priceLimit } = createBond
     const ownerPubkey = createBond.owner ?? this.wallet.publicKey
@@ -654,6 +664,7 @@ export interface BondSaleStruct {
   startTime: BN
   lastTrade: BN
   vestingTime: BN
+  nextBond: BN
   id: BN
 }
 
