@@ -263,7 +263,7 @@ export class Bonds {
   }
 
   async getAllBondSales() {
-    return (await this.program.account.bondSale.all([])).map(b => b.account) as BondSaleStruct[]
+    return await this.program.account.bondSale.all([])
   }
 
   async getBondSaleById(id: BN) {
