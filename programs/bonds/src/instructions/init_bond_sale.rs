@@ -36,14 +36,14 @@ pub struct InitBondSale<'info> {
         constraint = payer_quote_account.mint == token_quote.key(),
         constraint = payer_quote_account.owner == payer.key()
     )]
-    pub payer_quote_account: Box<Account<'info, TokenAccount>>,
+    pub payer_quote_account: Box<Account<'info, TokenAccount>>, // is that account needed?
     #[account(mut)]
     pub payer: Signer<'info>,
     #[account(
         constraint = authority.key() == state.load()?.authority
     )]
     pub authority: AccountInfo<'info>,
-    pub token_program: AccountInfo<'info>,
+    pub token_program: AccountInfo<'info>, //add token program validation
     #[account(address = system_program::ID)]
     pub system_program: AccountInfo<'info>,
     pub rent: Sysvar<'info, Rent>,
@@ -75,7 +75,7 @@ pub fn handler(
     let mut state = ctx.accounts.state.load_mut()?;
 
     let current_time = get_current_timestamp();
-    let token_bond_address = &ctx.accounts.token_bond.key();
+    let token_bond_address = &ctx.accounts.token_bond.key(); // there is no need to define this variable, token bond can be initialized using ctx directly
     let token_quote_address = &ctx.accounts.token_quote.key();
 
     **bond_sale = BondSale {
