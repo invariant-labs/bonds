@@ -16,10 +16,10 @@ const checkAllBonds = async (bonds: Bonds) => {
   const allBonds = await bonds.getAllBonds(bondSalePub)
 
   for (const bond of allBonds) {
-    console.log('amountToClaim: ', calculateAmountToClaim(bond).toString())
-    console.log('bondAmount: ', bond.bondAmount.v.toString())
-    console.log('lastClaim: ', bond.lastClaim.toString())
-    console.log('vestingEnd: ', bond.vestingEnd.toString())
+    console.log('amountToClaim: ', calculateAmountToClaim(bond.account).toString())
+    console.log('bondAmount: ', bond.account.bondAmount.v.toString())
+    console.log('lastClaim: ', bond.account.lastClaim.toString())
+    console.log('vestingEnd: ', bond.account.vestingEnd.toString())
     console.log('\n')
   }
 }

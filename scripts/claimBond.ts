@@ -8,7 +8,6 @@ import { MINTER } from './minter'
 
 require('dotenv').config()
 
-const bondSalePub = new PublicKey('4xYUgeAZ5SzpXEY5n9wJoAswwMCthvfyJ1KcdcR3TVDB')
 const provider = Provider.local(clusterApiUrl('devnet'), {
   skipPreflight: true
 })
@@ -20,7 +19,6 @@ const claimBond = async (bonds: Bonds) => {
   const ownerBondAccount = await bondToken.createAccount(MINTER.publicKey)
 
   const claimBondVars: ClaimBond = {
-    bondSale: bondSalePub,
     ownerBondAccount,
     owner: MINTER.publicKey,
     bondId: new BN(1)
