@@ -46,7 +46,7 @@ pub struct EndBondSale<'info> {
         constraint = payer.key() == bond_sale.load()?.payer
     )]
     pub payer: Signer<'info>,
-    pub token_program: AccountInfo<'info>,
+    pub token_program: AccountInfo<'info>, //add token program validation
 }
 
 impl<'info> TransferQuote<'info> for EndBondSale<'info> {

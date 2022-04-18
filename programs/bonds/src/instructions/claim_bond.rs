@@ -33,7 +33,7 @@ pub struct ClaimBond<'info> {
         constraint = authority.key() == state.load()?.authority
     )]
     pub authority: AccountInfo<'info>,
-    pub token_program: AccountInfo<'info>,
+    pub token_program: AccountInfo<'info>, //add token program validation
 }
 
 impl<'info> TransferBond<'info> for ClaimBond<'info> {
@@ -67,7 +67,7 @@ pub fn handler(ctx: Context<ClaimBond>) -> ProgramResult {
 
     let mut bond = *ctx.accounts.bond.load_mut()?;
     if bond.last_claim > bond.vesting_end {
-        bond = Default::default();
+        bond = Default::default(); // not suer if that is safe cos bond has variable of type TokenAmount which does not have a default implementation
         close(
             ctx.accounts.bond.to_account_info(),
             ctx.accounts.owner.to_account_info(),
