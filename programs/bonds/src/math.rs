@@ -1,4 +1,3 @@
-use anchor_lang::prelude::*;
 use std::convert::TryInto;
 
 use crate::structs::{BondSale, Decimal, TokenAmount};
@@ -17,7 +16,6 @@ pub fn calculate_new_price(
     let supply_ratio = buy_amount.percent(bond_sale.supply);
 
     let price = match { bond_sale.previous_price } < { bond_sale.floor_price + delta_price } {
-        // is that right ? in white paper is max(previous_price - delta_price, delta_price)
         true => bond_sale.floor_price,
         false => bond_sale.previous_price - delta_price,
     };

@@ -15,6 +15,10 @@ impl TokenAmount {
         TokenAmount { v: amount }
     }
 
+    pub fn get(&self) -> u64 {
+        self.v
+    }
+
     pub fn is_zero(&self) -> bool {
         self.v == 0
     }

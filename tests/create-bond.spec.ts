@@ -55,7 +55,6 @@ describe('create-bond', () => {
   describe('user', () => {
     it('#initBondSale()', async () => {
       const payerBondAccount = await tokenBond.createAccount(bondInitPayer.publicKey)
-      const payerQuoteAccount = await tokenQuote.createAccount(bondInitPayer.publicKey)
       await tokenBond.mintTo(payerBondAccount, mintAuthority, [mintAuthority], 1000)
 
       const initBondSaleVars: InitBondSale = {
@@ -63,7 +62,6 @@ describe('create-bond', () => {
         duration: new BN(100),
         floorPrice: DENOMINATOR,
         payerBondAccount,
-        payerQuoteAccount,
         tokenBond,
         tokenQuote,
         upBound: DENOMINATOR.divn(2),
@@ -107,7 +105,6 @@ describe('create-bond', () => {
         duration: new BN(100),
         floorPrice: DENOMINATOR,
         payerBondAccount,
-        payerQuoteAccount,
         tokenBond,
         tokenQuote,
         upBound: DENOMINATOR.divn(2),

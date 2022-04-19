@@ -13,7 +13,6 @@ pub struct Bond {
     pub bond_sale: Pubkey,
     pub token_bond: Pubkey,
     pub owner: Pubkey,
-    pub token_bond_account: Pubkey, // is that necessary to create token account for each bond instead of keeping it in bond sale?
     pub bond_amount: TokenAmount,
     pub last_claim: u64,
     pub vesting_start: u64,

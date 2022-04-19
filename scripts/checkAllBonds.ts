@@ -13,7 +13,7 @@ const provider = Provider.local(clusterApiUrl('devnet'), {
 const connection = provider.connection
 
 const checkAllBonds = async (bonds: Bonds) => {
-  const allBonds = await bonds.getAllBonds(bondSalePub)
+  const allBonds = (await bonds.getAllBonds(bondSalePub)).map(b => b.account)
 
   for (const bond of allBonds) {
     console.log('amountToClaim: ', calculateAmountToClaim(bond).toString())

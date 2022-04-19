@@ -41,7 +41,6 @@ const initBondSale = async (bonds: Bonds, payer: Keypair) => {
     tokenBond: invariantToken,
     tokenQuote: usdcToken,
     payerBondAccount,
-    payerQuoteAccount,
     payer: payer.publicKey
   }
 

@@ -19,8 +19,8 @@ pub const SEED: &str = "Bonds";
 pub mod bonds {
     use super::*;
 
-    pub fn create_state(ctx: Context<CreateState>, bump: u8, nonce: u8) -> ProgramResult {
-        instructions::create_state::handler(ctx, bump, nonce)
+    pub fn create_state(ctx: Context<CreateState>, nonce: u8) -> ProgramResult {
+        instructions::create_state::handler(ctx, nonce)
     }
 
     pub fn init_bond_sale(

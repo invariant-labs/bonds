@@ -1,6 +1,8 @@
 use anchor_lang::prelude::*;
+use anchor_spl::token;
 use anchor_spl::token::{transfer, TokenAccount, Transfer};
 
+use crate::structs::BondSale;
 use crate::{
     get_signer,
     interfaces::TransferBond,
@@ -13,13 +15,13 @@ use crate::{
 pub struct ClaimBond<'info> {
     #[account(seeds = [b"statev1"], bump = state.load()?.bump)]
     pub state: AccountLoader<'info, State>,
+    pub bond_sale: AccountLoader<'info, BondSale>,
     #[account(mut)]
     pub bond: AccountLoader<'info, Bond>,
     #[account(mut,
-        constraint = token_bond_account.key() == bond.load()?.token_bond_account
+        constraint = token_bond_account.key() == bond_sale.load()?.token_bond_account
     )]
     pub token_bond_account: Account<'info, TokenAccount>,
-
     #[account(mut,
         constraint = owner_bond_account.owner == owner.key(),
         constraint = owner_bond_account.mint == token_bond_account.mint
@@ -33,7 +35,8 @@ pub struct ClaimBond<'info> {
         constraint = authority.key() == state.load()?.authority
     )]
     pub authority: AccountInfo<'info>,
-    pub token_program: AccountInfo<'info>, //add token program validation
+    #[account(address = token::ID)]
+    pub token_program: AccountInfo<'info>,
 }
 
 impl<'info> TransferBond<'info> for ClaimBond<'info> {
@@ -67,7 +70,7 @@ pub fn handler(ctx: Context<ClaimBond>) -> ProgramResult {
 
     let mut bond = *ctx.accounts.bond.load_mut()?;
     if bond.last_claim > bond.vesting_end {
-        bond = Default::default(); // not suer if that is safe cos bond has variable of type TokenAmount which does not have a default implementation
+        bond = Default::default();
         close(
             ctx.accounts.bond.to_account_info(),
             ctx.accounts.owner.to_account_info(),

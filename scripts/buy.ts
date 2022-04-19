@@ -56,7 +56,7 @@ const buy = async (bonds: Bonds, buyer: Keypair, bondSalePub: PublicKey) => {
   let bond: BondStruct
   while (true) {
     try {
-      bond = await bonds.getBond(bondPubkey)
+      bond = await bonds.getBondByAddress(bondPubkey)
       break
     } catch (error) {}
   }

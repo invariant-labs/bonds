@@ -1,9 +1,9 @@
 use anchor_lang::prelude::*;
-use anchor_spl::token::{self, close_account, CloseAccount, TokenAccount, Transfer}; //unused imports
+use anchor_spl::token::{self, TokenAccount, Transfer};
 
 use crate::{
     get_signer,
-    interfaces::{CloseTokenAccount, TransferQuote}, //unused imports
+    interfaces::TransferQuote,
     structs::{BondSale, State, TokenAmount},
     SEED,
 };
