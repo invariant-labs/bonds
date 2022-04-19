@@ -65,7 +65,6 @@ describe('claim-bond', () => {
         duration: new BN(100),
         floorPrice: DENOMINATOR,
         payerBondAccount,
-        payerQuoteAccount,
         tokenBond,
         tokenQuote,
         upBound: DENOMINATOR.divn(2),
@@ -98,6 +97,7 @@ describe('claim-bond', () => {
 
       const ownerBondAccount = await tokenBond.createAccount(bondOwner.publicKey)
       const claimBondVars: ClaimBond = {
+        bondSale: bondSalePubkey,
         ownerBondAccount,
         bondId: new BN(0),
         owner: bondOwner.publicKey
@@ -116,6 +116,7 @@ describe('claim-bond', () => {
 
       const ownerBondAccount = await tokenBond.createAccount(bondOwner.publicKey)
       const claimBondVars: ClaimBond = {
+        bondSale: bondSalePubkey,
         ownerBondAccount,
         bondId: new BN(0),
         owner: bondOwner.publicKey
@@ -149,7 +150,6 @@ describe('claim-bond', () => {
         duration: new BN(100),
         floorPrice: DENOMINATOR,
         payerBondAccount,
-        payerQuoteAccount,
         tokenBond,
         tokenQuote,
         upBound: DENOMINATOR.divn(2),
@@ -180,6 +180,7 @@ describe('claim-bond', () => {
 
       const ownerBondAccount = await tokenBond.createAccount(wallet.publicKey)
       const claimBondVars: ClaimBond = {
+        bondSale: bondSalePubkey,
         ownerBondAccount,
         bondId: new BN(0)
       }
@@ -197,6 +198,7 @@ describe('claim-bond', () => {
 
       const ownerBondAccount = await tokenBond.createAccount(wallet.publicKey)
       const claimBondVars: ClaimBond = {
+        bondSale: bondSalePubkey,
         ownerBondAccount,
         bondId: new BN(0)
       }

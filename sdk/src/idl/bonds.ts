@@ -28,10 +28,6 @@ export type Bonds = {
       ],
       "args": [
         {
-          "name": "bump",
-          "type": "u8"
-        },
-        {
           "name": "nonce",
           "type": "u8"
         }
@@ -73,11 +69,6 @@ export type Bonds = {
         {
           "name": "payerBondAccount",
           "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "payerQuoteAccount",
-          "isMut": false,
           "isSigner": false
         },
         {
@@ -144,16 +135,6 @@ export type Bonds = {
         {
           "name": "bond",
           "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "tokenBond",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "tokenQuote",
-          "isMut": false,
           "isSigner": false
         },
         {
@@ -351,6 +332,11 @@ export type Bonds = {
           "isSigner": false
         },
         {
+          "name": "bondSale",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
           "name": "bond",
           "isMut": true,
           "isSigner": false
@@ -467,10 +453,6 @@ export type Bonds = {
           },
           {
             "name": "owner",
-            "type": "publicKey"
-          },
-          {
-            "name": "tokenBondAccount",
             "type": "publicKey"
           },
           {
@@ -713,10 +695,6 @@ export const IDL: Bonds = {
       ],
       "args": [
         {
-          "name": "bump",
-          "type": "u8"
-        },
-        {
           "name": "nonce",
           "type": "u8"
         }
@@ -758,11 +736,6 @@ export const IDL: Bonds = {
         {
           "name": "payerBondAccount",
           "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "payerQuoteAccount",
-          "isMut": false,
           "isSigner": false
         },
         {
@@ -829,16 +802,6 @@ export const IDL: Bonds = {
         {
           "name": "bond",
           "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "tokenBond",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "tokenQuote",
-          "isMut": false,
           "isSigner": false
         },
         {
@@ -1036,6 +999,11 @@ export const IDL: Bonds = {
           "isSigner": false
         },
         {
+          "name": "bondSale",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
           "name": "bond",
           "isMut": true,
           "isSigner": false
@@ -1152,10 +1120,6 @@ export const IDL: Bonds = {
           },
           {
             "name": "owner",
-            "type": "publicKey"
-          },
-          {
-            "name": "tokenBondAccount",
             "type": "publicKey"
           },
           {

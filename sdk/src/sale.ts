@@ -83,7 +83,7 @@ export class Bonds {
     const { stateAddress, bump } = await this.getStateAddress()
     const { programAuthority, nonce } = await this.getProgramAuthority()
 
-    return this.program.instruction.createState(bump, nonce, {
+    return this.program.instruction.createState(nonce, {
       accounts: {
         state: stateAddress,
         admin,
@@ -119,7 +119,6 @@ export class Bonds {
       tokenBond,
       tokenQuote,
       payerBondAccount,
-      payerQuoteAccount,
       floorPrice,
       upBound,
       velocity,
@@ -148,7 +147,6 @@ export class Bonds {
           tokenBondAccount: tokenBondAccountPub,
           tokenQuoteAccount: tokenQuoteAccountPub,
           payerBondAccount,
-          payerQuoteAccount,
           payer: payerPubkey,
           authority: programAuthority,
           tokenProgram: TOKEN_PROGRAM_ID,
@@ -229,7 +227,7 @@ export class Bonds {
     return (
       await this.program.account.bond.all([
         {
-          memcmp: { bytes: bs58.encode(id.toBuffer()), offset: 168 }
+          memcmp: { bytes: bs58.encode(id.toBuffer()), offset: 136 }
         }
       ])
     )[0]
@@ -285,8 +283,6 @@ export class Bonds {
       accounts: {
         bondSale,
         bond: bondPub,
-        tokenBond: bondSaleStruct.tokenBond,
-        tokenQuote: bondSaleStruct.tokenQuote,
         ownerQuoteAccount,
         tokenBondAccount: bondSaleStruct.tokenBondAccount,
         tokenQuoteAccount: bondSaleStruct.tokenQuoteAccount,
@@ -425,17 +421,19 @@ export class Bonds {
   }
 
   async claimBondInstruction(claimBond: ClaimBond) {
-    const { ownerBondAccount, bondId } = claimBond
+    const { bondSale, ownerBondAccount, bondId } = claimBond
     const owner = claimBond.owner ?? this.wallet.publicKey
     const bond = await this.getBondById(bondId)
     const { programAuthority } = await this.getProgramAuthority()
     const { stateAddress } = await this.getStateAddress()
+    const bondSaleStruct = await this.getBondSale(bondSale)
 
     return this.program.instruction.claimBond({
       accounts: {
         state: stateAddress,
+        bondSale,
         bond: bond.publicKey,
-        tokenBondAccount: bond.account.tokenBondAccount,
+        tokenBondAccount: bondSaleStruct.tokenBondAccount,
         ownerBondAccount,
         owner,
         authority: programAuthority,
@@ -444,7 +442,6 @@ export class Bonds {
     })
   }
 
-  // when would this be used?
   async claimBondTransaction(claimBond: ClaimBond) {
     const ix = await this.claimBondInstruction(claimBond)
 
@@ -571,7 +568,6 @@ export interface InitBondSale {
   tokenBond: Token
   tokenQuote: Token
   payerBondAccount: PublicKey
-  payerQuoteAccount: PublicKey
   payer?: PublicKey
   floorPrice: BN
   upBound: BN
@@ -608,6 +604,7 @@ export interface ClaimQuote {
 }
 
 export interface ClaimBond {
+  bondSale: PublicKey
   ownerBondAccount: PublicKey
   owner?: PublicKey
   bondId: BN

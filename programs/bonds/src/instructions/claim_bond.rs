@@ -1,6 +1,8 @@
 use anchor_lang::prelude::*;
+use anchor_spl::token;
 use anchor_spl::token::{transfer, TokenAccount, Transfer};
 
+use crate::structs::BondSale;
 use crate::{
     get_signer,
     interfaces::TransferBond,
@@ -13,13 +15,13 @@ use crate::{
 pub struct ClaimBond<'info> {
     #[account(seeds = [b"statev1"], bump = state.load()?.bump)]
     pub state: AccountLoader<'info, State>,
+    pub bond_sale: AccountLoader<'info, BondSale>,
     #[account(mut)]
     pub bond: AccountLoader<'info, Bond>,
     #[account(mut,
-        constraint = token_bond_account.key() == bond.load()?.token_bond_account
+        constraint = token_bond_account.key() == bond_sale.load()?.token_bond_account
     )]
     pub token_bond_account: Account<'info, TokenAccount>,
-
     #[account(mut,
         constraint = owner_bond_account.owner == owner.key(),
         constraint = owner_bond_account.mint == token_bond_account.mint
@@ -33,6 +35,7 @@ pub struct ClaimBond<'info> {
         constraint = authority.key() == state.load()?.authority
     )]
     pub authority: AccountInfo<'info>,
+    #[account(address = token::ID)]
     pub token_program: AccountInfo<'info>,
 }
 

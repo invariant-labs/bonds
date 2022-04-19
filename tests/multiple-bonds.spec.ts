@@ -64,7 +64,6 @@ describe('multiple-bonds', () => {
         duration: new BN(100),
         floorPrice: DENOMINATOR,
         payerBondAccount,
-        payerQuoteAccount,
         tokenBond,
         tokenQuote,
         upBound: DENOMINATOR.divn(2),

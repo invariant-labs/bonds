@@ -1,4 +1,5 @@
 use anchor_lang::prelude::*;
+use anchor_spl::token;
 use anchor_spl::token::{transfer, TokenAccount, Transfer};
 
 use crate::structs::{State, TokenAmount};
@@ -27,6 +28,7 @@ pub struct ClaimQuote<'info> {
         constraint = authority.key() == state.load()?.authority
     )]
     pub authority: AccountInfo<'info>,
+    #[account(address = token::ID)]
     pub token_program: AccountInfo<'info>,
 }
 

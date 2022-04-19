@@ -1,6 +1,6 @@
 use anchor_lang::{prelude::*, solana_program::system_program};
 use anchor_spl::token;
-use anchor_spl::token::{Mint, TokenAccount, Transfer};
+use anchor_spl::token::{TokenAccount, Transfer};
 use bond_sale::BondSale;
 
 use crate::math::calculate_new_price;
@@ -12,22 +12,17 @@ use crate::{
 
 #[derive(Accounts)]
 pub struct CreateBond<'info> {
-    #[account(mut,
-        constraint = bond_sale.load()?.token_bond == token_bond.key(),
-        constraint = bond_sale.load()?.token_quote == token_quote.key()
-    )]
+    #[account(mut)]
     pub bond_sale: AccountLoader<'info, BondSale>,
     #[account(zero)]
     pub bond: AccountLoader<'info, Bond>,
-    pub token_bond: Box<Account<'info, Mint>>,
-    pub token_quote: Box<Account<'info, Mint>>,
     #[account(mut,
         constraint = owner_quote_account.owner == owner.key(),
-        constraint = owner_quote_account.mint == token_quote.key()
+        constraint = owner_quote_account.mint == token_quote_account.mint
     )]
-    pub owner_quote_account: Box<Account<'info, TokenAccount>>,
+    pub owner_quote_account: Box<Account<'info, TokenAccount>>, 
     #[account(mut,
-        constraint = token_bond_account.key() == bond_sale.load()?.token_bond_account
+        constraint = token_bond_account.key() == bond_sale.load()?.token_bond_account 
     )]
     pub token_bond_account: Box<Account<'info, TokenAccount>>,
     #[account(mut,
@@ -36,6 +31,7 @@ pub struct CreateBond<'info> {
     pub token_quote_account: Box<Account<'info, TokenAccount>>,
     #[account(mut)]
     pub owner: Signer<'info>,
+    #[account(address = token::ID)]
     pub token_program: AccountInfo<'info>,
     #[account(address = system_program::ID)]
     pub system_program: AccountInfo<'info>,
@@ -63,22 +59,18 @@ pub fn handler(ctx: Context<CreateBond>, amount: u64, price_limit: u128) -> Prog
     let sell_price = calculate_new_price(bond_sale, current_time, TokenAmount::new(amount));
     require!(sell_price.v.le(&price_limit), PriceLimitExceeded);
 
-    let buy_amount;
-    let quote_amount;
-
     require!(
         amount <= bond_sale.remaining_amount.v,
         InsufficientTokenAmount
     );
-    buy_amount = amount;
-    quote_amount = TokenAmount::new(amount).big_mul(sell_price).to_token_ceil();
+    let buy_amount = amount;
+    let quote_amount = TokenAmount::new(amount).big_mul(sell_price).to_token_ceil();
     let fee = quote_amount.big_mul(bond_sale.fee).to_token_ceil();
     let quote_after_fee = quote_amount - fee;
 
     **bond = Bond {
         bond_sale: ctx.accounts.bond_sale.key(),
-        token_bond: ctx.accounts.token_bond.key(),
-        token_bond_account: ctx.accounts.token_bond_account.key(),
+        token_bond: bond_sale.token_bond,
         owner: ctx.accounts.owner.key(),
         bond_amount: TokenAmount::new(buy_amount),
         last_claim: get_current_timestamp(),
@@ -87,7 +79,7 @@ pub fn handler(ctx: Context<CreateBond>, amount: u64, price_limit: u128) -> Prog
         id: bond_sale.next_bond,
     };
 
-    token::transfer(ctx.accounts.transfer_quote(), quote_amount.v)?;
+    token::transfer(ctx.accounts.transfer_quote(), quote_amount.get())?;
 
     bond_sale.quote_amount += quote_after_fee;
     bond_sale.fee_amount += fee;

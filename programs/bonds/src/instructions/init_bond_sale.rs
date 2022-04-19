@@ -32,17 +32,13 @@ pub struct InitBondSale<'info> {
         constraint = payer_bond_account.owner == payer.key()
     )]
     pub payer_bond_account: Box<Account<'info, TokenAccount>>,
-    #[account(
-        constraint = payer_quote_account.mint == token_quote.key(),
-        constraint = payer_quote_account.owner == payer.key()
-    )]
-    pub payer_quote_account: Box<Account<'info, TokenAccount>>,
     #[account(mut)]
     pub payer: Signer<'info>,
     #[account(
         constraint = authority.key() == state.load()?.authority
     )]
     pub authority: AccountInfo<'info>,
+    #[account(address = token::ID)]
     pub token_program: AccountInfo<'info>,
     #[account(address = system_program::ID)]
     pub system_program: AccountInfo<'info>,
@@ -75,12 +71,10 @@ pub fn handler(
     let mut state = ctx.accounts.state.load_mut()?;
 
     let current_time = get_current_timestamp();
-    let token_bond_address = &ctx.accounts.token_bond.key();
-    let token_quote_address = &ctx.accounts.token_quote.key();
 
     **bond_sale = BondSale {
-        token_bond: *token_bond_address,
-        token_quote: *token_quote_address,
+        token_bond: ctx.accounts.token_bond.key(),
+        token_quote: ctx.accounts.token_quote.key(),
         token_bond_account: ctx.accounts.token_bond_account.key(),
         token_quote_account: ctx.accounts.token_quote_account.key(),
         payer: ctx.accounts.payer.key(),
