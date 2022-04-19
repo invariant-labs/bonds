@@ -1,4 +1,5 @@
 use anchor_lang::prelude::*;
+use anchor_spl::token;
 use anchor_spl::token::{close_account, transfer, CloseAccount, TokenAccount, Transfer};
 
 use crate::{
@@ -46,7 +47,8 @@ pub struct EndBondSale<'info> {
         constraint = payer.key() == bond_sale.load()?.payer
     )]
     pub payer: Signer<'info>,
-    pub token_program: AccountInfo<'info>, //add token program validation
+    #[account(address = token::ID)]
+    pub token_program: AccountInfo<'info>,
 }
 
 impl<'info> TransferQuote<'info> for EndBondSale<'info> {
