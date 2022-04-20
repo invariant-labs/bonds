@@ -97,7 +97,6 @@ describe('create-bond', () => {
   describe('wallet', () => {
     it('#initBondSale()', async () => {
       const payerBondAccount = await tokenBond.createAccount(wallet.publicKey)
-      const payerQuoteAccount = await tokenQuote.createAccount(wallet.publicKey)
       await tokenBond.mintTo(payerBondAccount, mintAuthority, [mintAuthority], 1000)
 
       const initBondSaleVars: InitBondSale = {

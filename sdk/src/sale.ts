@@ -80,7 +80,7 @@ export class Bonds {
   }
 
   async createStateInstruction(admin: PublicKey) {
-    const { stateAddress, bump } = await this.getStateAddress()
+    const { stateAddress } = await this.getStateAddress()
     const { programAuthority, nonce } = await this.getProgramAuthority()
 
     return this.program.instruction.createState(nonce, {
@@ -633,8 +633,6 @@ export interface BondStruct {
   bondSale: PublicKey
   tokenBond: PublicKey
   owner: PublicKey
-  tokenBondAccount: PublicKey
-  authority: PublicKey
   bondAmount: TokenAmount
   lastClaim: BN
   vestingStart: BN

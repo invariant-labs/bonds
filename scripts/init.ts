@@ -27,7 +27,6 @@ const initBondSale = async (bonds: Bonds, payer: Keypair) => {
   const usdcToken = new Token(connection, new PublicKey(MOCK_TOKENS.USDC), TOKEN_PROGRAM_ID, MINTER)
 
   const payerBondAccount = await invariantToken.createAccount(payer.publicKey)
-  const payerQuoteAccount = await usdcToken.createAccount(payer.publicKey)
 
   await invariantToken.mintTo(payerBondAccount, MINTER, [MINTER], 10_000_000)
 

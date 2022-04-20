@@ -9,7 +9,7 @@ wallet = "~/.config/solana/id.json"
 members = ["programs/bonds"]
 
 [programs.localnet]
-bonds = "2PAZiQGBhxQx45UsEcjn9iufTXZgrTD1q9ZdNBVR6YEc"
+bonds = "DojjMwd2tErELy9vuLs7Jb6JW7FBJEh4f25wibHp3HCm"
 
 [scripts]
 test = "ts-mocha -p ./tsconfig.json -t 1000000"

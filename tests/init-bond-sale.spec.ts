@@ -51,7 +51,6 @@ describe('init-bond-sale', () => {
 
   it('#initBondSale()', async () => {
     const payerBondAccount = await tokenBond.createAccount(bondInitPayer.publicKey)
-    const payerQuoteAccount = await tokenQuote.createAccount(bondInitPayer.publicKey)
     await tokenBond.mintTo(payerBondAccount, mintAuthority, [mintAuthority], 1000)
 
     const initBondSaleVars: InitBondSale = {
@@ -83,7 +82,6 @@ describe('init-bond-sale', () => {
 
   it('#initBondSale() wallet', async () => {
     const payerBondAccount = await tokenBond.createAccount(wallet.publicKey)
-    const payerQuoteAccount = await tokenQuote.createAccount(wallet.publicKey)
     await tokenBond.mintTo(payerBondAccount, mintAuthority, [mintAuthority], 1000)
 
     const initBondSaleVars: InitBondSale = {
