@@ -12,7 +12,7 @@ use anchor_lang::prelude::*;
 use errors::*;
 use instructions::*;
 
-declare_id!("2PAZiQGBhxQx45UsEcjn9iufTXZgrTD1q9ZdNBVR6YEc");
+declare_id!("DojjMwd2tErELy9vuLs7Jb6JW7FBJEh4f25wibHp3HCm");
 pub const SEED: &str = "Bonds";
 
 #[program]
