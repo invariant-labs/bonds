@@ -58,3 +58,18 @@ export const toDecimal = (x: BN, decimals: number = 0): Decimal => {
 export const toScale = (num: BN, scale: number) => {
   return num.mul(new BN(10).pow(new BN(scale)))
 }
+
+export const bigNumberToBuffer = (n: BN, size: 16 | 32 | 64 | 128 | 256) => {
+  const chunk = new BN(2).pow(new BN(16))
+
+  const buffer = Buffer.alloc(size / 8)
+  let offset = 0
+
+  while (n.gt(new BN(0))) {
+    buffer.writeUInt16LE(n.mod(chunk).toNumber(), offset)
+    n = n.div(chunk)
+    offset += 2
+  }
+
+  return buffer
+}

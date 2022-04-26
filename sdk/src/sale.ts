@@ -14,7 +14,7 @@ import { IWallet } from '.'
 import { Bonds as BondsProgram, IDL } from './idl/bonds'
 import { getProgramAddress, Network } from './network'
 
-import { signAndSend } from './utils'
+import { bigNumberToBuffer, signAndSend } from './utils'
 export const SEED = 'Bonds'
 export const BOND_SEED = 'bondv1'
 export const STATE_SEED = 'statev1'
@@ -230,7 +230,7 @@ export class Bonds {
           memcmp: { bytes: bs58.encode(bondSale.toBuffer()), offset: 8 }
         },
         {
-          memcmp: { bytes: bs58.encode(id.toBuffer()), offset: 136 }
+          memcmp: { bytes: bs58.encode(bigNumberToBuffer(id, 128)), offset: 136 }
         }
       ])
     )[0]
