@@ -83,7 +83,7 @@ pub fn handler(ctx: Context<CreateBond>, amount: u64, price_limit: u128) -> Prog
 
     bond_sale.quote_amount += quote_after_fee;
     bond_sale.fee_amount += fee;
-    bond_sale.id += 1;
+    bond_sale.next_bond += 1;
 
     Ok(())
 }

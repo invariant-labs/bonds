@@ -24,7 +24,6 @@ describe('claim-quote', () => {
   let tokenBond: Token
   let tokenQuote: Token
   let bondSalePubkey: PublicKey
-  let payerQuoteAccount: PublicKey
 
   before(async () => {
     bonds = await Bonds.build(
@@ -56,7 +55,6 @@ describe('claim-quote', () => {
   describe('changeFee', () => {
     it('#initBondSale()', async () => {
       const payerBondAccount = await tokenBond.createAccount(bondInitPayer.publicKey)
-      payerQuoteAccount = await tokenQuote.createAccount(bondInitPayer.publicKey)
       await tokenBond.mintTo(payerBondAccount, mintAuthority, [mintAuthority], 1000)
 
       const initBondSaleVars: InitBondSale = {

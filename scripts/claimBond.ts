@@ -12,6 +12,8 @@ const provider = Provider.local(clusterApiUrl('devnet'), {
   skipPreflight: true
 })
 
+const bondSalePubkey = new PublicKey('')
+
 const connection = provider.connection
 
 const claimBond = async (bonds: Bonds) => {
@@ -19,6 +21,7 @@ const claimBond = async (bonds: Bonds) => {
   const ownerBondAccount = await bondToken.createAccount(MINTER.publicKey)
 
   const claimBondVars: ClaimBond = {
+    bondSale: bondSalePubkey,
     ownerBondAccount,
     owner: MINTER.publicKey,
     bondId: new BN(1)

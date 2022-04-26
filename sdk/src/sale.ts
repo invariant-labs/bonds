@@ -223,9 +223,12 @@ export class Bonds {
     return (await this.program.account.bond.fetch(bondPub)) as BondStruct
   }
 
-  async getBondById(id: BN) {
+  async getBondById(bondSale: PublicKey, id: BN) {
     return (
       await this.program.account.bond.all([
+        {
+          memcmp: { bytes: bs58.encode(bondSale.toBuffer()), offset: 8 }
+        },
         {
           memcmp: { bytes: bs58.encode(id.toBuffer()), offset: 136 }
         }
@@ -423,7 +426,7 @@ export class Bonds {
   async claimBondInstruction(claimBond: ClaimBond) {
     const { bondSale, ownerBondAccount, bondId } = claimBond
     const owner = claimBond.owner ?? this.wallet.publicKey
-    const bond = await this.getBondById(bondId)
+    const bond = await this.getBondById(bondSale, bondId)
     const { programAuthority } = await this.getProgramAuthority()
     const { stateAddress } = await this.getStateAddress()
     const bondSaleStruct = await this.getBondSale(bondSale)

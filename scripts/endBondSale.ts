@@ -8,7 +8,7 @@ import { MINTER } from './minter'
 
 require('dotenv').config()
 
-const bondSalePub = new PublicKey('4xYUgeAZ5SzpXEY5n9wJoAswwMCthvfyJ1KcdcR3TVDB')
+const bondSalePub = new PublicKey('4ns4t8Eot4sfSW6eNC3YEVhisjgaZWkzakduKFQbgUjB')
 const provider = Provider.local(clusterApiUrl('devnet'), {
   skipPreflight: true
 })
