@@ -17,5 +17,8 @@ export const getProgramAddress = (network: Network) => {
 export const MOCK_TOKENS = {
   INVT: '7419i15RMBxn6c4aETP8V2wrPd9C5kdCdk4inYDtph1i',
   USDC: '7AUnkVAWnkkh5Za3xLnSdgEuhs8SDuHuaqTAGErh44zc',
-  USDT: 'UAA13oafJZkQv1LMZD8xShownp3QTqUhzyk5rWXm74f'
+  USDT: 'UAA13oafJZkQv1LMZD8xShownp3QTqUhzyk5rWXm74f',
+  SOL: 'AHHQ4K1vHH5Bw6t1XQoEN2PqitS9tKALR38Vg8zMor24',
+  SNY: 'HNyfcBMk7bW5VRw6yyE1tJyrvicy5f1PMWWyU4awYqrZ',
+  HAWK: 'CXNnEXnzenBoBg2gArf4AQyoPX7AT4tSz5xmE4rm6U9X'
 }

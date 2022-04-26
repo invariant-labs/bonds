@@ -1,12 +1,12 @@
-import { Network, Bonds } from '@invariant-labs/bonds-sdk'
+import { Bonds, Network } from '@invariant-labs/bonds-sdk/src'
 import {
   calculateSellPrice,
   getCeilPrice,
   getPriceAfterSlippage
-} from '@invariant-labs/bonds-sdk/lib/math'
-import { MOCK_TOKENS } from '@invariant-labs/bonds-sdk/lib/network'
-import { BondSaleStruct, BondStruct, CreateBond } from '@invariant-labs/bonds-sdk/lib/sale'
-import { toDecimal } from '@invariant-labs/bonds-sdk/lib/utils'
+} from '@invariant-labs/bonds-sdk/src/math'
+import { MOCK_TOKENS } from '@invariant-labs/bonds-sdk/src/network'
+import { BondSaleStruct, BondStruct, CreateBond } from '@invariant-labs/bonds-sdk/src/sale'
+import { toDecimal } from '@invariant-labs/bonds-sdk/src/utils'
 import { BN, Provider } from '@project-serum/anchor'
 import { Token, TOKEN_PROGRAM_ID } from '@solana/spl-token'
 import { clusterApiUrl, Keypair, PublicKey } from '@solana/web3.js'
